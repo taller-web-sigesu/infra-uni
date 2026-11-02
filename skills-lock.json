@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "mysql-best-practices": {
+      "source": "mindrally/skills",
+      "sourceType": "github",
+      "skillPath": "mysql-best-practices/SKILL.md",
+      "computedHash": "37124f2b56aa4468a3d41aee441d51b17ea4430c3fce00b151a40e16f5f7d625"
+    }
+  }
+}

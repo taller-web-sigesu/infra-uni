@@ -1,0 +1,7 @@
+# Credenciales de desarrollo locales
+.env
+.env.*
+!.env.example
+
+# Artefactos temporales de ejecución de planes
+.superpowers/

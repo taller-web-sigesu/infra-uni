@@ -1,0 +1,97 @@
+name: universidad-sm
+
+services:
+  mysql:
+    image: mysql:8.4.13
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?Define MYSQL_DATABASE in infra-uni/.env}
+      MYSQL_USER: ${MYSQL_USER:?Define MYSQL_USER in infra-uni/.env}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Define MYSQL_PASSWORD in infra-uni/.env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD in infra-uni/.env}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - db_internal
+    cpus: 1.0
+    mem_limit: 1g
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          mysql --protocol=TCP --host=127.0.0.1 --user=root
+          --password="$${MYSQL_ROOT_PASSWORD}" --connect-timeout=3
+          --batch --skip-column-names --execute="SELECT 1" >/dev/null 2>&1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  backend:
+    build:
+      context: ../backend-uni
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?allowPublicKeyRetrieval=true&sslMode=DISABLED
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ../backend-uni:/workspace
+      - backend_target:/workspace/target
+      - maven_cache:/home/app/.m2
+    networks:
+      - app_net
+      - db_internal
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl --fail --silent --output /dev/null http://127.0.0.1:8080/actuator/health
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+
+  frontend:
+    build:
+      context: ../frontend-uni
+      dockerfile: Dockerfile.dev
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ../frontend-uni:/workspace
+      - frontend_node_modules:/workspace/node_modules
+    networks:
+      - app_net
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+networks:
+  app_net:
+    driver: bridge
+  db_internal:
+    internal: true
+
+volumes:
+  mysql_data:
+  backend_target:
+  maven_cache:
+  frontend_node_modules:

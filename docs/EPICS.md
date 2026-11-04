@@ -6,3 +6,4 @@
 | EP-04 | Dashboard e indicadores de atención | Alta  | HU-12, HU-13, HU-14 |
 | EP-05 | Administración y configuración | Alta  | HU-15, HU-16, HU-17 |
 | EP-06 | SLA, auditoría y calidad del servicio | Media | HU-18, HU-19, HU-20 |
+| EP-07 | Reserva de ambientes | Media | HU-21, HU-22, HU-23, HU-24, HU-25 |

@@ -26,3 +26,9 @@
 | RF-22 | El sistema debe registrar cada cambio de una solicitud (campo, valor anterior, valor nuevo, usuario y fecha). | Sistema | AL-07 | Media |
 | RF-23 | El sistema debe permitir exportar reportes de solicitudes e indicadores. | Supervisor, Administrador | — | Baja |
 | RF-24 | El sistema debe permitir al solicitante responder una encuesta de satisfacción cuando su solicitud se cierra. | Estudiante | — | Baja |
+| RF-25 | El sistema debe permitir consultar los espacios reservables y su disponibilidad por fecha y hora. | Todos | AL-08 | Alta |
+| RF-26 | El sistema debe permitir registrar una reserva indicando espacio, fecha, hora de inicio, hora de fin y motivo; la reserva queda pendiente de aprobación. | Todos | AL-08 | Alta |
+| RF-27 | El sistema debe impedir reservas solapadas o duplicadas y las que incumplan horario, duración, anticipación o capacidad. | Sistema | AL-08 | Alta |
+| RF-28 | El sistema debe permitir al supervisor del área del espacio o al administrador aprobar o rechazar reservas pendientes, registrando responsable, fecha y motivo. | Supervisor, Administrador | AL-08 | Alta |
+| RF-29 | El sistema debe permitir al solicitante consultar y cancelar sus reservas vigentes. | Todos | AL-08 | Alta |
+| RF-30 | El sistema debe permitir administrar espacios, tipos de espacio, horarios y la política de reservas. | Administrador | AL-08 | Media |

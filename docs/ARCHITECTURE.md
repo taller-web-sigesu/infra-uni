@@ -1,6 +1,6 @@
 # ARCHITECTURE.md — Sistema Web Inteligente para la Gestión Integral de Servicios Universitarios
 
-> **Estado:** Base de desarrollo presente en código y configuración; arquitectura funcional objetivo pendiente. Ejecución no verificada en esta revisión.  
+> **Estado:** Base de desarrollo presente en código y configuración; plan de ingeniería aprobado el 2026-11-04, implementación pendiente. Ejecución no verificada en esta revisión.  
 > **Ubicación canónica:** `infra-uni/docs/ARCHITECTURE.md`.  
 > **Última actualización:** 2026-11-02.  
 > **Propósito:** Dar al equipo y a los agentes de IA una referencia compartida sobre límites, componentes, datos, seguridad y despliegue. **Actualizar cuando cambie una decisión aprobada o el código real.**
@@ -119,7 +119,7 @@ No se requieren Redis, Elasticsearch, RabbitMQ ni una segunda base de datos para
 | Almacenamiento de archivos | Evidencias, si se implementan | API/SDK del proveedor; **por decidir** |
 | Servicio de alertas | Avisos técnicos sobre salud | Canal/proveedor por decidir |
 
-**Fuera de alcance inicial:** pagos, chatbots con LLM, servicios externos de mensajería, API Gateway y microservicios. Las notificaciones internas siguen como extensión. La reserva de ambientes fue aprobada como EP-07 (ver `docs/adr/ADR-0001-reserva-ambientes.md`) y se implementa como módulo separado. El uso de IA durante el desarrollo **sí exige** su registro documental, pero no exige integrar un chatbot en el producto.
+**Fuera de alcance inicial:** pagos, chatbots con LLM, servicios externos de mensajería, API Gateway y microservicios. Las notificaciones internas siguen como extensión. La reserva de ambientes fue aprobada como EP-07 (ver `docs/adr/ADR-0001-reserva-ambientes.md`) y se implementa como módulo separado. El alcance aprobado el 2026-11-04 es de **ingeniería** (ver plan en `docs/superpowers/plans/2026-11-04-ingenieria-pendiente.md`); las extensiones de producto (notificaciones, recuperación de contraseña, tiempo real, adjuntos y reservas recurrentes) siguen fuera. El uso de IA durante el desarrollo **sí exige** su registro documental, pero no exige integrar un chatbot en el producto.
 
 ## 6. Deployment & Infrastructure
 
@@ -131,7 +131,7 @@ No se requieren Redis, Elasticsearch, RabbitMQ ni una segunda base de datos para
 
 Para iniciar, clonar los tres repositorios hermanos, abrir Docker Desktop y ejecutar `iniciar.bat`; crea `.env` desde `.env.example` si falta y ejecuta Compose. `detener.bat` detiene sin borrar datos. Procedimiento, configuración y límites de verificación: [README](../README.md) y [DOCKER.md](DOCKER.md). No se ha verificado ejecución en esta revisión documental.
 
-**CI/CD objetivo por repositorio (aún sin workflows):**
+**CI/CD objetivo por repositorio (propuesto en [ADR-0005](adr/ADR-0005-ci-cd-calidad.md), pendiente de aprobación formal; workflows aún no implementados):**
 
 - Frontend: dependencias → lint → pruebas → build → despliegue de preview/staging → smoke/E2E cuando aplique.
 - Backend: compilación → unitarias → integración con MySQL de prueba → análisis estático/dependencias → imagen Docker → staging → smoke tests.
@@ -140,7 +140,7 @@ Para iniciar, clonar los tres repositorios hermanos, abrir Docker Desktop y ejec
 
 **Promoción a producción:** solo después de pruebas de aceptación, controles de seguridad y aprobación. Definir procedimiento de rollback, backup y restauración antes de sustentación.
 
-**Observabilidad mínima:** Spring Actuator/Micrometer para salud y métricas, logs estructurados, identificador de correlación y trazas (OpenTelemetry es una opción expresamente mencionada por la propuesta). Alertas por indisponibilidad y errores anómalos; proteger endpoints de administración/actuator.
+**Observabilidad mínima:** Spring Actuator/Micrometer para salud y métricas, logs estructurados, identificador de correlación y trazas (OpenTelemetry es una opción expresamente mencionada por la propuesta). Alertas por indisponibilidad y errores anómalos; proteger endpoints de administración/actuator. Ver [ADR-0003](adr/ADR-0003-observabilidad-retencion.md).
 
 ## 7. Seguridad transversal
 
@@ -148,7 +148,7 @@ Backend es responsable de autenticación, RBAC y controles por recurso, validaci
 
 Infraestructura gestiona aislamiento de redes, configuración por entorno, secretos y persistencia. Nunca versionar `.env` ni credenciales reales. La configuración local usa HTTP y conexión MySQL sin TLS dentro de Docker; no extrapolarla a producción, donde se requiere HTTPS/TLS y revisión de credenciales y acceso.
 
-JWT de corta duración en memoria es una propuesta inicial; JWT frente a sesión sigue pendiente de ADR. Si se añaden cookies, coordinar CSRF, CORS, `HttpOnly`, `Secure` y SameSite entre repositorios. Los adjuntos y endpoints operativos requieren autorización. No registrar tokens, contraseñas ni información sensible innecesaria.
+La estrategia propuesta es JWT de acceso de corta duración en memoria y refresh token en cookie `HttpOnly` (ver [ADR-0002](adr/ADR-0002-autenticacion-sesion.md), estado Propuesto). Si se añaden cookies, coordinar CSRF, CORS, `HttpOnly`, `Secure` y SameSite entre repositorios. Los adjuntos y endpoints operativos requieren autorización. No registrar tokens, contraseñas ni información sensible innecesaria.
 
 ## 8. Development & Testing Environment
 
@@ -185,7 +185,22 @@ JWT de corta duración en memoria es una propuesta inicial; JWT frente a sesión
 
 **Posibles extensiones, nunca automáticas:** notificaciones internas, recuperación de contraseña y mejoras de tiempo real. Un chatbot con IA no es un módulo obligatorio del PDF. No migrar a microservicios sin restricciones técnicas verificadas.
 
-**Decisiones pendientes que requieren ADR:** proveedor y costo de MySQL cloud; elección definitiva JWT/sesión; almacenamiento de adjuntos; regla exacta de fechas límite y KPI de vencidas; política de cierre/reapertura; retención de logs; validación de las versiones fijadas actualmente en los manifiestos.
+**Decisiones propuestas en ADR (pendientes de aprobación formal):** JWT vs sesión ([ADR-0002](adr/ADR-0002-autenticacion-sesion.md)), observabilidad y retención ([ADR-0003](adr/ADR-0003-observabilidad-retencion.md)), despliegue y MySQL ([ADR-0004](adr/ADR-0004-despliegue-persistencia.md)) y CI/CD ([ADR-0005](adr/ADR-0005-ci-cd-calidad.md)). **Siguen pendientes de decisión de producto:** almacenamiento de adjuntos, regla exacta de fechas límite y KPI de vencidas, política de cierre/reapertura, retención de auditoría y validación definitiva de versiones.
+
+### 9.1. Plan de ingeniería aprobado (2026-11-04)
+
+El equipo aprobó cerrar la brecha de ingeniería sin ampliar el alcance funcional. El plan detallado vive en [`docs/superpowers/plans/2026-11-04-ingenieria-pendiente.md`](superpowers/plans/2026-11-04-ingenieria-pendiente.md).
+
+- **Fase 0:** ADR-0002 a ADR-0005, OpenAPI, `SECURITY.md`, `DATABASE.md` y validación de versiones.
+- **Fase 1:** Flyway, `shared`, `auth`, `users`, `catalogs`, `requests`, `management`, `dashboard`, SLA/auditoría/encuesta y `reservations`.
+- **Fase 2:** router, cliente HTTP, features por rol, accesibilidad, Vitest y Playwright.
+- **Fase 3:** CI/CD, SAST/DAST, k6 y puertas de calidad.
+- **Fase 4:** logs JSON, métricas, trazas, alertas, retención, backups y runbooks.
+- **Fase 5:** Docker de producción, Vercel/Render/MySQL gestionado, staging, producción, rollback y smoke tests.
+
+**Decisiones:** [ADR-0002 autenticación](adr/ADR-0002-autenticacion-sesion.md), [ADR-0003 observabilidad](adr/ADR-0003-observabilidad-retencion.md), [ADR-0004 despliegue](adr/ADR-0004-despliegue-persistencia.md) y [ADR-0005 CI/CD](adr/ADR-0005-ci-cd-calidad.md).
+
+**Sigue fuera de alcance:** pagos, chatbot con LLM, mensajería externa, API Gateway, microservicios, notificaciones, recuperación de contraseña, tiempo real, adjuntos y reservas recurrentes.
 
 ## 10. Project Identification
 
@@ -199,8 +214,8 @@ JWT de corta duración en memoria es una propuesta inicial; JWT frente a sesión
 | Equipo | Grupo académico de cinco integrantes |
 | Responsable técnico/contacto | Por asignar por el equipo |
 | Fuente del alcance | PDF de propuesta del curso, 11 páginas |
-| Estado de implementación | Base de desarrollo en código; módulos funcionales pendientes |
-| Última actualización | 2026-11-02 |
+| Estado de implementación | Base de desarrollo; plan de ingeniería aprobado, módulos funcionales pendientes |
+| Última actualización | 2026-11-04 |
 
 **Gobernanza de cambios:** toda decisión arquitectónica relevante se registra en `infra-uni/docs/adr/ADR-XXXX-descripcion.md`, enlaza las historias afectadas y se revisa por al menos otro integrante. Al implementar un módulo, corregir este documento para diferenciar intención de realidad. Revisarlo en cada entrega parcial y final.
 

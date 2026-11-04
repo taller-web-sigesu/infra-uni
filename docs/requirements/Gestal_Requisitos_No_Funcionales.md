@@ -17,3 +17,6 @@
 | RNF-13 | Calidad | El backend debe seguir una arquitectura por capas (controladores, servicios, DTO y acceso a datos). | Alta |
 | RNF-14 | Calidad | El sistema debe contar con pruebas automatizadas unitarias y de integración ejecutadas en el pipeline CI/CD. | Alta |
 | RNF-15 | Calidad | El sistema debe generar logs y métricas que permitan identificar incidentes y depurar errores. | Media |
+| RNF-16 | Integridad | El servidor debe garantizar que no existan dos reservas activas solapadas para un mismo espacio, incluso con solicitudes concurrentes. | Alta |
+| RNF-17 | Seguridad | Un usuario solo accede a sus reservas; el supervisor a las de los espacios de su área; el administrador a todas. | Alta |
+| RNF-18 | Rendimiento | La consulta de disponibilidad de un espacio y día debe responder en menos de 2 segundos con la carga de demostración. | Media |

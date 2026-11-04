@@ -1,17 +1,17 @@
-# DISEÑO-BD.md — Base de datos MySQL del Sistema de Servicios Universitarios
+# DISENIO-BD.md — Base de datos MySQL del Sistema de Servicios Universitarios
 
 > **Proyecto:** Sistema Web Inteligente para la Gestión Integral de Servicios Universitarios (Gestal).
 > **Motor:** MySQL 8.4.13 (imagen `mysql:8.4.13` de `compose.yaml`).
 > **Base de datos:** `uni_services`.
 > **Estado:** diseño propuesto, pendiente de implementación con Flyway en `backend-uni`.
-> **Fuentes:** `docs/requirements/user-stories/HU-01` a `HU-20`, `docs/requirements/Gestal_Requisitos_Funcionales.md`, `docs/requirements/Gestal_Requisitos_No_Funcionales.md`, `docs/EPICS.md`, `docs/ARCHITECTURE.md`, `compose.yaml` y `docs/DOCKER.md`.
-> **Última actualización:** 2026-11-02.
+> **Fuentes:** `docs/requirements/user-stories/HU-01` a `HU-25`, `docs/requirements/Gestal_Requisitos_Funcionales.md`, `docs/requirements/Gestal_Requisitos_No_Funcionales.md`, `docs/EPICS.md`, `docs/ARCHITECTURE.md`, `compose.yaml` y `docs/DOCKER.md`.
+> **Última actualización:** 2026-11-04.
 
 ---
 
 ## 1. Resumen ejecutivo
 
-El modelo cubre los seis módulos del sistema: autenticación y roles, registro y seguimiento de solicitudes, ciclo de vida y asignaciones, dashboard, administración de catálogos y SLA/auditoría/encuesta.
+El modelo cubre los siete módulos del sistema: autenticación y roles, registro y seguimiento de solicitudes, ciclo de vida y asignaciones, dashboard, administración de catálogos, SLA/auditoría/encuesta y reserva de ambientes.
 
 La pieza central es `solicitudes`. A su alrededor se agrupan:
 
@@ -19,6 +19,7 @@ La pieza central es `solicitudes`. A su alrededor se agrupan:
 - **Catálogos:** `areas`, `prioridades`, `categorias`, `estados_solicitud`, `transiciones_estado`, `politicas_sla`.
 - **Ciclo de vida:** `historial_estados`, `asignaciones`, `comentarios`, `encuestas_satisfaccion`.
 - **Soporte:** `auditoria_eventos`, `secuencias_codigo_solicitud`.
+- **Reservas:** `tipos_espacio`, `espacios`, `horarios_espacio`, `estados_reserva`, `politicas_reserva`, `reservas`, `historial_estados_reserva`, `secuencias_codigo_reserva`.
 
 El diseño prioriza:
 
@@ -27,6 +28,7 @@ El diseño prioriza:
 3. **Reglas explícitas:** la máquina de estados vive en `transiciones_estado`, no en código hardcodeado.
 4. **Consultas rápidas:** índices compuestos alineados con “mis solicitudes”, bandeja del área, bandeja del técnico, SLA y dashboard.
 5. **Compatibilidad MySQL 8.4:** InnoDB, `utf8mb4`, checks nativos, columnas generadas e índices únicos.
+6. **Reservas sin doble uso:** el solapamiento se controla en transacción con bloqueo de la fila del espacio y un índice compuesto de disponibilidad.
 
 ---
 
@@ -42,6 +44,7 @@ El diseño prioriza:
 | EP-04 | HU-12, HU-13, HU-14 | Indicadores, filtros y exportación. |
 | EP-05 | HU-15, HU-16, HU-17 | Usuarios, áreas, categorías, prioridades y estados. |
 | EP-06 | HU-18, HU-19, HU-20 | SLA, auditoría y encuesta de satisfacción. |
+| EP-07 | HU-21, HU-22, HU-23, HU-24, HU-25 | Reservar ambientes, aprobar/rechazar y administrar espacios. |
 
 ### 2.2. Fuera de alcance del esquema
 
@@ -70,6 +73,14 @@ El diseño prioriza:
 | D-12 | `sesiones_usuario` permite revocar sesiones en logout. | HU-01 CA-04 exige invalidar la sesión activa. | JWT sin revocación del lado servidor. |
 | D-13 | Fechas en `DATETIME(6)` UTC. | Evita el límite 2038 de `TIMESTAMP` y conserva microsegundos. | `TIMESTAMP`. |
 | D-14 | PKs surrogate `BIGINT UNSIGNED`. | Consistencia con `Long` de JPA y margen para auditoría/historial. | PKs naturales o `INT UNSIGNED`. |
+| D-15 | Reserva de ambientes como módulo separado de `solicitudes`. | Ciclo de vida, actores y datos difieren; evita mezclar tickets con reservas. | Reutilizar `solicitudes` con una categoría de reserva. |
+| D-16 | Aprobación obligatoria: `PENDIENTE → CONFIRMADA` o `RECHAZADA`. | Controla el uso de los ambientes y deja trazabilidad de la decisión. | Confirmación automática si no hay conflicto. |
+| D-17 | Franja por `fecha` + `hora_inicio` + `hora_fin`. | Flexibilidad para reservar parcialmente un día. | Franjas fijas de una hora o reserva por día completo. |
+| D-18 | Solapamiento validado en servicio con `SELECT … FOR UPDATE` sobre `espacios`, más índice único de franja exacta. | MySQL no tiene exclusion constraints; el bloqueo serializa la validación concurrente. | Confiar solo en una consulta sin bloqueo. |
+| D-19 | `espacios.area_id` nullable; aprueba el supervisor del área o el administrador; sin área, solo el administrador. | Encaja con el RBAC y la organización por áreas existente. | Aprobación centralizada únicamente por el administrador. |
+| D-20 | Estados operativos `EN_CURSO` y `FINALIZADA` derivados en vista, no almacenados. | Evita procesos programados de transición; coherente con `vw_estado_sla`. | Job periódico que actualice estados. |
+| D-21 | Historial dedicado `historial_estados_reserva` más `auditoria_eventos`. | Misma separación que `solicitudes`: línea de tiempo visible y registro de cumplimiento. | Usar solo auditoría para reconstruir la línea de tiempo. |
+| D-22 | Catálogos `tipos_espacio` y `estados_reserva` en tablas, no `ENUM`. | El administrador los gestiona (HU-25) sin migraciones de esquema. | Columnas `ENUM` fijas. |
 
 ---
 
@@ -132,6 +143,16 @@ erDiagram
     usuarios ||--o{ comentarios : "autor"
     usuarios ||--o{ encuestas_satisfaccion : "responde"
     usuarios ||--o{ auditoria_eventos : "actor"
+    tipos_espacio ||--o{ espacios : "tipo"
+    areas ||--o{ espacios : "responsable"
+    espacios ||--o{ horarios_espacio : "horario"
+    espacios ||--o{ reservas : "reserva"
+    usuarios ||--o{ reservas : "solicita"
+    usuarios ||--o{ reservas : "aprueba"
+    usuarios ||--o{ reservas : "cancela"
+    estados_reserva ||--o{ reservas : "estado actual"
+    reservas ||--o{ historial_estados_reserva : "historial"
+    usuarios ||--o{ historial_estados_reserva : "cambia"
 ```
 
 ---
@@ -407,6 +428,164 @@ Secuencia atómica por año para generar códigos legibles sin colisiones.
 | `ultimo_valor` | `INT UNSIGNED` | No | `0` | — | Último consecutivo usado. |
 | `actualizado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Última actualización. |
 
+
+### 6.17. `tipos_espacio`
+
+Catálogo de tipos de ambiente. `codigo` es estable; `nombre` es el texto visible y administrable (HU-25).
+
+| Columna | Tipo | Nulo | Default | Clave/Índice | Descripción |
+| --- | --- | --- | --- | --- | --- |
+| `id` | `BIGINT UNSIGNED` | No | `AUTO_INCREMENT` | PK | Identificador. |
+| `codigo` | `VARCHAR(40)` | No | — | UK | `AULA`, `LABORATORIO`, `SALA_ESTUDIO`, `AUDITORIO`, `SALA_REUNIONES`, `OTRO`. |
+| `nombre` | `VARCHAR(80)` | No | — | UK | Nombre visible. |
+| `descripcion` | `VARCHAR(255)` | Sí | `NULL` | — | Alcance del tipo. |
+| `activo` | `TINYINT UNSIGNED` | No | `1` | IDX | Alta/baja lógica. |
+| `creado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Alta. |
+| `actualizado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Última modificación. |
+
+**Checks:** `chk_tipos_espacio_activo CHECK (activo IN (0,1))`.
+
+### 6.18. `espacios`
+
+Ambientes reservables. `area_id` define quién aprueba: el supervisor del área o el administrador; si es `NULL`, solo el administrador. `pabellon` usa cadena vacía por defecto para que el índice único funcione aunque no se informe.
+
+| Columna | Tipo | Nulo | Default | Clave/Índice | Descripción |
+| --- | --- | --- | --- | --- | --- |
+| `id` | `BIGINT UNSIGNED` | No | `AUTO_INCREMENT` | PK | Identificador. |
+| `tipo_espacio_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Tipo de ambiente. |
+| `area_id` | `BIGINT UNSIGNED` | Sí | `NULL` | FK, IDX | Área responsable de aprobar y mantener. |
+| `codigo` | `VARCHAR(40)` | No | — | UK | Código estable, por ejemplo `LAB-204`. |
+| `nombre` | `VARCHAR(120)` | No | — | UK con pabellón | Nombre visible. |
+| `descripcion` | `VARCHAR(255)` | Sí | `NULL` | — | Detalle del ambiente. |
+| `pabellon` | `VARCHAR(60)` | No | `''` | parte de UK | Pabellón o edificio. |
+| `piso` | `VARCHAR(20)` | Sí | `NULL` | — | Nivel o piso. |
+| `ubicacion_detallada` | `VARCHAR(255)` | Sí | `NULL` | — | Referencia adicional. |
+| `capacidad` | `SMALLINT UNSIGNED` | No | — | CHECK | Aforo máximo; debe ser mayor que cero. |
+| `requiere_aprobacion` | `TINYINT UNSIGNED` | No | `1` | — | 1 = la reserva queda pendiente (EP-07 exige 1); 0 reservado para una política futura. |
+| `activo` | `TINYINT UNSIGNED` | No | `1` | IDX | Alta/baja lógica; no se elimina con reservas. |
+| `creado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Alta. |
+| `actualizado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Última modificación. |
+
+**Índices:** `uk_espacios_codigo`, `uk_espacios_nombre_pabellon (nombre, pabellon)`, `idx_espacios_tipo_activo (tipo_espacio_id, activo)`, `idx_espacios_area_activo (area_id, activo)`, `idx_espacios_pabellon_activo (pabellon, activo)`.
+
+**Checks:** `chk_espacios_capacidad CHECK (capacidad > 0)`, `chk_espacios_requiere_aprobacion CHECK (requiere_aprobacion IN (0,1))`, `chk_espacios_activo CHECK (activo IN (0,1))`.
+
+### 6.19. `horarios_espacio`
+
+Horario semanal de atención. Un día sin fila se considera cerrado.
+
+| Columna | Tipo | Nulo | Default | Clave/Índice | Descripción |
+| --- | --- | --- | --- | --- | --- |
+| `id` | `BIGINT UNSIGNED` | No | `AUTO_INCREMENT` | PK | Identificador. |
+| `espacio_id` | `BIGINT UNSIGNED` | No | — | FK, UK compuesto | Espacio. |
+| `dia_semana` | `TINYINT UNSIGNED` | No | — | UK compuesto | 1 = lunes … 7 = domingo (ISO-8601). |
+| `hora_apertura` | `TIME` | No | — | — | Inicio de atención. |
+| `hora_cierre` | `TIME` | No | — | — | Fin de atención; debe ser mayor que la apertura. |
+| `activo` | `TINYINT UNSIGNED` | No | `1` | — | Permite desactivar el horario sin borrarlo. |
+| `creado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Alta. |
+| `actualizado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Última modificación. |
+
+**Índices:** `uk_horarios_espacio_dia (espacio_id, dia_semana)`.
+
+**Checks:** `chk_horarios_dia CHECK (dia_semana BETWEEN 1 AND 7)`, `chk_horarios_horas CHECK (hora_cierre > hora_apertura)`, `chk_horarios_activo CHECK (activo IN (0,1))`.
+
+### 6.20. `estados_reserva`
+
+Estados del ciclo de vida de una reserva. `codigo` es inmutable; `nombre` es visible.
+
+| Columna | Tipo | Nulo | Default | Clave/Índice | Descripción |
+| --- | --- | --- | --- | --- | --- |
+| `id` | `BIGINT UNSIGNED` | No | `AUTO_INCREMENT` | PK | Identificador. |
+| `codigo` | `VARCHAR(30)` | No | — | UK | `PENDIENTE`, `CONFIRMADA`, `RECHAZADA`, `CANCELADA`. |
+| `nombre` | `VARCHAR(60)` | No | — | — | Nombre visible. |
+| `descripcion` | `VARCHAR(255)` | Sí | `NULL` | — | Significado del estado. |
+| `es_final` | `TINYINT UNSIGNED` | No | `0` | IDX | 1 para `RECHAZADA` y `CANCELADA`. |
+| `orden` | `TINYINT UNSIGNED` | No | — | UK | Orden visual. |
+| `activo` | `TINYINT UNSIGNED` | No | `1` | — | Alta/baja lógica. |
+| `creado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Alta. |
+| `actualizado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Última modificación. |
+
+**Checks:** `chk_estados_reserva_final CHECK (es_final IN (0,1))`, `chk_estados_reserva_activo CHECK (activo IN (0,1))`.
+
+### 6.21. `politicas_reserva`
+
+Política vigente de reservas. Se guarda una sola fila activa; los cambios se aplican a reservas nuevas.
+
+| Columna | Tipo | Nulo | Default | Clave/Índice | Descripción |
+| --- | --- | --- | --- | --- | --- |
+| `id` | `BIGINT UNSIGNED` | No | `AUTO_INCREMENT` | PK | Identificador. |
+| `duracion_minima_minutos` | `SMALLINT UNSIGNED` | No | `30` | — | Duración mínima de una reserva. |
+| `duracion_maxima_minutos` | `SMALLINT UNSIGNED` | No | `240` | — | Duración máxima. |
+| `dias_anticipacion_maxima` | `SMALLINT UNSIGNED` | No | `30` | — | Días hacia adelante en que se puede reservar. |
+| `horas_anticipacion_minima` | `SMALLINT UNSIGNED` | No | `1` | — | Antelación mínima antes del inicio. |
+| `max_reservas_activas_por_dia` | `TINYINT UNSIGNED` | No | `2` | — | Límite por usuario y día. |
+| `vigente_desde` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | IDX | Inicio de vigencia. |
+| `vigente_hasta` | `DATETIME(6)` | Sí | `NULL` | — | Fin de vigencia; `NULL` = vigente. |
+| `activo` | `TINYINT UNSIGNED` | No | `1` | IDX | Alta/baja lógica. |
+| `creado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Alta. |
+| `actualizado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Última modificación. |
+
+**Índices:** `idx_politicas_reserva_vigente (activo, vigente_desde)`.
+
+**Checks:** `chk_politicas_reserva_duracion CHECK (duracion_minima_minutos > 0 AND duracion_maxima_minutos >= duracion_minima_minutos)`, `chk_politicas_reserva_vigencia CHECK (vigente_hasta IS NULL OR vigente_hasta > vigente_desde)`, `chk_politicas_reserva_activo CHECK (activo IN (0,1))`.
+
+### 6.22. `reservas`
+
+Entidad central de EP-07. Una reserva ocupa una franja de un espacio y pasa por aprobación.
+
+| Columna | Tipo | Nulo | Default | Clave/Índice | Descripción |
+| --- | --- | --- | --- | --- | --- |
+| `id` | `BIGINT UNSIGNED` | No | `AUTO_INCREMENT` | PK | Identificador. |
+| `codigo` | `VARCHAR(20)` | No | — | UK | `RES-2026-000001`. |
+| `espacio_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Ambiente reservado. |
+| `solicitante_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Usuario que registra. |
+| `estado_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Estado actual. |
+| `fecha` | `DATE` | No | — | IDX compuesto | Día de la reserva. |
+| `hora_inicio` | `TIME` | No | — | IDX compuesto | Inicio de la franja. |
+| `hora_fin` | `TIME` | No | — | — | Fin de la franja; debe ser posterior al inicio. |
+| `motivo` | `VARCHAR(255)` | No | — | — | Motivo de la reserva; no vacío. |
+| `num_asistentes` | `SMALLINT UNSIGNED` | Sí | `NULL` | — | Asistentes previstos; no supera la capacidad. |
+| `aprobada_por_id` | `BIGINT UNSIGNED` | Sí | `NULL` | FK, IDX | Aprobador; se llena solo al aprobar. |
+| `aprobada_en` | `DATETIME(6)` | Sí | `NULL` | — | Fecha de aprobación. |
+| `motivo_rechazo` | `TEXT` | Sí | `NULL` | — | Obligatorio al rechazar. |
+| `cancelada_por_id` | `BIGINT UNSIGNED` | Sí | `NULL` | FK, IDX | Usuario que cancela. |
+| `cancelada_en` | `DATETIME(6)` | Sí | `NULL` | — | Fecha de cancelación. |
+| `version_fila` | `INT UNSIGNED` | No | `0` | — | Bloqueo optimista JPA. |
+| `creado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | IDX | Registro. |
+| `actualizado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Última modificación. |
+
+**Índices:** `uk_reservas_codigo`, `uk_reservas_franja_exacta (espacio_id, fecha, hora_inicio, estado_id)`, `idx_reservas_disponibilidad (espacio_id, fecha, estado_id, hora_inicio, hora_fin)`, `idx_reservas_solicitante (solicitante_id, fecha)`, `idx_reservas_estado_fecha (estado_id, fecha)`, `idx_reservas_aprobador (aprobada_por_id, aprobada_en)`.
+
+**Checks:** `chk_reservas_horas CHECK (hora_fin > hora_inicio)`, `chk_reservas_motivo CHECK (CHAR_LENGTH(TRIM(motivo)) > 0)`, `chk_reservas_asistentes CHECK (num_asistentes IS NULL OR num_asistentes > 0)`, `chk_reservas_aprobacion CHECK ((aprobada_por_id IS NULL AND aprobada_en IS NULL) OR (aprobada_por_id IS NOT NULL AND aprobada_en IS NOT NULL))`.
+
+> **Solapamiento:** MySQL no ofrece exclusion constraints. La aplicación bloquea la fila del espacio con `SELECT … FOR UPDATE`, consulta las reservas activas que se cruzan y recién entonces inserta o aprueba. `uk_reservas_franja_exacta` es la segunda barrera contra duplicados exactos en el mismo estado; incluye `estado_id` para no bloquear una franja que quedó cancelada o rechazada.
+
+### 6.23. `historial_estados_reserva`
+
+Línea de tiempo de la reserva. En el alta, `estado_origen_id` es `NULL` y `estado_destino_id` es `PENDIENTE`.
+
+| Columna | Tipo | Nulo | Default | Clave/Índice | Descripción |
+| --- | --- | --- | --- | --- | --- |
+| `id` | `BIGINT UNSIGNED` | No | `AUTO_INCREMENT` | PK | Identificador. |
+| `reserva_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Reserva. |
+| `estado_origen_id` | `BIGINT UNSIGNED` | Sí | `NULL` | FK | Estado anterior; `NULL` en el alta. |
+| `estado_destino_id` | `BIGINT UNSIGNED` | No | — | FK | Estado nuevo. |
+| `cambiado_por_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Usuario que ejecuta. |
+| `motivo` | `TEXT` | Sí | `NULL` | — | Motivo de rechazo/cancelación o nota. |
+| `cambiado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | IDX | Fecha del cambio. |
+
+**Índices:** `idx_historial_reserva (reserva_id, cambiado_en)`, `idx_historial_reserva_origen (estado_origen_id)`, `idx_historial_reserva_destino (estado_destino_id)`, `idx_historial_reserva_usuario (cambiado_por_id)`.
+
+### 6.24. `secuencias_codigo_reserva`
+
+Secuencia atómica por año para generar `RES-AAAA-NNNNNN` sin colisiones.
+
+| Columna | Tipo | Nulo | Default | Clave/Índice | Descripción |
+| --- | --- | --- | --- | --- | --- |
+| `anio` | `SMALLINT UNSIGNED` | No | — | PK | Año de la secuencia. |
+| `ultimo_valor` | `INT UNSIGNED` | No | `0` | — | Último consecutivo usado. |
+| `actualizado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Última actualización. |
+
 ---
 
 ## 7. Reglas de integridad y negocio
@@ -500,6 +679,37 @@ SELECT CONCAT('SOL-', @anio, '-', LPAD(LAST_INSERT_ID(), 6, '0')) AS codigo;
 
 `LAST_INSERT_ID(expr)` es atómico por conexión y evita códigos duplicados en concurrencia.
 
+
+### 7.8. Reservas de ambientes
+
+Máquina de estados:
+
+```text
+PENDIENTE ──aprobar──► CONFIRMADA ──cancelar──► CANCELADA
+    │                                                  ▲
+    ├──rechazar (motivo)──► RECHAZADA                  │
+    └──cancelar────────────────────────────────────────┘
+```
+
+| Origen | Destino | Rol | ¿Motivo? | Historia |
+| --- | --- | --- | --- | --- |
+| `PENDIENTE` | `CONFIRMADA` | Supervisor del área / Administrador | No | HU-23, RF-28 |
+| `PENDIENTE` | `RECHAZADA` | Supervisor del área / Administrador | Sí | HU-23, RF-28 |
+| `PENDIENTE` | `CANCELADA` | Solicitante / Administrador | No | HU-24, RF-29 |
+| `CONFIRMADA` | `CANCELADA` | Solicitante / Administrador | No | HU-24, RF-29 |
+
+Reglas:
+
+- `RECHAZADA` y `CANCELADA` son terminales: no admiten nuevas transiciones.
+- No puede haber solapamiento para un mismo `espacio_id` + `fecha` entre reservas `PENDIENTE` o `CONFIRMADA`. Hay conflicto cuando `nueva.hora_inicio < existente.hora_fin AND nueva.hora_fin > existente.hora_inicio`.
+- La validación se ejecuta dentro de una transacción: `SELECT id FROM espacios WHERE id = ? FOR UPDATE`, luego la consulta de solapamiento y finalmente el `INSERT` o la aprobación. `uk_reservas_franja_exacta` es la segunda barrera. Incluye `estado_id` para no bloquear una franja liberada por cancelación o rechazo.
+- Duración, anticipación, horario y límite diario se toman de la `politicas_reserva` activa. La fecha pasada se valida en servicio porque un `CHECK` de MySQL no puede usar `CURRENT_DATE`.
+- `num_asistentes`, si se informa, debe ser menor o igual a `espacios.capacidad`.
+- Al aprobar se revalida el solapamiento. Un aprobador no puede aprobar su propia reserva (segregación de funciones).
+- La cancelación solo procede antes de `fecha + hora_inicio`.
+- Toda transición inserta en `historial_estados_reserva` y en `auditoria_eventos` con `entidad = 'reservas'`.
+- El estado operativo (`PROXIMA`, `EN_CURSO`, `FINALIZADA`) se calcula en `vw_reservas_operativas`; no se persiste.
+
 ---
 
 ## 8. Índices y rendimiento
@@ -525,10 +735,50 @@ SELECT CONCAT('SOL-', @anio, '-', LPAD(LAST_INSERT_ID(), 6, '0')) AS codigo;
 | `idx_auditoria_entidad` | `auditoria_eventos` | `entidad, entidad_id, ocurrido_en` | Auditoría genérica. |
 | `idx_auditoria_actor` | `auditoria_eventos` | `actor_id, ocurrido_en` | Actividad por usuario. |
 | `idx_sesiones_usuario` | `sesiones_usuario` | `usuario_id, revocada_en` | Sesiones activas. |
+| `uk_espacios_codigo` | `espacios` | `codigo` | Código único del ambiente. |
+| `uk_espacios_nombre_pabellon` | `espacios` | `nombre, pabellon` | Evita ambientes duplicados en el mismo pabellón. |
+| `idx_espacios_tipo_activo` | `espacios` | `tipo_espacio_id, activo` | Catálogo filtrado por tipo. |
+| `idx_espacios_area_activo` | `espacios` | `area_id, activo` | Espacios de un área para aprobación. |
+| `idx_espacios_pabellon_activo` | `espacios` | `pabellon, activo` | Filtro por pabellón. |
+| `uk_horarios_espacio_dia` | `horarios_espacio` | `espacio_id, dia_semana` | Un horario por día y espacio. |
+| `uk_reservas_codigo` | `reservas` | `codigo` | Código único de reserva. |
+| `uk_reservas_franja_exacta` | `reservas` | `espacio_id, fecha, hora_inicio, estado_id` | Bloquea duplicados exactos en el mismo estado. |
+| `idx_reservas_disponibilidad` | `reservas` | `espacio_id, fecha, estado_id, hora_inicio, hora_fin` | Disponibilidad y detección de solapamiento. |
+| `idx_reservas_solicitante` | `reservas` | `solicitante_id, fecha` | “Mis reservas” paginado. |
+| `idx_reservas_estado_fecha` | `reservas` | `estado_id, fecha` | Bandeja de pendientes y agenda. |
+| `idx_reservas_aprobador` | `reservas` | `aprobada_por_id, aprobada_en` | Historial de aprobaciones. |
+| `idx_historial_reserva` | `historial_estados_reserva` | `reserva_id, cambiado_en` | Línea de tiempo de la reserva. |
 
 **Paginación:** usar `LIMIT ? OFFSET ?` o keyset (`(creado_en, id) < (?, ?)`) para listados grandes. Los índices incluyen `creado_en` para evitar filesort en los listados principales.
 
 **Orden del técnico:** `ORDER BY p.nivel DESC, s.creado_en ASC`; el índice `idx_solicitudes_responsable` cubre el filtro principal y el orden por fecha; para el orden por prioridad, MySQL puede usar el índice compuesto y un sort acotado.
+
+
+### 8.1. Consultas de disponibilidad de reservas
+
+```sql
+-- Franjas ocupadas de un espacio en una fecha.
+SELECT hora_inicio, hora_fin
+FROM reservas
+WHERE espacio_id = :espacio_id
+  AND fecha = :fecha
+  AND estado_id IN (:pendiente_id, :confirmada_id)
+ORDER BY hora_inicio;
+
+-- Detección de solapamiento dentro de la transacción.
+SELECT 1
+FROM reservas
+WHERE espacio_id = :espacio_id
+  AND fecha = :fecha
+  AND estado_id IN (:pendiente_id, :confirmada_id)
+  AND hora_inicio < :hora_fin
+  AND hora_fin > :hora_inicio
+LIMIT 1;
+```
+
+`idx_reservas_disponibilidad` cubre el filtro por espacio, fecha y estado y permite resolver el solapamiento sin escanear la tabla. En tablas pequeñas MySQL puede elegir `uk_reservas_franja_exacta`, que también cubre `espacio_id` y `fecha`; ambos aparecen en `possible_keys`. Con volumen real, revisar `EXPLAIN` y, si hace falta, forzar `USE INDEX (idx_reservas_disponibilidad)`. Evitar `YEAR(fecha)` o `DATE(fecha)` en los filtros: aplican una función sobre la columna e impiden el uso del índice.
+
+**Concurrencia:** la validación se ejecuta dentro de una transacción con `SELECT id FROM espacios WHERE id = :espacio_id FOR UPDATE`; así dos solicitudes concurrentes para el mismo espacio se serializan. `uk_reservas_franja_exacta` evita además el duplicado exacto en el mismo estado.
 
 ---
 
@@ -607,6 +857,73 @@ SELECT
     END AS cumplio_sla
 FROM solicitudes s
 JOIN estados_solicitud e ON e.id = s.estado_id;
+```
+
+
+### 9.3. `vw_reservas_detalle`
+
+Vista de lectura para listados y detalle de reservas, con espacio, tipo, área, solicitante, estado y aprobador.
+
+```sql
+CREATE OR REPLACE VIEW vw_reservas_detalle AS
+SELECT
+    r.id,
+    r.codigo,
+    r.espacio_id,
+    esp.nombre AS espacio,
+    te.nombre AS tipo_espacio,
+    a.nombre AS area,
+    r.solicitante_id,
+    sol.nombre_completo AS solicitante,
+    r.fecha,
+    r.hora_inicio,
+    r.hora_fin,
+    r.motivo,
+    r.num_asistentes,
+    r.estado_id,
+    er.codigo AS estado_codigo,
+    er.nombre AS estado,
+    er.es_final,
+    r.aprobada_por_id,
+    apr.nombre_completo AS aprobador,
+    r.aprobada_en,
+    r.motivo_rechazo,
+    r.cancelada_por_id,
+    r.cancelada_en,
+    r.creado_en,
+    r.actualizado_en
+FROM reservas r
+JOIN espacios esp ON esp.id = r.espacio_id
+JOIN tipos_espacio te ON te.id = esp.tipo_espacio_id
+LEFT JOIN areas a ON a.id = esp.area_id
+JOIN usuarios sol ON sol.id = r.solicitante_id
+JOIN estados_reserva er ON er.id = r.estado_id
+LEFT JOIN usuarios apr ON apr.id = r.aprobada_por_id;
+```
+
+### 9.4. `vw_reservas_operativas`
+
+Deriva el estado operativo sin persistirlo. Las reservas no confirmadas conservan su estado almacenado.
+
+```sql
+CREATE OR REPLACE VIEW vw_reservas_operativas AS
+SELECT
+    r.id AS reserva_id,
+    r.codigo,
+    r.espacio_id,
+    r.fecha,
+    r.hora_inicio,
+    r.hora_fin,
+    r.estado_id,
+    er.codigo AS estado_codigo,
+    CASE
+        WHEN er.codigo <> 'CONFIRMADA' THEN er.codigo
+        WHEN TIMESTAMP(r.fecha, r.hora_fin) < UTC_TIMESTAMP(6) THEN 'FINALIZADA'
+        WHEN TIMESTAMP(r.fecha, r.hora_inicio) <= UTC_TIMESTAMP(6) THEN 'EN_CURSO'
+        ELSE 'PROXIMA'
+    END AS estado_operativo
+FROM reservas r
+JOIN estados_reserva er ON er.id = r.estado_id;
 ```
 
 ---
@@ -772,6 +1089,11 @@ Los seeds son **catálogos de demostración**, no datos reales. Se cargan con un
 | `categorias` | Soporte informático, Mantenimiento, Servicios generales, Biblioteca. |
 | `politicas_sla` | 72/12 h (Baja), 48/8 h (Media), 24/4 h (Alta), 8/2 h (Crítica); 24/4 h específica para Soporte informático. |
 | `transiciones_estado` | Matriz de la sección 7.1. |
+| `tipos_espacio` | `AULA`, `LABORATORIO`, `SALA_ESTUDIO`, `AUDITORIO`, `SALA_REUNIONES`, `OTRO`. |
+| `estados_reserva` | `PENDIENTE`, `CONFIRMADA`, `RECHAZADA`, `CANCELADA`. |
+| `espacios` | 6–8 ambientes de demostración: aulas, laboratorios, sala de estudio y auditorio. |
+| `horarios_espacio` | Lunes a viernes 07:00–22:00; sábado 07:00–13:00 en biblioteca. |
+| `politicas_reserva` | 30–240 min, 30 días de anticipación, 1 h mínima y 2 reservas activas por día. |
 
 > **Usuarios:** no se insertan. El primer administrador se crea con un hash BCrypt/Argon2id generado por la aplicación, `activo = 1` y `debe_cambiar_contrasena = 1`.
 
@@ -801,6 +1123,11 @@ Los seeds son **catálogos de demostración**, no datos reales. Se cargan con un
 | HU-18 | RF-21 | `politicas_sla`, `solicitudes`, `vw_estado_sla` |
 | HU-19 | RF-22 | `auditoria_eventos`, `historial_estados` |
 | HU-20 | RF-24 | `encuestas_satisfaccion`, `solicitudes` |
+| HU-21 | RF-25 | `espacios`, `tipos_espacio`, `horarios_espacio`, `reservas`, `estados_reserva` |
+| HU-22 | RF-26, RF-27 | `reservas`, `espacios`, `politicas_reserva`, `estados_reserva`, `historial_estados_reserva`, `secuencias_codigo_reserva` |
+| HU-23 | RF-28 | `reservas`, `historial_estados_reserva`, `estados_reserva`, `auditoria_eventos` |
+| HU-24 | RF-29 | `reservas`, `historial_estados_reserva`, `estados_reserva` |
+| HU-25 | RF-30 | `espacios`, `tipos_espacio`, `horarios_espacio`, `politicas_reserva` |
 
 ---
 
@@ -902,6 +1229,7 @@ Los archivos deben almacenarse fuera de MySQL, en un almacenamiento privado, y v
 
 ### 14.2. Otras extensiones
 
+- **Reservas de ambientes:** ya incorporadas como EP-07; no se consideran una extensión futura.
 - **Notificaciones internas:** tabla `notificaciones` con `usuario_id`, `solicitud_id`, `tipo`, `leida_en`.
 - **Historial de prioridad:** si se necesita reportar cambios de prioridad, ya quedan en `auditoria_eventos`; no hace falta una tabla adicional.
 - **Particionado de auditoría:** por año si el volumen lo justifica.
@@ -914,7 +1242,7 @@ Los archivos deben almacenarse fuera de MySQL, en un almacenamiento privado, y v
 
 ```sql
 -- ============================================================
--- DISEÑO-BD.md — Anexo A
+-- DISENIO-BD.md — Anexo A
 -- Sistema de Servicios Universitarios (Gestal)
 -- MySQL 8.4.13
 -- ============================================================
@@ -1482,6 +1810,331 @@ INSERT INTO politicas_sla
     (3, 3, NULL, 24, 4),   -- Alta
     (4, 4, NULL, 8, 2),    -- Crítica
     (5, NULL, 1, 24, 4);   -- Soporte informático (prevalece sobre prioridad)
+
+-- ============================================================
+-- Reservas de ambientes (EP-07)
+-- ============================================================
+
+-- ------------------------------------------------------------
+-- 17. tipos_espacio
+-- ------------------------------------------------------------
+CREATE TABLE tipos_espacio (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    codigo VARCHAR(40) NOT NULL,
+    nombre VARCHAR(80) NOT NULL,
+    descripcion VARCHAR(255) NULL,
+    activo TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    creado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    actualizado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_tipos_espacio_codigo (codigo),
+    UNIQUE KEY uk_tipos_espacio_nombre (nombre),
+    CONSTRAINT chk_tipos_espacio_activo CHECK (activo IN (0, 1))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ------------------------------------------------------------
+-- 18. espacios
+-- ------------------------------------------------------------
+CREATE TABLE espacios (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    tipo_espacio_id BIGINT UNSIGNED NOT NULL,
+    area_id BIGINT UNSIGNED NULL,
+    codigo VARCHAR(40) NOT NULL,
+    nombre VARCHAR(120) NOT NULL,
+    descripcion VARCHAR(255) NULL,
+    pabellon VARCHAR(60) NOT NULL DEFAULT '',
+    piso VARCHAR(20) NULL,
+    ubicacion_detallada VARCHAR(255) NULL,
+    capacidad SMALLINT UNSIGNED NOT NULL,
+    requiere_aprobacion TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    activo TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    creado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    actualizado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_espacios_codigo (codigo),
+    UNIQUE KEY uk_espacios_nombre_pabellon (nombre, pabellon),
+    KEY idx_espacios_tipo_activo (tipo_espacio_id, activo),
+    KEY idx_espacios_area_activo (area_id, activo),
+    KEY idx_espacios_pabellon_activo (pabellon, activo),
+    CONSTRAINT fk_espacios_tipo FOREIGN KEY (tipo_espacio_id)
+        REFERENCES tipos_espacio (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_espacios_area FOREIGN KEY (area_id)
+        REFERENCES areas (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT chk_espacios_capacidad CHECK (capacidad > 0),
+    CONSTRAINT chk_espacios_requiere_aprobacion
+        CHECK (requiere_aprobacion IN (0, 1)),
+    CONSTRAINT chk_espacios_activo CHECK (activo IN (0, 1))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ------------------------------------------------------------
+-- 19. horarios_espacio
+-- ------------------------------------------------------------
+CREATE TABLE horarios_espacio (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    espacio_id BIGINT UNSIGNED NOT NULL,
+    dia_semana TINYINT UNSIGNED NOT NULL,
+    hora_apertura TIME NOT NULL,
+    hora_cierre TIME NOT NULL,
+    activo TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    creado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    actualizado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_horarios_espacio_dia (espacio_id, dia_semana),
+    CONSTRAINT fk_horarios_espacio FOREIGN KEY (espacio_id)
+        REFERENCES espacios (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT chk_horarios_dia CHECK (dia_semana BETWEEN 1 AND 7),
+    CONSTRAINT chk_horarios_horas CHECK (hora_cierre > hora_apertura),
+    CONSTRAINT chk_horarios_activo CHECK (activo IN (0, 1))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ------------------------------------------------------------
+-- 20. estados_reserva
+-- ------------------------------------------------------------
+CREATE TABLE estados_reserva (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    codigo VARCHAR(30) NOT NULL,
+    nombre VARCHAR(60) NOT NULL,
+    descripcion VARCHAR(255) NULL,
+    es_final TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    orden TINYINT UNSIGNED NOT NULL,
+    activo TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    creado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    actualizado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_estados_reserva_codigo (codigo),
+    UNIQUE KEY uk_estados_reserva_orden (orden),
+    CONSTRAINT chk_estados_reserva_final CHECK (es_final IN (0, 1)),
+    CONSTRAINT chk_estados_reserva_activo CHECK (activo IN (0, 1))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ------------------------------------------------------------
+-- 21. politicas_reserva
+-- ------------------------------------------------------------
+CREATE TABLE politicas_reserva (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    duracion_minima_minutos SMALLINT UNSIGNED NOT NULL DEFAULT 30,
+    duracion_maxima_minutos SMALLINT UNSIGNED NOT NULL DEFAULT 240,
+    dias_anticipacion_maxima SMALLINT UNSIGNED NOT NULL DEFAULT 30,
+    horas_anticipacion_minima SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+    max_reservas_activas_por_dia TINYINT UNSIGNED NOT NULL DEFAULT 2,
+    vigente_desde DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    vigente_hasta DATETIME(6) NULL,
+    activo TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    creado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    actualizado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (id),
+    KEY idx_politicas_reserva_vigente (activo, vigente_desde),
+    CONSTRAINT chk_politicas_reserva_duracion CHECK (
+        duracion_minima_minutos > 0
+        AND duracion_maxima_minutos >= duracion_minima_minutos
+    ),
+    CONSTRAINT chk_politicas_reserva_vigencia CHECK (
+        vigente_hasta IS NULL OR vigente_hasta > vigente_desde
+    ),
+    CONSTRAINT chk_politicas_reserva_activo CHECK (activo IN (0, 1))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ------------------------------------------------------------
+-- 22. reservas
+-- ------------------------------------------------------------
+CREATE TABLE reservas (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    codigo VARCHAR(20) NOT NULL,
+    espacio_id BIGINT UNSIGNED NOT NULL,
+    solicitante_id BIGINT UNSIGNED NOT NULL,
+    estado_id BIGINT UNSIGNED NOT NULL,
+    fecha DATE NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fin TIME NOT NULL,
+    motivo VARCHAR(255) NOT NULL,
+    num_asistentes SMALLINT UNSIGNED NULL,
+    aprobada_por_id BIGINT UNSIGNED NULL,
+    aprobada_en DATETIME(6) NULL,
+    motivo_rechazo TEXT NULL,
+    cancelada_por_id BIGINT UNSIGNED NULL,
+    cancelada_en DATETIME(6) NULL,
+    version_fila INT UNSIGNED NOT NULL DEFAULT 0,
+    creado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    actualizado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_reservas_codigo (codigo),
+    UNIQUE KEY uk_reservas_franja_exacta (espacio_id, fecha, hora_inicio, estado_id),
+    KEY idx_reservas_disponibilidad
+        (espacio_id, fecha, estado_id, hora_inicio, hora_fin),
+    KEY idx_reservas_solicitante (solicitante_id, fecha),
+    KEY idx_reservas_estado_fecha (estado_id, fecha),
+    KEY idx_reservas_aprobador (aprobada_por_id, aprobada_en),
+    CONSTRAINT fk_reservas_espacio FOREIGN KEY (espacio_id)
+        REFERENCES espacios (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_reservas_solicitante FOREIGN KEY (solicitante_id)
+        REFERENCES usuarios (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_reservas_estado FOREIGN KEY (estado_id)
+        REFERENCES estados_reserva (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_reservas_aprobador FOREIGN KEY (aprobada_por_id)
+        REFERENCES usuarios (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_reservas_cancelador FOREIGN KEY (cancelada_por_id)
+        REFERENCES usuarios (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT chk_reservas_horas CHECK (hora_fin > hora_inicio),
+    CONSTRAINT chk_reservas_motivo CHECK (CHAR_LENGTH(TRIM(motivo)) > 0),
+    CONSTRAINT chk_reservas_asistentes
+        CHECK (num_asistentes IS NULL OR num_asistentes > 0),
+    CONSTRAINT chk_reservas_aprobacion CHECK (
+        (aprobada_por_id IS NULL AND aprobada_en IS NULL)
+        OR (aprobada_por_id IS NOT NULL AND aprobada_en IS NOT NULL)
+    )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ------------------------------------------------------------
+-- 23. historial_estados_reserva
+-- ------------------------------------------------------------
+CREATE TABLE historial_estados_reserva (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    reserva_id BIGINT UNSIGNED NOT NULL,
+    estado_origen_id BIGINT UNSIGNED NULL,
+    estado_destino_id BIGINT UNSIGNED NOT NULL,
+    cambiado_por_id BIGINT UNSIGNED NOT NULL,
+    motivo TEXT NULL,
+    cambiado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (id),
+    KEY idx_historial_reserva (reserva_id, cambiado_en),
+    KEY idx_historial_reserva_origen (estado_origen_id),
+    KEY idx_historial_reserva_destino (estado_destino_id),
+    KEY idx_historial_reserva_usuario (cambiado_por_id),
+    CONSTRAINT fk_historial_reserva FOREIGN KEY (reserva_id)
+        REFERENCES reservas (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_historial_reserva_origen FOREIGN KEY (estado_origen_id)
+        REFERENCES estados_reserva (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_historial_reserva_destino FOREIGN KEY (estado_destino_id)
+        REFERENCES estados_reserva (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_historial_reserva_usuario FOREIGN KEY (cambiado_por_id)
+        REFERENCES usuarios (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT chk_historial_reserva_distintos CHECK (
+        estado_origen_id IS NULL OR estado_origen_id <> estado_destino_id
+    )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ------------------------------------------------------------
+-- 24. secuencias_codigo_reserva
+-- ------------------------------------------------------------
+CREATE TABLE secuencias_codigo_reserva (
+    anio SMALLINT UNSIGNED NOT NULL,
+    ultimo_valor INT UNSIGNED NOT NULL DEFAULT 0,
+    actualizado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
+        ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (anio)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ------------------------------------------------------------
+-- Vistas de reservas
+-- ------------------------------------------------------------
+CREATE OR REPLACE VIEW vw_reservas_detalle AS
+SELECT
+    r.id,
+    r.codigo,
+    r.espacio_id,
+    esp.nombre AS espacio,
+    te.nombre AS tipo_espacio,
+    a.nombre AS area,
+    r.solicitante_id,
+    sol.nombre_completo AS solicitante,
+    r.fecha,
+    r.hora_inicio,
+    r.hora_fin,
+    r.motivo,
+    r.num_asistentes,
+    r.estado_id,
+    er.codigo AS estado_codigo,
+    er.nombre AS estado,
+    er.es_final,
+    r.aprobada_por_id,
+    apr.nombre_completo AS aprobador,
+    r.aprobada_en,
+    r.motivo_rechazo,
+    r.cancelada_por_id,
+    r.cancelada_en,
+    r.creado_en,
+    r.actualizado_en
+FROM reservas r
+JOIN espacios esp ON esp.id = r.espacio_id
+JOIN tipos_espacio te ON te.id = esp.tipo_espacio_id
+LEFT JOIN areas a ON a.id = esp.area_id
+JOIN usuarios sol ON sol.id = r.solicitante_id
+JOIN estados_reserva er ON er.id = r.estado_id
+LEFT JOIN usuarios apr ON apr.id = r.aprobada_por_id;
+
+CREATE OR REPLACE VIEW vw_reservas_operativas AS
+SELECT
+    r.id AS reserva_id,
+    r.codigo,
+    r.espacio_id,
+    r.fecha,
+    r.hora_inicio,
+    r.hora_fin,
+    r.estado_id,
+    er.codigo AS estado_codigo,
+    CASE
+        WHEN er.codigo <> 'CONFIRMADA' THEN er.codigo
+        WHEN TIMESTAMP(r.fecha, r.hora_fin) < UTC_TIMESTAMP(6) THEN 'FINALIZADA'
+        WHEN TIMESTAMP(r.fecha, r.hora_inicio) <= UTC_TIMESTAMP(6) THEN 'EN_CURSO'
+        ELSE 'PROXIMA'
+    END AS estado_operativo
+FROM reservas r
+JOIN estados_reserva er ON er.id = r.estado_id;
+
+-- ------------------------------------------------------------
+-- Datos semilla de reservas (catálogos y ambientes de demostración)
+-- ------------------------------------------------------------
+INSERT INTO tipos_espacio (id, codigo, nombre, descripcion) VALUES
+    (1, 'AULA', 'Aula', 'Espacio para clases y actividades académicas.'),
+    (2, 'LABORATORIO', 'Laboratorio', 'Espacio equipado para prácticas.'),
+    (3, 'SALA_ESTUDIO', 'Sala de estudio', 'Espacio para estudio individual o grupal.'),
+    (4, 'AUDITORIO', 'Auditorio', 'Espacio para eventos y presentaciones.'),
+    (5, 'SALA_REUNIONES', 'Sala de reuniones', 'Espacio para reuniones de trabajo.'),
+    (6, 'OTRO', 'Otro', 'Ambiente no clasificado en las categorías anteriores.');
+
+INSERT INTO estados_reserva
+    (id, codigo, nombre, descripcion, es_final, orden) VALUES
+    (1, 'PENDIENTE', 'Pendiente', 'Registrada y pendiente de aprobación.', 0, 1),
+    (2, 'CONFIRMADA', 'Confirmada', 'Aprobada por el responsable del área.', 0, 2),
+    (3, 'RECHAZADA', 'Rechazada', 'Rechazada con motivo; estado final.', 1, 3),
+    (4, 'CANCELADA', 'Cancelada', 'Cancelada por el solicitante o el administrador; estado final.', 1, 4);
+
+INSERT INTO espacios
+    (id, tipo_espacio_id, area_id, codigo, nombre, descripcion, pabellon, piso,
+     ubicacion_detallada, capacidad, requiere_aprobacion) VALUES
+    (1, 2, 1, 'LAB-204', 'Laboratorio 204', 'Laboratorio de cómputo.',
+     'Pabellón nuevo', '2', 'Laboratorio 204 - Pabellón nuevo', 30, 1),
+    (2, 1, NULL, 'AULA-101', 'Aula 101', 'Aula teórica.',
+     'Pabellón antiguo', '1', 'Aula 101 - Pabellón antiguo', 40, 1),
+    (3, 3, 4, 'SALA-EST-01', 'Sala de estudio 1', 'Sala de estudio grupal.',
+     'Biblioteca', '1', 'Sala de estudio 1 - Biblioteca', 12, 1),
+    (4, 4, NULL, 'AUD-01', 'Auditorio principal', 'Auditorio para eventos.',
+     'Pabellón central', '1', 'Auditorio principal - Pabellón central', 200, 1),
+    (5, 5, 2, 'SALA-REU-01', 'Sala de reuniones 1', 'Sala para reuniones.',
+     'Pabellón administrativo', '2', 'Sala de reuniones 1 - Pabellón administrativo', 10, 1);
+
+INSERT INTO horarios_espacio (espacio_id, dia_semana, hora_apertura, hora_cierre)
+SELECT e.id, d.dia, '07:00:00', '22:00:00'
+FROM espacios e
+CROSS JOIN (
+    SELECT 1 AS dia UNION ALL SELECT 2 UNION ALL SELECT 3
+    UNION ALL SELECT 4 UNION ALL SELECT 5
+) d;
+
+INSERT INTO horarios_espacio (espacio_id, dia_semana, hora_apertura, hora_cierre)
+VALUES (3, 6, '08:00:00', '13:00:00');
+
+INSERT INTO politicas_reserva
+    (duracion_minima_minutos, duracion_maxima_minutos, dias_anticipacion_maxima,
+     horas_anticipacion_minima, max_reservas_activas_por_dia, vigente_desde, activo)
+VALUES
+    (30, 240, 30, 1, 2, UTC_TIMESTAMP(6), 1);
 ```
 
 ---
@@ -1560,7 +2213,11 @@ LIMIT 20;
 
 ### 16.4. Checklist de aceptación del diseño
 
-- [ ] El DDL crea las 16 tablas y 2 vistas sin errores en MySQL 8.4.13.
+- [ ] El DDL crea las 24 tablas y 4 vistas sin errores en MySQL 8.4.13.
+- [ ] Los `CHECK` de reservas rechazan franjas invertidas, textos vacíos y capacidades no positivas.
+- [ ] `uk_reservas_franja_exacta` impide duplicar una franja exacta en el mismo estado.
+- [ ] `EXPLAIN` de disponibilidad usa un índice de `reservas` que cubra `espacio_id` y `fecha` (`idx_reservas_disponibilidad` o `uk_reservas_franja_exacta`).
+- [ ] Los seeds cargan tipos de espacio, estados de reserva, espacios, horarios y política.
 - [ ] Los `CHECK` rechazan calificaciones fuera de rango, políticas SLA inválidas y textos vacíos.
 - [ ] `uk_asignaciones_activa` impide dos asignaciones activas.
 - [ ] `uk_encuestas_solicitud` impide dos encuestas por solicitud.
@@ -1568,6 +2225,42 @@ LIMIT 20;
 - [ ] Las consultas de los 9 indicadores devuelven datos coherentes con los seeds.
 - [ ] `EXPLAIN` muestra uso de índices en “mis solicitudes”, bandeja del área y bandeja del técnico.
 - [ ] `ARCHITECTURE.md` usa el ciclo de vida de las HU y los nombres de tablas en español.
+
+
+### 16.5. Comprobaciones de reservas
+
+```sql
+-- Debe fallar: hora_fin <= hora_inicio.
+INSERT INTO reservas
+    (codigo, espacio_id, solicitante_id, estado_id, fecha, hora_inicio, hora_fin, motivo)
+VALUES
+    ('RES-2026-999999', 1, 1, 1, '2026-11-10', '12:00:00', '11:00:00', 'Prueba inválida');
+
+-- Debe fallar: duplicado exacto de franja.
+INSERT INTO reservas
+    (codigo, espacio_id, solicitante_id, estado_id, fecha, hora_inicio, hora_fin, motivo)
+VALUES
+    ('RES-2026-999998', 1, 1, 1, '2026-11-10', '10:00:00', '12:00:00', 'Prueba'),
+    ('RES-2026-999997', 1, 1, 1, '2026-11-10', '10:00:00', '11:00:00', 'Duplicado');
+
+-- Debe fallar: capacidad cero.
+INSERT INTO espacios (tipo_espacio_id, codigo, nombre, capacidad)
+VALUES (1, 'PRUEBA-0', 'Prueba', 0);
+
+-- Debe fallar: horario con cierre anterior a la apertura.
+INSERT INTO horarios_espacio (espacio_id, dia_semana, hora_apertura, hora_cierre)
+VALUES (1, 7, '18:00:00', '08:00:00');
+
+EXPLAIN FORMAT=JSON
+SELECT hora_inicio, hora_fin
+FROM reservas
+WHERE espacio_id = 1
+  AND fecha = '2026-11-10'
+  AND estado_id IN (1, 2)
+ORDER BY hora_inicio;
+```
+
+> Los `INSERT` requieren que existan el espacio y el usuario referenciados por las FK. Ejecutar estas comprobaciones en una base de prueba con los seeds cargados y descartar la base al terminar.
 
 ---
 
@@ -1581,6 +2274,12 @@ LIMIT 20;
 | Implementación de adjuntos. | Fuera de alcance hasta que una HU lo apruebe. | Producto. |
 | Multi-rol por usuario. | Se asume un rol por usuario (HU-15). | Producto. |
 | Nombres visibles definitivos de los estados. | Editables por administración (HU-17). | Administrador. |
+| Catálogo real de espacios, pabellones y horarios de la universidad. | Pendiente de validación con el negocio. | Producto / administrador. |
+| Aprobación de reservas por área frente a aprobación centralizada. | Se adopta área con respaldo del administrador. | Producto. |
+| Feriados y días no laborables. | Sin definir; hoy se valida solo el horario semanal. | Administrador / backend. |
+| Límites definitivos de la política de reservas. | Los seeds son ejemplos demostrativos. | Administrador. |
+| Notificaciones de aprobación, rechazo y cancelación. | Fuera de alcance inicial de EP-07. | Producto. |
+| Reservas recurrentes o periódicas. | Fuera de alcance inicial de EP-07. | Producto. |
 
 ---
 

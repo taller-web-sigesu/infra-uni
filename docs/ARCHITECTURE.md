@@ -38,7 +38,7 @@ universidad-sm/                  # Agrupación local, no otro repositorio
     ├── .env.example
     ├── iniciar.bat
     ├── detener.bat
-    ├── DISEÑO-BD.md
+    ├── DISENIO-BD.md
     └── docs/
         ├── ARCHITECTURE.md      # Visión global y arquitectura de infraestructura
         ├── DOCKER.md
@@ -83,6 +83,8 @@ flowchart TD
 
 **Flujo crítico de negocio:** el solicitante inicia sesión → registra solicitud → la API valida permisos y campos → MySQL guarda solicitud con código único y estado `Nuevo` → supervisor evalúa/prioriza/asigna → técnico atiende y resuelve → supervisor cierra → frontend consulta seguimiento y dashboard. Cada transición autorizada deja historial persistente.
 
+**Flujo de reserva de ambientes:** el usuario consulta espacios y disponibilidad → registra la reserva en estado `Pendiente` → el supervisor del área del espacio o el administrador la aprueba o rechaza → el solicitante puede cancelarla antes de la hora de inicio. Cada transición deja historial y auditoría.
+
 **Regla arquitectónica:** una sola aplicación Spring Boot desplegable (**monolito modular**), no microservicios. Los módulos internos no se comunican a través de HTTP entre sí. No introducir mensajerías, cachés distribuidas, GraphQL o API Gateway sin necesidad demostrada y ADR aprobado.
 
 ## 3. Componentes y persistencia
@@ -100,7 +102,7 @@ El [frontend](../../frontend-uni/ARCHITECTURE.md) posee la presentación y el [b
 
 ## 4. Almacenamiento y límites de confianza
 
-MySQL es el motor exigido por la propuesta académica. Infraestructura provisiona el servicio y su persistencia; backend posee esquema, migraciones y acceso a los datos. React no consulta MySQL directamente. Consultar [persistencia del backend](../../backend-uni/ARCHITECTURE.md) y el [diseño relacional](../DISEÑO-BD.md).
+MySQL es el motor exigido por la propuesta académica. Infraestructura provisiona el servicio y su persistencia; backend posee esquema, migraciones y acceso a los datos. React no consulta MySQL directamente. Consultar [persistencia del backend](../../backend-uni/ARCHITECTURE.md) y el [diseño relacional](../DISENIO-BD.md).
 
 La carga de adjuntos y su proveedor siguen pendientes: si se aprueban, los archivos requieren almacenamiento persistente y privado, con metadatos en MySQL y autorización de descarga en backend. No usar disco efímero para evidencias críticas.
 
@@ -117,7 +119,7 @@ No se requieren Redis, Elasticsearch, RabbitMQ ni una segunda base de datos para
 | Almacenamiento de archivos | Evidencias, si se implementan | API/SDK del proveedor; **por decidir** |
 | Servicio de alertas | Avisos técnicos sobre salud | Canal/proveedor por decidir |
 
-**Fuera de alcance inicial:** pagos, chatbots con LLM, servicios externos de mensajería, API Gateway y microservicios. Las notificaciones internas y reservas de ambientes se consideran extensiones solo si las historias aprobadas las incorporan. El uso de IA durante el desarrollo **sí exige** su registro documental, pero no exige integrar un chatbot en el producto.
+**Fuera de alcance inicial:** pagos, chatbots con LLM, servicios externos de mensajería, API Gateway y microservicios. Las notificaciones internas siguen como extensión. La reserva de ambientes fue aprobada como EP-07 (ver `docs/adr/ADR-0001-reserva-ambientes.md`) y se implementa como módulo separado. El uso de IA durante el desarrollo **sí exige** su registro documental, pero no exige integrar un chatbot en el producto.
 
 ## 6. Deployment & Infrastructure
 
@@ -179,7 +181,9 @@ JWT de corta duración en memoria es una propuesta inicial; JWT frente a sesión
 
 **Semanas 14–16 (Fase IV):** pruebas de aceptación/usuario/seguridad/carga/estrés, logs/métricas/trazas, correcciones, manuales y **sustentación con demostración real** en semana 16.
 
-**Posibles extensiones, nunca automáticas:** notificaciones internas, reservas de ambientes, recuperación de contraseña y mejoras de tiempo real. Un chatbot con IA no es un módulo obligatorio del PDF. No migrar a microservicios sin restricciones técnicas verificadas.
+**EP-07 (reserva de ambientes):** aprobada; su diseño relacional vive en `DISENIO-BD.md` y su implementación se planifica después del núcleo de autenticación y solicitudes.
+
+**Posibles extensiones, nunca automáticas:** notificaciones internas, recuperación de contraseña y mejoras de tiempo real. Un chatbot con IA no es un módulo obligatorio del PDF. No migrar a microservicios sin restricciones técnicas verificadas.
 
 **Decisiones pendientes que requieren ADR:** proveedor y costo de MySQL cloud; elección definitiva JWT/sesión; almacenamiento de adjuntos; regla exacta de fechas límite y KPI de vencidas; política de cierre/reapertura; retención de logs; validación de las versiones fijadas actualmente en los manifiestos.
 
@@ -224,7 +228,7 @@ JWT de corta duración en memoria es una propuesta inicial; JWT frente a sesión
 
 1. Leer `AGENTS.md`, el `ARCHITECTURE.md` del repositorio activo y esta arquitectura global.
 2. Leer la HU individual, requisitos y criterios BDD de la tarea; para UI, leer también `frontend-uni/DESIGN.md`.
-3. Para contratos REST y datos, consultar la arquitectura del backend y `infra-uni/DISEÑO-BD.md`; OpenAPI, `docs/DATABASE.md` y migraciones son referencias previstas hasta que se implementen.
+3. Para contratos REST y datos, consultar la arquitectura del backend y `infra-uni/DISENIO-BD.md`; OpenAPI, `docs/DATABASE.md` y migraciones son referencias previstas hasta que se implementen.
 4. No considerar como existente ninguna carpeta o endpoint de la arquitectura objetivo sin verificar el código.
 5. Si un cambio atraviesa repositorios, coordinar contratos, revisiones y pruebas de integración antes de darlo por cerrado.
 6. Mantener este documento y el registro de uso de IA actualizados; no añadir funcionalidades fuera de alcance sin aprobación.

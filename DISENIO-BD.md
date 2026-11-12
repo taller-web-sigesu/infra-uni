@@ -747,7 +747,7 @@ Reglas:
 ### 7.9. Cuentas y contraseñas
 
 - El auto-registro (HU-27) crea la cuenta con el rol `ESTUDIANTE`, `area_id = NULL`, `estado_cuenta = 'PENDIENTE'`, `origen_registro = 'AUTO_REGISTRO'` y `debe_cambiar_contrasena = 0`. El rol que envíe el cliente se ignora.
-- Solo se aceptan correos del dominio institucional configurado por variable de entorno. Un correo ya registrado, en cualquier estado, no puede volver a registrarse.
+- Solo se aceptan correos que terminan exactamente en `@unmsm.edu.pe` (sin subdominios), comparados sin distinguir mayúsculas. El valor se lee de una variable de entorno para poder cambiarlo sin tocar código. Un correo ya registrado, en cualquier estado, no puede volver a registrarse.
 - `PENDIENTE → ACTIVA` (aprobar) o `PENDIENTE → RECHAZADA` (rechazar con motivo) solo los ejecuta el administrador (HU-28); se guardan `revisado_por_id` y `revisado_en`. `RECHAZADA` es terminal salvo que el administrador la apruebe después.
 - Las cuentas creadas por el administrador (HU-15) nacen `ACTIVA` con `origen_registro = 'ADMINISTRADOR'`.
 - El login exige `activo = 1` y `estado_cuenta = 'ACTIVA'`. Con cuenta pendiente o rechazada responde un mensaje claro sin emitir sesión.
@@ -2370,7 +2370,7 @@ ORDER BY hora_inicio;
 | Valores definitivos de SLA por prioridad/categoría. | Los seeds son ejemplos demostrativos. | Administrador. |
 | Política de retención de `auditoria_eventos`. | Sin definir; evaluar a partir del volumen real. | Infraestructura / backend. |
 | Implementación de adjuntos. | Resuelto: HU-26, tabla 6.25 y Supabase Storage (ADR-0004). | — |
-| Dominio institucional permitido en el auto-registro. | Pendiente: definir el valor de la variable de entorno. | Producto / administrador. |
+| Dominio institucional permitido en el auto-registro. | Resuelto: `unmsm.edu.pe` ([decisiones 01](docs/decisiones/decisiones-01.md)). | — |
 | Límites definitivos de evidencias (5 archivos, 5 MB, JPG/PNG/PDF). | Valores iniciales del equipo; ajustables. | Producto. |
 | Multi-rol por usuario. | Se asume un rol por usuario (HU-15). | Producto. |
 | Nombres visibles definitivos de los estados. | Editables por administración (HU-17). | Administrador. |

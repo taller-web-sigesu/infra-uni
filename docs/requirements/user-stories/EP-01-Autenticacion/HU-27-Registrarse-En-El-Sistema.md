@@ -19,7 +19,7 @@ Como estudiante sin cuenta, quiero registrarme con mi correo institucional, para
 ## 3. Criterios de aceptación
 
 - **CA-01:** El formulario exige nombre completo, correo institucional, contraseña y confirmación de contraseña.
-- **CA-02:** El sistema acepta solo correos del dominio institucional configurado y rechaza correos ya registrados sin revelar a quién pertenecen.
+- **CA-02:** El sistema acepta solo correos del dominio institucional `@unmsm.edu.pe` y rechaza correos ya registrados sin revelar a quién pertenecen.
 - **CA-03:** La contraseña debe cumplir la política de contraseñas definida en `SECURITY.md` y se guarda con hash seguro.
 - **CA-04:** La cuenta se crea con el rol Estudiante, sin área, en estado pendiente de aprobación. El usuario no puede elegir otro rol.
 - **CA-05:** El sistema muestra el mensaje «Registro enviado. Podrás ingresar cuando un administrador apruebe tu cuenta». No se envía correo.
@@ -37,9 +37,9 @@ Como estudiante sin cuenta, quiero registrarme con mi correo institucional, para
 ### Escenario 27.2 – Correo fuera del dominio institucional (Validación)
 
 **Dado** que el visitante está en la pantalla «Crear cuenta»  
-**Cuando** ingresa un correo de un dominio no institucional  
+**Cuando** ingresa un correo `@gmail.com` u otro dominio distinto de `@unmsm.edu.pe`  
 **Entonces** el sistema no crea la cuenta  
-**Y** indica que se debe usar el correo institucional.  
+**Y** indica que se debe usar el correo institucional `@unmsm.edu.pe`.  
 
 ### Escenario 27.3 – Intento de ingreso con cuenta pendiente (Validación)
 

@@ -6,7 +6,7 @@
 | # | Tema | Decisión | Qué implica |
 | --- | --- | --- | --- |
 | D1 | Evidencias en la solicitud | **Sí, completo.** Adjuntar, ver y eliminar archivos en la solicitud, con almacenamiento en la nube en producción. | Tabla `adjuntos_solicitud`, endpoints `multipart/form-data`, validación de tipo y tamaño, acceso solo a quien puede ver la solicitud. En local, volumen Docker. |
-| D2 | Registro de usuarios | **Auto-registro con aprobación del administrador.** El estudiante se registra con correo institucional; la cuenta queda pendiente hasta que el admin la aprueba o rechaza. | Rol por defecto Estudiante, sin correo de verificación, estado de cuenta pendiente, pantalla de registro y bandeja de aprobación para el admin. |
+| D2 | Registro de usuarios | **Auto-registro con aprobación del administrador.** El estudiante se registra con su correo institucional `@unmsm.edu.pe`; la cuenta queda pendiente hasta que el admin la aprueba o rechaza. | Rol por defecto Estudiante, sin correo de verificación, estado de cuenta pendiente, pantalla de registro y bandeja de aprobación para el admin. |
 | D3 | Recuperación de contraseña | **Cambio de contraseña + restablecimiento por el administrador.** Sin recuperación por correo. | El admin genera una contraseña temporal y el usuario debe cambiarla al ingresar. El usuario puede cambiar su contraseña desde el perfil. |
 
 ## Pendientes resueltos
@@ -15,8 +15,8 @@
 - [x] [`DISENIO-BD.md`](../../DISENIO-BD.md): tabla `adjuntos_solicitud` (6.25), estado de cuenta en `usuarios` (6.2) y reglas 7.9 y 7.10.
 - [x] Almacén de evidencias: **Supabase Storage**, bucket privado por entorno ([ADR-0004](../adr/ADR-0004-despliegue-persistencia.md), punto 10).
 - [x] [`ALCANCE-POR-ROL.html`](../ALCANCE-POR-ROL.html) actualizado.
+- [x] Dominio institucional del auto-registro: `unmsm.edu.pe` (solo ese dominio, sin subdominios).
 
 ## Aún por definir
 
-- Dominio institucional permitido en el auto-registro (variable de entorno).
 - Crear la cuenta y los proyectos de Supabase (staging y producción) cuando llegue la Fase 5.

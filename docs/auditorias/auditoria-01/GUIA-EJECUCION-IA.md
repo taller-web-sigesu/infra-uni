@@ -14,7 +14,7 @@
 
 ## 1. Antes de abrir la IA
 
-- [ ] Leer [`AUDITORIA-ALCANCE.md`](AUDITORIA-ALCANCE.md) y resolver las decisiones pendientes: evidencias, auto-registro, recuperación de contraseña, proveedor MySQL y rate limiting. Anotar la respuesta en la sección 7 de la auditoría: los prompts de las sesiones 1.2, 1.4, 2.2 y 2.3 dependen de ella.
+- [ ] Leer [`AUDITORIA-ALCANCE.md`](AUDITORIA-ALCANCE.md) y las [decisiones 01](../../decisiones/decisiones-01.md) (evidencias, auto-registro y recuperación ya resueltas). Siguen pendientes el proveedor MySQL y el rate limiting. Cada decisión nueva va en `infra-uni/docs/decisiones/decisiones-NN.md`.
 - [ ] Tener los tres repositorios de la organización de GitHub `taller-web-sigesu` clonados en carpetas hermanas: `frontend-uni`, `backend-uni`, `infra-uni`. El nombre de la carpeta local que los contiene es libre (por ejemplo `universidad-sm`).
 - [ ] Docker Desktop abierto y `infra-uni/iniciar.bat` funcionando (`http://localhost:3000`).
 - [ ] **Rama base con la documentación.** Mientras `docs/ingenieria-pendiente` no esté fusionada en `main`, los planes, ADR y contratos que leen los prompts solo existen en esa rama. Usar como base:
@@ -76,7 +76,8 @@ Trabaja solo en la Fase 0 del plan de ingeniería.
 Lee:
 - infra-uni/docs/superpowers/plans/2026-11-04-ingenieria-pendiente.md
 - infra-uni/docs/ARCHITECTURE.md
-- infra-uni/docs/auditorias/auditoria-01/AUDITORIA-ALCANCE.md (sección 7: decisiones tomadas)
+- infra-uni/docs/auditorias/auditoria-01/AUDITORIA-ALCANCE.md
+- infra-uni/docs/decisiones/decisiones-01.md
 - infra-uni/docs/adr/ADR-0001 a ADR-0005
 - backend-uni/docs/API-DISENIO.md
 - backend-uni/docs/api/*.md
@@ -84,7 +85,7 @@ Lee:
 - infra-uni/DISENIO-BD.md
 
 Tarea:
-1. Crear backend-uni/docs/api/openapi.yaml con todos los endpoints, esquemas, filtros, errores y ejemplos. Incluir los endpoints condicionales (evidencias, auto-registro, recuperación) solo si la decisión de la auditoría fue afirmativa.
+1. Crear backend-uni/docs/api/openapi.yaml con todos los endpoints, esquemas, filtros, errores y ejemplos, incluidos los de las decisiones 01 (evidencias, auto-registro con aprobación y restablecimiento por admin) siempre que sus HU ya existan.
 2. Crear backend-uni/docs/SECURITY.md con la matriz RBAC por endpoint, rol y recurso.
 3. Crear backend-uni/docs/DATABASE.md con convenciones, migraciones Flyway y diccionario de datos.
 4. Definir el formato de errores, paginación, fechas UTC e identificadores.
@@ -160,14 +161,14 @@ Lee:
 - backend-uni/docs/api/openapi.yaml
 - backend-uni/docs/SECURITY.md
 - backend-uni/docs/BACKEND-DISENIO.md secciones auth y users
-- infra-uni/docs/auditorias/auditoria-01/AUDITORIA-ALCANCE.md, secciones 7.2 y 7.3
+- infra-uni/docs/decisiones/decisiones-01.md (D2 y D3)
 
 Alcance:
 - Sesión según ADR-0002: access token JWT de 15 minutos, refresh token opaco en cookie HttpOnly con rotación, hash en sesiones_usuario, logout y revocación.
 - Cambio obligatorio de contraseña en el primer ingreso.
 - RBAC por rol y área.
 - CRUD de usuarios y asignación de rol y área según HU-15. Las áreas se leen del catálogo (semilla V2); su CRUD es de la sesión 5.3.
-- Auto-registro y recuperación de contraseña solo si la decisión de la auditoría fue afirmativa.
+- Auto-registro con aprobación del administrador (D2) y restablecimiento de contraseña por el administrador (D3), según sus HU. Sin envío de correos.
 - Pruebas de autenticación, autorización, rotación de refresh y escalada de privilegios.
 
 No implementes catálogos, solicitudes ni dashboard.
@@ -213,13 +214,13 @@ Lee:
 - backend-uni/docs/api/solicitudes.md.
 - backend-uni/docs/api/openapi.yaml.
 - infra-uni/DISENIO-BD.md, tablas solicitudes, historial_estados, comentarios y secuencias_codigo_solicitud.
-- infra-uni/docs/auditorias/auditoria-01/AUDITORIA-ALCANCE.md, sección 7.1 (evidencias).
+- infra-uni/docs/decisiones/decisiones-01.md (D1, evidencias).
 
 Alcance:
 - Registrar solicitud con código automático, fecha, solicitante, prioridad inicial y estado Nuevo.
 - Listar mis solicitudes, ver detalle e historial y agregar comentarios.
 - Validaciones, paginación y autorización por recurso.
-- Evidencias adjuntas solo si la decisión fue afirmativa: validar tipo y tamaño, almacenamiento privado y acceso autorizado.
+- Evidencias adjuntas (D1): subir, ver y eliminar; validar tipo y tamaño, almacenamiento privado (volumen local en desarrollo, nube en producción) y acceso autorizado.
 - Pruebas de creación, listado, detalle, comentarios y accesos indebidos.
 
 No implementes asignación ni cambios de estado; eso es management.
@@ -379,13 +380,13 @@ Lee:
 - HU-01 y HU-02.
 - infra-uni/docs/adr/ADR-0002-autenticacion-sesion.md
 - backend-uni/docs/api/openapi.yaml.
-- infra-uni/docs/auditorias/auditoria-01/AUDITORIA-ALCANCE.md, secciones 7.2 y 7.3.
+- infra-uni/docs/decisiones/decisiones-01.md (D2 y D3).
 - Capturas p01, p02 y p16.
 
 Alcance:
 - Login, logout, sesión, refresh y primer ingreso. El access token vive solo en memoria; el refresh va en cookie HttpOnly (ADR-0002).
 - Pantalla de perfil y cambio de contraseña.
-- Pantallas de auto-registro o recuperación solo si la decisión fue afirmativa.
+- Pantalla de auto-registro, bandeja de aprobación de cuentas para el admin (D2) y restablecimiento de contraseña por el admin (D3).
 - Manejo de 401 con un único reintento tras refresh, errores y reintento.
 - Pruebas de sesión y permisos.
 
@@ -406,12 +407,12 @@ Lee:
 - frontend-uni/docs/superpowers/plans/03-solicitudes-y-atencion.md
 - HU-03 a HU-11.
 - backend-uni/docs/api/openapi.yaml.
-- infra-uni/docs/auditorias/auditoria-01/AUDITORIA-ALCANCE.md, sección 7.1 (evidencias).
+- infra-uni/docs/decisiones/decisiones-01.md (D1, evidencias).
 - Capturas p03, p04, p05, p06 y p07.
 
 Alcance:
 - Registro, listado, detalle, historial y comentarios.
-- Adjuntar evidencias solo si la decisión fue afirmativa.
+- Adjuntar, ver y eliminar evidencias en la solicitud (D1).
 - Bandeja del técnico, asignación, prioridad, estados, cierre y rechazo.
 - Formularios con validación y confirmaciones.
 - Pruebas de flujo y permisos.
@@ -739,3 +740,4 @@ El registro es único y vive en [`infra-uni/docs/ai/AI_USAGE_LOG.md`](../../ai/A
 | --- | --- | --- |
 | 2026-11-11 | Creación de la guía de ejecución con prompts por fase y reglas para la IA. | Equipo |
 | 2026-11-11 | Auditoría 01: se mueve a `infra-uni/docs/auditorias/auditoria-01/`; ramas solo `feature/`, `fix/` y `docs/`; rama base condicionada a `docs/ingenieria-pendiente`; registro de IA único en infra-uni; JWT en la sesión 1.2; CRUD de áreas solo en catálogos; Vitest/ESLint y CI mínima adelantados; decisiones condicionales en los prompts; healthcheck de Actuator; numeración unificada. | Equipo |
+| 2026-11-11 | Los prompts usan las decisiones D1–D3 de `docs/decisiones/decisiones-01.md` (evidencias, auto-registro con aprobación y restablecimiento por admin) en lugar de condiciones abiertas. | Equipo |

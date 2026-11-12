@@ -5,7 +5,7 @@
 - **ID:** HU-06
 - **Épica:** EP-02 — Registro y seguimiento de solicitudes
 - **Prioridad:** Alta
-- **Actor:** estudiante, técnico o supervisor
+- **Actor:** solicitante (estudiante o docente), técnico o supervisor
 - **Alcance de la historia (según RF):** AL-03
 - **Alcance de la épica:** AL-02, AL-03
 - **Requisitos funcionales asociados:** RF-08
@@ -13,13 +13,13 @@
 
 ## 2. Historia de usuario
 
-Como estudiante, técnico o supervisor, quiero añadir comentarios en una solicitud dejando constancia de mi usuario y la fecha, para comunicar avances, consultas o precisiones durante la atención.
+Como solicitante (estudiante o docente), técnico o supervisor, quiero añadir comentarios en una solicitud dejando constancia de mi usuario y la fecha, para comunicar avances, consultas o precisiones durante la atención.
 
 ## 3. Criterios de aceptación
 
 > El informe documenta los criterios de HU-05 y HU-06 de forma conjunta. Se muestran aquí los que corresponden directamente a HU-06.
 
-- **CA-03:** El estudiante, el técnico asignado y el supervisor del área pueden añadir comentarios de seguimiento, registrándose automáticamente el autor y la fecha.
+- **CA-03:** El solicitante (estudiante o docente), el técnico asignado y el supervisor del área pueden añadir comentarios de seguimiento, registrándose automáticamente el autor y la fecha.
 - **CA-04:** No se permite publicar un comentario en blanco.
 
 ## 4. Escenarios BDD

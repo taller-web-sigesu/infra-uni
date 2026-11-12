@@ -5,7 +5,7 @@
 - **ID:** HU-26
 - **Épica:** EP-02 — Registro y seguimiento de solicitudes
 - **Prioridad:** Media
-- **Actor:** estudiante (solicitante); técnico asignado y supervisor del área
+- **Actor:** solicitante (estudiante o docente); técnico asignado y supervisor del área
 - **Alcance de la historia (según RF):** AL-02
 - **Alcance de la épica:** AL-02, AL-03
 - **Requisitos funcionales asociados:** RF-31

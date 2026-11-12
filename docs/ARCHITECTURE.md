@@ -60,7 +60,7 @@ Las estructuras internas futuras se documentan en los archivos locales. `docs/ad
 
 ```mermaid
 flowchart TD
-    U[Estudiante / Técnico / Supervisor / Administrador]
+    U[Estudiante / Docente / Técnico / Supervisor / Administrador]
     F[Frontend React - frontend-uni]
     B[API REST Spring Boot - backend-uni]
     DB[(MySQL)]
@@ -119,7 +119,7 @@ No se requieren Redis, Elasticsearch, RabbitMQ ni una segunda base de datos para
 | Almacenamiento de archivos | Evidencias, si se implementan | API/SDK del proveedor; **por decidir** |
 | Servicio de alertas | Avisos técnicos sobre salud | Canal/proveedor por decidir |
 
-**Fuera de alcance inicial:** pagos, chatbots con LLM, servicios externos de mensajería, API Gateway y microservicios. Las notificaciones internas siguen como extensión. La reserva de ambientes fue aprobada como EP-07 (ver `docs/adr/ADR-0001-reserva-ambientes.md`) y se implementa como módulo separado. El alcance aprobado el 2026-11-04 es de **ingeniería** (ver plan en `docs/superpowers/plans/2026-11-04-ingenieria-pendiente.md`); las extensiones de producto (notificaciones, recuperación de contraseña, tiempo real, adjuntos y reservas recurrentes) siguen fuera. El uso de IA durante el desarrollo **sí exige** su registro documental, pero no exige integrar un chatbot en el producto.
+**Fuera de alcance inicial:** pagos, chatbots con LLM, servicios externos de mensajería, API Gateway y microservicios. Las notificaciones internas siguen como extensión. La reserva de ambientes fue aprobada como EP-07 (ver `docs/adr/ADR-0001-reserva-ambientes.md`) y se implementa como módulo separado. El alcance aprobado el 2026-11-04 es de **ingeniería** (ver plan en `docs/superpowers/plans/2026-11-04-ingenieria-pendiente.md`); las extensiones de producto (notificaciones, recuperación de contraseña por correo, tiempo real y reservas recurrentes) siguen fuera. Evidencias, auto-registro con aprobación y restablecimiento de contraseña por el administrador se incorporaron en `docs/decisiones/decisiones-01.md`; el rol Docente, en `docs/decisiones/decisiones-02.md`. El uso de IA durante el desarrollo **sí exige** su registro documental, pero no exige integrar un chatbot en el producto.
 
 ## 6. Deployment & Infrastructure
 

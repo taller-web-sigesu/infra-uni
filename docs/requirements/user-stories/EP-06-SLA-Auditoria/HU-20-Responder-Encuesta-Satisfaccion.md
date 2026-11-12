@@ -5,7 +5,7 @@
 - **ID:** HU-20
 - **Épica:** EP-06 — SLA, auditoría y calidad del servicio
 - **Prioridad:** Baja
-- **Actor:** estudiante
+- **Actor:** solicitante (estudiante o docente)
 - **Alcance de la historia (según RF):** No asignado directamente en la tabla de requisitos funcionales
 - **Alcance de la épica:** AL-07
 - **Requisitos funcionales asociados:** RF-24
@@ -13,7 +13,7 @@
 
 ## 2. Historia de usuario
 
-Como estudiante, quiero responder una breve encuesta de satisfacción cuando mi solicitud pase al estado *Cerrado*, para calificar la atención recibida.
+Como estudiante o docente, quiero responder una breve encuesta de satisfacción cuando mi solicitud pase al estado *Cerrado*, para calificar la atención recibida.
 
 ## 3. Criterios de aceptación
 

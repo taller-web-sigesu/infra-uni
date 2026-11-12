@@ -21,7 +21,7 @@ Como estudiante sin cuenta, quiero registrarme con mi correo institucional, para
 - **CA-01:** El formulario exige nombre completo, correo institucional, contraseña y confirmación de contraseña.
 - **CA-02:** El sistema acepta solo correos del dominio institucional `@unmsm.edu.pe` y rechaza correos ya registrados sin revelar a quién pertenecen.
 - **CA-03:** La contraseña debe cumplir la política de contraseñas definida en `SECURITY.md` y se guarda con hash seguro.
-- **CA-04:** La cuenta se crea con el rol Estudiante, sin área, en estado pendiente de aprobación. El usuario no puede elegir otro rol.
+- **CA-04:** La cuenta se crea con el rol Estudiante, sin área, en estado pendiente de aprobación. El usuario no puede elegir otro rol: las cuentas de docente solo las crea el administrador (HU-15, [decisiones 02](../../../decisiones/decisiones-02.md)).
 - **CA-05:** El sistema muestra el mensaje «Registro enviado. Podrás ingresar cuando un administrador apruebe tu cuenta». No se envía correo.
 - **CA-06:** Mientras la cuenta está pendiente o rechazada, el inicio de sesión no se permite y el sistema informa el estado de la cuenta con un mensaje claro.
 
@@ -50,7 +50,7 @@ Como estudiante sin cuenta, quiero registrarme con mi correo institucional, para
 
 ### Escenario 27.4 – Intento de escalar privilegios (Seguridad)
 
-**Dado** que el visitante envía el formulario de registro modificado para pedir el rol Administrador  
+**Dado** que el visitante envía el formulario de registro modificado para pedir el rol Docente o Administrador  
 **Cuando** el sistema procesa el registro  
 **Entonces** ignora el rol enviado y crea la cuenta solo con el rol Estudiante en estado pendiente.  
 

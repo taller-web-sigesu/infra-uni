@@ -4,7 +4,7 @@
 - **Fecha:** 2026-11-04
 - **Decisores:** Equipo del proyecto Gestal
 - **Requisitos afectados:** RNF-15
-- **Documentos relacionados:** [ARCHITECTURE.md](../ARCHITECTURE.md), [backend ARCHITECTURE](../../../backend-uni/ARCHITECTURE.md)
+- **Documentos relacionados:** [ARCHITECTURE.md](../ARCHITECTURE.md), [backend ARCHITECTURE](https://github.com/taller-web-sigesu/backend-uni/blob/main/ARCHITECTURE.md)
 
 ## Contexto
 

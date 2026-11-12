@@ -18,4 +18,4 @@
 
 ## Pendiente
 
-- Figma: leyenda de roles, matriz rol × pantalla, selector de rol en P12 y etiqueta «Docente» en topbar y perfil. Detalle en [`falta-implementar-03.md`](../../../frontend-uni/docs/FIGMA/v2/falta-implementar-03.md) de frontend-uni.
+- Figma: leyenda de roles, matriz rol × pantalla, selector de rol en P12 y etiqueta «Docente» en topbar y perfil. Detalle en [`falta-implementar-03.md`](https://github.com/taller-web-sigesu/frontend-uni/blob/main/docs/FIGMA/v2/falta-implementar-03.md) de frontend-uni.

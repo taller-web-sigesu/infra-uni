@@ -15,8 +15,8 @@ Los tres repositorios Git son independientes y se clonan como carpetas hermanas.
 
 | Referencia | Propiedad |
 | --- | --- |
-| [Frontend](../../frontend-uni/ARCHITECTURE.md) | Estructura React, componentes, sesión, consumo de API y pruebas UI |
-| [Backend](../../backend-uni/ARCHITECTURE.md) | Módulos Spring Boot, API, reglas de negocio, seguridad y persistencia |
+| [Frontend](https://github.com/taller-web-sigesu/frontend-uni/blob/main/ARCHITECTURE.md) | Estructura React, componentes, sesión, consumo de API y pruebas UI |
+| [Backend](https://github.com/taller-web-sigesu/backend-uni/blob/main/ARCHITECTURE.md) | Módulos Spring Boot, API, reglas de negocio, seguridad y persistencia |
 | Este documento | Visión global, integración, infraestructura, despliegue y decisiones compartidas |
 
 ```text
@@ -91,7 +91,7 @@ flowchart TD
 
 ### 3.1. Aplicaciones
 
-El [frontend](../../frontend-uni/ARCHITECTURE.md) posee la presentación y el [backend](../../backend-uni/ARCHITECTURE.md) implementará el monolito modular. Sus estructuras, dependencias, responsabilidades internas y pruebas se mantienen en sus respectivos documentos.
+El [frontend](https://github.com/taller-web-sigesu/frontend-uni/blob/main/ARCHITECTURE.md) posee la presentación y el [backend](https://github.com/taller-web-sigesu/backend-uni/blob/main/ARCHITECTURE.md) implementará el monolito modular. Sus estructuras, dependencias, responsabilidades internas y pruebas se mantienen en sus respectivos documentos.
 
 ### 3.2. Infraestructura y documentación transversal
 
@@ -102,7 +102,7 @@ El [frontend](../../frontend-uni/ARCHITECTURE.md) posee la presentación y el [b
 
 ## 4. Almacenamiento y límites de confianza
 
-MySQL es el motor exigido por la propuesta académica. Infraestructura provisiona el servicio y su persistencia; backend posee esquema, migraciones y acceso a los datos. React no consulta MySQL directamente. Consultar [persistencia del backend](../../backend-uni/ARCHITECTURE.md) y el [diseño relacional](../DISENIO-BD.md).
+MySQL es el motor exigido por la propuesta académica. Infraestructura provisiona el servicio y su persistencia; backend posee esquema, migraciones y acceso a los datos. React no consulta MySQL directamente. Consultar [persistencia del backend](https://github.com/taller-web-sigesu/backend-uni/blob/main/ARCHITECTURE.md) y el [diseño relacional](../DISENIO-BD.md).
 
 La carga de adjuntos y su proveedor siguen pendientes: si se aprueban, los archivos requieren almacenamiento persistente y privado, con metadatos en MySQL y autorización de descarga en backend. No usar disco efímero para evidencias críticas.
 

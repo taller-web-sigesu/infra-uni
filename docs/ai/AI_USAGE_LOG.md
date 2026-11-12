@@ -1,0 +1,7 @@
+# Registro de uso de IA
+
+Registro único del uso de herramientas de IA en los tres repositorios (`frontend-uni`, `backend-uni`, `infra-uni`). Cada sesión agrega una fila al final, según la [guía de ejecución](../auditorias/auditoria-01/GUIA-EJECUCION-IA.md#12-registro-de-uso-de-ia).
+
+| Fecha | Fase | Repo | Herramienta | Prompt | Resultado | ¿Se usó? | Validación | Modificaciones | Responsable |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 2026-11-11 | Auditoría 01 | infra-uni | Claude Code | Revisar y corregir la guía de ejecución con IA | `docs/auditorias/auditoria-01/` y este registro | Sí | Revisión manual de rutas y enlaces | Ubicación, ramas, orden de sesiones y prompts condicionales | Completar |

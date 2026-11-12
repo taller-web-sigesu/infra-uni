@@ -18,8 +18,8 @@ Como usuario autenticado, quiero visualizar únicamente las opciones de navegaci
 
 ## 3. Criterios de aceptación
 
-- **CA-01:** El menú de navegación muestra únicamente los módulos autorizados para el rol del usuario autenticado (Estudiante, Técnico, Supervisor o Administrador).
-- **CA-02:** Un usuario con rol Estudiante no puede visualizar ni ejecutar acciones de asignación de responsables, cambio de prioridad ni administración de catálogos.
+- **CA-01:** El menú de navegación muestra únicamente los módulos autorizados para el rol del usuario autenticado (Estudiante, Docente, Técnico, Supervisor o Administrador).
+- **CA-02:** Un usuario con rol Estudiante o Docente no puede visualizar ni ejecutar acciones de asignación de responsables, cambio de prioridad ni administración de catálogos.
 
 ## 4. Escenarios BDD
 

@@ -4,12 +4,12 @@
 | ----- | ----- | ----- | ----- | ----- |
 | RF-01 | El sistema debe permitir iniciar y cerrar sesión con correo y contraseña. | Todos | AL-01 | Alta |
 | RF-02 | El sistema debe mostrar solo las opciones y datos permitidos al rol del usuario. | Todos | AL-01 | Alta |
-| RF-03 | El sistema debe permitir registrar una solicitud indicando categoría, descripción y ubicación. | Estudiante | AL-02 | Alta |
-| RF-04 | El sistema debe validar los campos obligatorios antes de registrar la solicitud y mostrar mensajes claros cuando falten datos. | Estudiante | AL-02 | Alta |
+| RF-03 | El sistema debe permitir registrar una solicitud indicando categoría, descripción y ubicación. | Estudiante, Docente | AL-02 | Alta |
+| RF-04 | El sistema debe validar los campos obligatorios antes de registrar la solicitud y mostrar mensajes claros cuando falten datos. | Estudiante, Docente | AL-02 | Alta |
 | RF-05 | El sistema debe asignar automáticamente a cada solicitud un código, la fecha de registro, el solicitante, la prioridad inicial y el estado Nuevo. | Sistema | AL-02 | Alta |
-| RF-06 | El sistema debe mostrar al solicitante el listado de sus solicitudes con código, categoría, estado, prioridad y fecha. | Estudiante | AL-03 | Alta |
-| RF-07 | El sistema debe mostrar el detalle de una solicitud con sus datos, responsable, estado actual e historial de estados. | Estudiante, Técnico, Supervisor | AL-03 | Alta |
-| RF-08 | El sistema debe permitir añadir comentarios a una solicitud, registrando autor y fecha. | Estudiante, Técnico, Supervisor | AL-03 | Alta |
+| RF-06 | El sistema debe mostrar al solicitante el listado de sus solicitudes con código, categoría, estado, prioridad y fecha. | Estudiante, Docente | AL-03 | Alta |
+| RF-07 | El sistema debe mostrar el detalle de una solicitud con sus datos, responsable, estado actual e historial de estados. | Estudiante, Docente, Técnico, Supervisor | AL-03 | Alta |
+| RF-08 | El sistema debe permitir añadir comentarios a una solicitud, registrando autor y fecha. | Estudiante, Docente, Técnico, Supervisor | AL-03 | Alta |
 | RF-09 | El sistema debe mostrar al supervisor las solicitudes de su área, con filtros por estado, categoría y prioridad. | Supervisor | AL-04 | Alta |
 | RF-10 | El sistema debe permitir al supervisor asignar o reasignar una solicitud a un técnico de su área. | Supervisor | AL-04 | Alta |
 | RF-11 | El sistema debe permitir al supervisor ajustar la prioridad de una solicitud. | Supervisor | AL-04 | Alta |
@@ -25,14 +25,14 @@
 | RF-21 | El sistema debe permitir definir un tiempo máximo de atención (SLA) por prioridad o categoría y marcar las solicitudes vencidas o próximas a vencer. | Administrador, Sistema | AL-07 | Media |
 | RF-22 | El sistema debe registrar cada cambio de una solicitud (campo, valor anterior, valor nuevo, usuario y fecha). | Sistema | AL-07 | Media |
 | RF-23 | El sistema debe permitir exportar reportes de solicitudes e indicadores. | Supervisor, Administrador | — | Baja |
-| RF-24 | El sistema debe permitir al solicitante responder una encuesta de satisfacción cuando su solicitud se cierra. | Estudiante | — | Baja |
+| RF-24 | El sistema debe permitir al solicitante responder una encuesta de satisfacción cuando su solicitud se cierra. | Estudiante, Docente | — | Baja |
 | RF-25 | El sistema debe permitir consultar los espacios reservables y su disponibilidad por fecha y hora. | Todos | AL-08 | Alta |
 | RF-26 | El sistema debe permitir registrar una reserva indicando espacio, fecha, hora de inicio, hora de fin y motivo; la reserva queda pendiente de aprobación. | Todos | AL-08 | Alta |
 | RF-27 | El sistema debe impedir reservas solapadas o duplicadas y las que incumplan horario, duración, anticipación o capacidad. | Sistema | AL-08 | Alta |
 | RF-28 | El sistema debe permitir al supervisor del área del espacio o al administrador aprobar o rechazar reservas pendientes, registrando responsable, fecha y motivo. | Supervisor, Administrador | AL-08 | Alta |
 | RF-29 | El sistema debe permitir al solicitante consultar y cancelar sus reservas vigentes. | Todos | AL-08 | Alta |
 | RF-30 | El sistema debe permitir administrar espacios, tipos de espacio, horarios y la política de reservas. | Administrador | AL-08 | Media |
-| RF-31 | El sistema debe permitir adjuntar, consultar y eliminar evidencias (JPG, PNG o PDF) en una solicitud abierta, con límites de tipo, tamaño y cantidad. | Estudiante, Técnico, Supervisor | AL-02 | Media |
+| RF-31 | El sistema debe permitir adjuntar, consultar y eliminar evidencias (JPG, PNG o PDF) en una solicitud abierta, con límites de tipo, tamaño y cantidad. | Estudiante, Docente, Técnico, Supervisor | AL-02 | Media |
 | RF-32 | El sistema debe permitir que un estudiante se registre con su correo institucional; la cuenta queda pendiente de aprobación con el rol Estudiante. | Visitante | AL-01 | Media |
 | RF-33 | El sistema debe permitir al administrador aprobar o rechazar con motivo las cuentas pendientes de aprobación. | Administrador | AL-06 | Media |
 | RF-34 | El sistema debe permitir al administrador restablecer la contraseña de un usuario con una contraseña temporal de cambio obligatorio, y a cada usuario cambiar su propia contraseña. | Administrador, Todos | AL-06 | Media |

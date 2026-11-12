@@ -5,7 +5,7 @@
 - **ID:** HU-04
 - **Épica:** EP-02 — Registro y seguimiento de solicitudes
 - **Prioridad:** Alta
-- **Actor:** estudiante
+- **Actor:** solicitante (estudiante o docente)
 - **Alcance de la historia (según RF):** AL-03
 - **Alcance de la épica:** AL-02, AL-03
 - **Requisitos funcionales asociados:** RF-06
@@ -14,13 +14,13 @@
 
 ## 2. Historia de usuario
 
-Como estudiante, quiero consultar el listado de mis solicitudes registradas viendo su código, categoría, estado, prioridad y fecha, para conocer rápidamente el estado general de mis trámites.
+Como estudiante o docente, quiero consultar el listado de mis solicitudes registradas viendo su código, categoría, estado, prioridad y fecha, para conocer rápidamente el estado general de mis trámites.
 
 ## 3. Criterios de aceptación
 
-- **CA-01:** El listado muestra únicamente las solicitudes creadas por el estudiante autenticado.
+- **CA-01:** El listado muestra únicamente las solicitudes creadas por el solicitante autenticado.
 - **CA-02:** Por cada solicitud se visualiza: código, categoría, estado actual, prioridad y fecha de registro.
-- **CA-03:** Si el estudiante aún no ha registrado ninguna solicitud, se muestra un mensaje de estado vacío con un acceso directo para crear su primera solicitud.
+- **CA-03:** Si el solicitante aún no ha registrado ninguna solicitud, se muestra un mensaje de estado vacío con un acceso directo para crear su primera solicitud.
 
 ## 4. Escenarios BDD
 

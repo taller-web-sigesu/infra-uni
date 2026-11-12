@@ -490,7 +490,7 @@ Alcance:
 - Repetir los recorridos de las fases 02 a 05 contra la API real en Docker.
 - Registrar evidencia por HU y marcar lo que quede pendiente.
 
-Criterio de cierre: los cuatro roles completan sus recorridos y las comprobaciones de CI pasan.
+Criterio de cierre: los cinco roles completan sus recorridos y las comprobaciones de CI pasan.
 
 Rama: feature/frontend-integracion.
 ```

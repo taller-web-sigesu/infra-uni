@@ -5,7 +5,7 @@
 - **ID:** HU-05
 - **Épica:** EP-02 — Registro y seguimiento de solicitudes
 - **Prioridad:** Alta
-- **Actor:** estudiante, técnico o supervisor
+- **Actor:** solicitante (estudiante o docente), técnico o supervisor
 - **Alcance de la historia (según RF):** AL-03
 - **Alcance de la épica:** AL-02, AL-03
 - **Requisitos funcionales asociados:** RF-07
@@ -13,7 +13,7 @@
 
 ## 2. Historia de usuario
 
-Como estudiante, técnico o supervisor, quiero consultar el detalle completo de una solicitud junto con su responsable asignado y su historial de estados, para conocer la trazabilidad de la atención.
+Como solicitante (estudiante o docente), técnico o supervisor, quiero consultar el detalle completo de una solicitud junto con su responsable asignado y su historial de estados, para conocer la trazabilidad de la atención.
 
 ## 3. Criterios de aceptación
 

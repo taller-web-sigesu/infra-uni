@@ -5,7 +5,7 @@
 > **Base de datos:** `uni_services`.
 > **Estado:** diseño propuesto, pendiente de implementación con Flyway en `backend-uni`.
 > **Fuentes:** `docs/requirements/user-stories/HU-01` a `HU-29`, `docs/requirements/Gestal_Requisitos_Funcionales.md`, `docs/requirements/Gestal_Requisitos_No_Funcionales.md`, `docs/EPICS.md`, `docs/ARCHITECTURE.md`, `compose.yaml` y `docs/DOCKER.md`.
-> **Última actualización:** 2026-11-11 (evidencias, auto-registro y restablecimiento de contraseña, [decisiones 01](docs/decisiones/decisiones-01.md)).
+> **Última actualización:** 2026-11-11 (evidencias, auto-registro y restablecimiento de contraseña, [decisiones 01](docs/decisiones/decisiones-01.md)); 2026-11-12 (rol `DOCENTE`, [decisiones 02](docs/decisiones/decisiones-02.md)).
 
 ---
 
@@ -86,6 +86,7 @@ El diseño prioriza:
 | D-24 | `estado_cuenta` y `origen_registro` como `VARCHAR` con `CHECK`, no como catálogo. | Son conjuntos fijos que controla el código de autenticación; nadie los administra. | Tabla catálogo como en D-22. |
 | D-25 | El restablecimiento por administrador reutiliza `hash_contrasena`, `debe_cambiar_contrasena = 1` y la revocación de `sesiones_usuario`; no hay tabla de tokens. | HU-29 y decisión D3: sin recuperación por correo. | Tokens de recuperación enviados por correo. |
 | D-26 | Evidencias: metadatos en `adjuntos_solicitud` y archivo en un bucket privado de Supabase Storage; la fila se borra lógicamente (`eliminado_en`) y el objeto se borra del bucket. | HU-26 y RNF-19: no inflar MySQL ni los backups y conservar la trazabilidad. | Guardar el archivo como `BLOB` en MySQL. |
+| D-27 | Rol `DOCENTE` con los mismos permisos que `ESTUDIANTE` (solicitante), sin área y creado solo por el administrador. | Decisiones 02: el docente registra solicitudes y reservas igual que el estudiante; distinguirlo sirve para reportes. | Política de reservas o prioridad propias por rol. |
 
 ---
 
@@ -174,7 +175,7 @@ Catálogo RBAC. Los códigos son estables; el nombre visible puede ajustarse sin
 | Columna | Tipo | Nulo | Default | Clave/Índice | Descripción |
 | --- | --- | --- | --- | --- | --- |
 | `id` | `BIGINT UNSIGNED` | No | `AUTO_INCREMENT` | PK | Identificador. |
-| `codigo` | `VARCHAR(30)` | No | — | UK | `ESTUDIANTE`, `TECNICO`, `SUPERVISOR`, `ADMINISTRADOR`. |
+| `codigo` | `VARCHAR(30)` | No | — | UK | `ESTUDIANTE`, `DOCENTE`, `TECNICO`, `SUPERVISOR`, `ADMINISTRADOR`. |
 | `nombre` | `VARCHAR(60)` | No | — | UK | Nombre visible. |
 | `descripcion` | `VARCHAR(255)` | Sí | `NULL` | — | Propósito del rol. |
 | `activo` | `TINYINT UNSIGNED` | No | `1` | IDX | Habilitado/deshabilitado. |
@@ -183,7 +184,7 @@ Catálogo RBAC. Los códigos son estables; el nombre visible puede ajustarse sin
 
 ### 6.2. `usuarios`
 
-Cuenta de acceso. `area_id` es obligatorio para `TECNICO` y `SUPERVISOR`; la regla se valida en la capa de servicio porque depende del rol. Solo puede iniciar sesión una cuenta con `activo = 1` y `estado_cuenta = 'ACTIVA'` (HU-27, HU-28).
+Cuenta de acceso. `area_id` es obligatorio para `TECNICO` y `SUPERVISOR` y queda `NULL` para `ESTUDIANTE` y `DOCENTE`; la regla se valida en la capa de servicio porque depende del rol. Solo puede iniciar sesión una cuenta con `activo = 1` y `estado_cuenta = 'ACTIVA'` (HU-27, HU-28).
 
 | Columna | Tipo | Nulo | Default | Clave/Índice | Descripción |
 | --- | --- | --- | --- | --- | --- |
@@ -328,7 +329,7 @@ Entidad central. `area_id` es una copia del área de la categoría al momento de
 | --- | --- | --- | --- | --- | --- |
 | `id` | `BIGINT UNSIGNED` | No | `AUTO_INCREMENT` | PK | Identificador. |
 | `codigo` | `VARCHAR(20)` | No | — | UK | `SOL-2026-000001`. |
-| `solicitante_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Estudiante que registra. |
+| `solicitante_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Estudiante o docente que registra. |
 | `categoria_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Categoría. |
 | `area_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Área derivada de la categoría. |
 | `prioridad_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Prioridad actual. |
@@ -746,7 +747,7 @@ Reglas:
 
 ### 7.9. Cuentas y contraseñas
 
-- El auto-registro (HU-27) crea la cuenta con el rol `ESTUDIANTE`, `area_id = NULL`, `estado_cuenta = 'PENDIENTE'`, `origen_registro = 'AUTO_REGISTRO'` y `debe_cambiar_contrasena = 0`. El rol que envíe el cliente se ignora.
+- El auto-registro (HU-27) crea la cuenta con el rol `ESTUDIANTE`, `area_id = NULL`, `estado_cuenta = 'PENDIENTE'`, `origen_registro = 'AUTO_REGISTRO'` y `debe_cambiar_contrasena = 0`. El rol que envíe el cliente se ignora. Las cuentas `DOCENTE` solo las crea el administrador (HU-15).
 - Solo se aceptan correos que terminan exactamente en `@unmsm.edu.pe` (sin subdominios), comparados sin distinguir mayúsculas. El valor se lee de una variable de entorno para poder cambiarlo sin tocar código. Un correo ya registrado, en cualquier estado, no puede volver a registrarse.
 - `PENDIENTE → ACTIVA` (aprobar) o `PENDIENTE → RECHAZADA` (rechazar con motivo) solo los ejecuta el administrador (HU-28); se guardan `revisado_por_id` y `revisado_en`. `RECHAZADA` es terminal salvo que el administrador la apruebe después.
 - Las cuentas creadas por el administrador (HU-15) nacen `ACTIVA` con `origen_registro = 'ADMINISTRADOR'`.
@@ -1136,7 +1137,7 @@ Los seeds son **catálogos de demostración**, no datos reales. Se cargan con un
 
 | Catálogo | Valores iniciales |
 | --- | --- |
-| `roles` | `ESTUDIANTE`, `TECNICO`, `SUPERVISOR`, `ADMINISTRADOR`. |
+| `roles` | `ESTUDIANTE`, `DOCENTE`, `TECNICO`, `SUPERVISOR`, `ADMINISTRADOR`. |
 | `areas` | Soporte informático, Mantenimiento, Servicios generales, Biblioteca. |
 | `prioridades` | Baja (1), Media (2), Alta (3), Crítica (4). |
 | `estados_solicitud` | Nuevo, Asignado, En proceso, Resuelto, Cerrado, Rechazado. |
@@ -1812,7 +1813,8 @@ INSERT INTO roles (id, codigo, nombre, descripcion) VALUES
     (1, 'ESTUDIANTE', 'Estudiante', 'Registra y consulta sus propias solicitudes.'),
     (2, 'TECNICO', 'Técnico', 'Atiende las solicitudes asignadas a su área.'),
     (3, 'SUPERVISOR', 'Supervisor', 'Gestiona, asigna y cierra solicitudes de su área.'),
-    (4, 'ADMINISTRADOR', 'Administrador', 'Administra usuarios y catálogos del sistema.');
+    (4, 'ADMINISTRADOR', 'Administrador', 'Administra usuarios y catálogos del sistema.'),
+    (5, 'DOCENTE', 'Docente', 'Registra y consulta sus propias solicitudes y reservas; cuenta creada por el administrador.');
 
 INSERT INTO areas (id, codigo, nombre, descripcion) VALUES
     (1, 'SOPORTE_INFORMATICO', 'Soporte informático',

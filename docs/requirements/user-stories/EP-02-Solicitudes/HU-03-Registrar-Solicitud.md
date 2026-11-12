@@ -5,7 +5,7 @@
 - **ID:** HU-03
 - **Épica:** EP-02 — Registro y seguimiento de solicitudes
 - **Prioridad:** Alta
-- **Actor:** estudiante
+- **Actor:** solicitante (estudiante o docente)
 - **Alcance de la historia (según RF):** AL-02
 - **Alcance de la épica:** AL-02, AL-03
 - **Requisitos funcionales asociados:** RF-03, RF-04, RF-05
@@ -14,7 +14,7 @@
 
 ## 2. Historia de usuario
 
-Como estudiante, quiero registrar una solicitud de servicio indicando su categoría, descripción y ubicación, para reportar un problema o requerimiento en la universidad y que sea atendido.
+Como estudiante o docente, quiero registrar una solicitud de servicio indicando su categoría, descripción y ubicación, para reportar un problema o requerimiento en la universidad y que sea atendido.
 
 ## 3. Criterios de aceptación
 

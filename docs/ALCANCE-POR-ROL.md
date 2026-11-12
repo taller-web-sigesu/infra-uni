@@ -2,7 +2,7 @@
 
 > **Propósito:** resumen no técnico de qué se implementará, qué queda fuera y qué está pendiente, agrupado por rol.
 > **Fuentes:** `docs/ARCHITECTURE.md`, `docs/EPICS.md`, `docs/requirements/`, `docs/adr/`, `DISENIO-BD.md` y `docs/superpowers/plans/2026-11-04-ingenieria-pendiente.md`.
-> **Última actualización:** 2026-11-04.
+> **Última actualización:** 2026-11-12 (decisiones 01 y 02).
 
 ## 1. Punto de partida
 
@@ -14,19 +14,24 @@ Hoy el producto es un **esqueleto**: pantalla de estado en React, `GET /api/v1/s
 
 | Se implementará | No se implementará / pendiente |
 | --- | --- |
-| Iniciar y cerrar sesión con correo y contraseña. | Recuperación de contraseña. |
+| Iniciar y cerrar sesión con correo y contraseña. | Recuperación de contraseña por correo (la cubre el restablecimiento por el administrador). |
+| Registrarse con correo institucional `@unmsm.edu.pe` (solo estudiantes); la cuenta queda pendiente hasta que el administrador la aprueba. | Verificación de la cuenta por correo. |
+| Cambiar la propia contraseña desde el perfil. | — |
 | Ver solo las opciones y datos permitidos por su rol. | Notificaciones por correo o internas. |
 | Consultar espacios reservables y su disponibilidad. | Varios roles por usuario (se asume uno por cuenta). |
 | Registrar reservas y consultar o cancelar las propias. | Tiempo real (actualizaciones en vivo). |
 
-### 2.2 Estudiante
+### 2.2 Estudiante y docente
+
+El docente tiene los mismos permisos que el estudiante. Su cuenta la crea el administrador; no se auto-registra.
 
 | Se implementará | No se implementará / pendiente |
 | --- | --- |
-| Registrar solicitud con categoría, descripción y ubicación, con validación de campos. | Adjuntar evidencias, fotos o archivos. |
+| Registrar solicitud con categoría, descripción y ubicación, con validación de campos. | Evidencias de otros formatos (video, audio) o de más de 5 MB. |
+| Adjuntar, ver y eliminar evidencias (JPG, PNG o PDF) en sus solicitudes abiertas. | — |
 | Ver el listado de sus solicitudes con código, categoría, estado, prioridad y fecha. | Recibir avisos de cambio de estado. |
 | Ver el detalle con responsable, estado e historial, y comentar. | — |
-| Responder la encuesta de satisfacción al cierre de su solicitud. | — |
+| Responder la encuesta de satisfacción al cierre de su solicitud. | Política de reservas o prioridad propias para docentes. |
 
 ### 2.3 Técnico
 
@@ -50,11 +55,12 @@ Hoy el producto es un **esqueleto**: pantalla de estado en React, `GET /api/v1/s
 
 | Se implementará | No se implementará / pendiente |
 | --- | --- |
-| Crear, editar y desactivar usuarios; asignar rol y área. | Catálogos reales de la universidad (áreas, categorías, espacios). |
+| Crear, editar y desactivar usuarios; asignar rol y área. Es la única vía para crear docentes. | Catálogos reales de la universidad (áreas, categorías, espacios). |
 | Gestionar áreas, categorías, prioridades y nombres de estados. | Valores definitivos de SLA y de la política de reservas. |
 | Definir políticas de SLA y marcar vencidas o por vencer. | Feriados y días no laborables. |
 | Administrar espacios, tipos de espacio, horarios y política de reservas. | Multi-rol por usuario. |
 | Aprobar cualquier reserva y ver el dashboard y la auditoría. | Retención definitiva de la auditoría. |
+| Aprobar o rechazar con motivo las cuentas auto-registradas y restablecer contraseñas con una temporal. | — |
 
 ### 2.6 Sistema e ingeniería (comportamiento automático)
 
@@ -73,8 +79,7 @@ Hoy el producto es un **esqueleto**: pantalla de estado en React, `GET /api/v1/s
 - Chatbot con IA o LLM dentro del producto (sí se registra el uso de IA en el desarrollo).
 - Mensajería externa: correo, SMS o chat.
 - API Gateway y microservicios.
-- Notificaciones internas y recuperación de contraseña.
-- Adjuntos o evidencias de solicitud.
+- Notificaciones internas y recuperación de contraseña por correo.
 - Reservas recurrentes o periódicas.
 - Varios roles por usuario.
 - Datos personales reales: los datos de demostración son ficticios.

@@ -32,3 +32,7 @@
 | RF-28 | El sistema debe permitir al supervisor del área del espacio o al administrador aprobar o rechazar reservas pendientes, registrando responsable, fecha y motivo. | Supervisor, Administrador | AL-08 | Alta |
 | RF-29 | El sistema debe permitir al solicitante consultar y cancelar sus reservas vigentes. | Todos | AL-08 | Alta |
 | RF-30 | El sistema debe permitir administrar espacios, tipos de espacio, horarios y la política de reservas. | Administrador | AL-08 | Media |
+| RF-31 | El sistema debe permitir adjuntar, consultar y eliminar evidencias (JPG, PNG o PDF) en una solicitud abierta, con límites de tipo, tamaño y cantidad. | Estudiante, Técnico, Supervisor | AL-02 | Media |
+| RF-32 | El sistema debe permitir que un estudiante se registre con su correo institucional; la cuenta queda pendiente de aprobación con el rol Estudiante. | Visitante | AL-01 | Media |
+| RF-33 | El sistema debe permitir al administrador aprobar o rechazar con motivo las cuentas pendientes de aprobación. | Administrador | AL-06 | Media |
+| RF-34 | El sistema debe permitir al administrador restablecer la contraseña de un usuario con una contraseña temporal de cambio obligatorio, y a cada usuario cambiar su propia contraseña. | Administrador, Todos | AL-06 | Media |

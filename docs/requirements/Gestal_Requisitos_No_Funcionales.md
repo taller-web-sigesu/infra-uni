@@ -7,7 +7,7 @@
 | RNF-03 | Usabilidad | Los formularios deben mostrar mensajes de validación junto a cada campo, confirmaciones de las acciones y estados vacíos. | Alta |
 | RNF-04 | Usabilidad | La interfaz debe cumplir buenas prácticas básicas de accesibilidad: etiquetas en los campos, contraste suficiente y navegación con teclado. | Media |
 | RNF-05 | Seguridad | Las contraseñas deben almacenarse con un algoritmo de hash seguro, nunca en texto plano. | Alta |
-| RNF-06 | Seguridad | Toda operación, salvo el inicio de sesión, debe requerir autenticación (JWT o sesión) y respetar la autorización por rol. | Alta |
+| RNF-06 | Seguridad | Toda operación, salvo el inicio de sesión y el auto-registro (HU-27), debe requerir autenticación (JWT o sesión) y respetar la autorización por rol. | Alta |
 | RNF-07 | Seguridad | Las entradas deben validarse en el frontend y en el backend para prevenir inyección y XSS, siguiendo los principios OWASP. | Alta |
 | RNF-08 | Seguridad | Los secretos (claves, credenciales de base de datos) deben gestionarse con variables de entorno, sin valores fijos en el código. | Alta |
 | RNF-09 | Rendimiento | Las operaciones habituales (listar, consultar detalle, registrar) deben responder en menos de 2 segundos con la carga de demostración. | Media |
@@ -20,3 +20,4 @@
 | RNF-16 | Integridad | El servidor debe garantizar que no existan dos reservas activas solapadas para un mismo espacio, incluso con solicitudes concurrentes. | Alta |
 | RNF-17 | Seguridad | Un usuario solo accede a sus reservas; el supervisor a las de los espacios de su área; el administrador a todas. | Alta |
 | RNF-18 | Rendimiento | La consulta de disponibilidad de un espacio y día debe responder en menos de 2 segundos con la carga de demostración. | Media |
+| RNF-19 | Seguridad | Las evidencias se guardan fuera de la base de datos en un almacenamiento privado (Supabase Storage en la nube) y solo se entregan a usuarios autorizados mediante URLs firmadas de corta duración. | Alta |

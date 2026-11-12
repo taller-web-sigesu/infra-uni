@@ -4,8 +4,8 @@
 > **Motor:** MySQL 8.4.13 (imagen `mysql:8.4.13` de `compose.yaml`).
 > **Base de datos:** `uni_services`.
 > **Estado:** diseño propuesto, pendiente de implementación con Flyway en `backend-uni`.
-> **Fuentes:** `docs/requirements/user-stories/HU-01` a `HU-25`, `docs/requirements/Gestal_Requisitos_Funcionales.md`, `docs/requirements/Gestal_Requisitos_No_Funcionales.md`, `docs/EPICS.md`, `docs/ARCHITECTURE.md`, `compose.yaml` y `docs/DOCKER.md`.
-> **Última actualización:** 2026-11-04.
+> **Fuentes:** `docs/requirements/user-stories/HU-01` a `HU-29`, `docs/requirements/Gestal_Requisitos_Funcionales.md`, `docs/requirements/Gestal_Requisitos_No_Funcionales.md`, `docs/EPICS.md`, `docs/ARCHITECTURE.md`, `compose.yaml` y `docs/DOCKER.md`.
+> **Última actualización:** 2026-11-11 (evidencias, auto-registro y restablecimiento de contraseña, [decisiones 01](docs/decisiones/decisiones-01.md)).
 
 ---
 
@@ -19,6 +19,7 @@ La pieza central es `solicitudes`. A su alrededor se agrupan:
 - **Catálogos:** `areas`, `prioridades`, `categorias`, `estados_solicitud`, `transiciones_estado`, `politicas_sla`.
 - **Ciclo de vida:** `historial_estados`, `asignaciones`, `comentarios`, `encuestas_satisfaccion`.
 - **Soporte:** `auditoria_eventos`, `secuencias_codigo_solicitud`.
+- **Evidencias:** `adjuntos_solicitud` (metadatos; el archivo vive en Supabase Storage).
 - **Reservas:** `tipos_espacio`, `espacios`, `horarios_espacio`, `estados_reserva`, `politicas_reserva`, `reservas`, `historial_estados_reserva`, `secuencias_codigo_reserva`.
 
 El diseño prioriza:
@@ -38,18 +39,18 @@ El diseño prioriza:
 
 | Épica | Historias | Necesidad principal |
 | --- | --- | --- |
-| EP-01 | HU-01, HU-02 | Login/logout, roles y autorización. |
-| EP-02 | HU-03, HU-04, HU-05, HU-06 | Registrar, listar, detallar, historiar y comentar solicitudes. |
+| EP-01 | HU-01, HU-02, HU-27 | Login/logout, roles, autorización y auto-registro pendiente de aprobación. |
+| EP-02 | HU-03, HU-04, HU-05, HU-06, HU-26 | Registrar, listar, detallar, historiar, comentar y adjuntar evidencias. |
 | EP-03 | HU-07, HU-08, HU-09, HU-10, HU-11 | Filtrar por área, asignar/reasignar, atender, cerrar y rechazar. |
 | EP-04 | HU-12, HU-13, HU-14 | Indicadores, filtros y exportación. |
-| EP-05 | HU-15, HU-16, HU-17 | Usuarios, áreas, categorías, prioridades y estados. |
+| EP-05 | HU-15, HU-16, HU-17, HU-28, HU-29 | Usuarios, aprobación de cuentas, restablecimiento de contraseña, áreas, categorías, prioridades y estados. |
 | EP-06 | HU-18, HU-19, HU-20 | SLA, auditoría y encuesta de satisfacción. |
 | EP-07 | HU-21, HU-22, HU-23, HU-24, HU-25 | Reservar ambientes, aprobar/rechazar y administrar espacios. |
 
 ### 2.2. Fuera de alcance del esquema
 
-- **Adjuntos/evidencias:** ninguna HU actual exige carga de archivos. Se deja una tabla opcional documentada en la sección 14.
-- **Notificaciones, correo, chat o tiempo real:** no aparecen en las HU aprobadas.
+- **Archivos de evidencias:** el binario no se guarda en MySQL; vive en Supabase Storage (ADR-0004). La base solo guarda metadatos en `adjuntos_solicitud` (HU-26).
+- **Notificaciones, correo, chat o tiempo real:** no aparecen en las HU aprobadas. El auto-registro y el restablecimiento de contraseña se resuelven sin correo (HU-27 a HU-29).
 - **Datos personales reales:** los seeds solo contienen catálogos; no se insertan usuarios con contraseñas por defecto.
 - **Reportes exportados:** HU-14 no requiere persistencia; se resuelve con consultas y descarga directa.
 
@@ -81,6 +82,10 @@ El diseño prioriza:
 | D-20 | Estados operativos `EN_CURSO` y `FINALIZADA` derivados en vista, no almacenados. | Evita procesos programados de transición; coherente con `vw_estado_sla`. | Job periódico que actualice estados. |
 | D-21 | Historial dedicado `historial_estados_reserva` más `auditoria_eventos`. | Misma separación que `solicitudes`: línea de tiempo visible y registro de cumplimiento. | Usar solo auditoría para reconstruir la línea de tiempo. |
 | D-22 | Catálogos `tipos_espacio` y `estados_reserva` en tablas, no `ENUM`. | El administrador los gestiona (HU-25) sin migraciones de esquema. | Columnas `ENUM` fijas. |
+| D-23 | `usuarios.estado_cuenta` (`PENDIENTE`, `ACTIVA`, `RECHAZADA`) separado de `activo`. | HU-27 y HU-28: distinguir una cuenta por aprobar de una cuenta desactivada por el administrador. | Reutilizar `activo = 0` para las pendientes. |
+| D-24 | `estado_cuenta` y `origen_registro` como `VARCHAR` con `CHECK`, no como catálogo. | Son conjuntos fijos que controla el código de autenticación; nadie los administra. | Tabla catálogo como en D-22. |
+| D-25 | El restablecimiento por administrador reutiliza `hash_contrasena`, `debe_cambiar_contrasena = 1` y la revocación de `sesiones_usuario`; no hay tabla de tokens. | HU-29 y decisión D3: sin recuperación por correo. | Tokens de recuperación enviados por correo. |
+| D-26 | Evidencias: metadatos en `adjuntos_solicitud` y archivo en un bucket privado de Supabase Storage; la fila se borra lógicamente (`eliminado_en`) y el objeto se borra del bucket. | HU-26 y RNF-19: no inflar MySQL ni los backups y conservar la trazabilidad. | Guardar el archivo como `BLOB` en MySQL. |
 
 ---
 
@@ -113,6 +118,7 @@ erDiagram
     roles ||--o{ usuarios : "rol"
     areas ||--o{ usuarios : "area"
     usuarios ||--o{ sesiones_usuario : "sesiones"
+    usuarios ||--o{ usuarios : "revisa cuenta"
 
     areas ||--o{ categorias : "responsable"
     prioridades ||--o{ categorias : "prioridad por defecto"
@@ -136,6 +142,8 @@ erDiagram
     solicitudes ||--o{ comentarios : "comentarios"
     solicitudes ||--o{ encuestas_satisfaccion : "encuesta"
     solicitudes ||--o{ auditoria_eventos : "auditoria"
+    solicitudes ||--o{ adjuntos_solicitud : "evidencias"
+    usuarios ||--o{ adjuntos_solicitud : "sube"
 
     usuarios ||--o{ historial_estados : "cambia"
     usuarios ||--o{ asignaciones : "tecnico"
@@ -175,7 +183,7 @@ Catálogo RBAC. Los códigos son estables; el nombre visible puede ajustarse sin
 
 ### 6.2. `usuarios`
 
-Cuenta de acceso. `area_id` es obligatorio para `TECNICO` y `SUPERVISOR`; la regla se valida en la capa de servicio porque depende del rol.
+Cuenta de acceso. `area_id` es obligatorio para `TECNICO` y `SUPERVISOR`; la regla se valida en la capa de servicio porque depende del rol. Solo puede iniciar sesión una cuenta con `activo = 1` y `estado_cuenta = 'ACTIVA'` (HU-27, HU-28).
 
 | Columna | Tipo | Nulo | Default | Clave/Índice | Descripción |
 | --- | --- | --- | --- | --- | --- |
@@ -187,12 +195,17 @@ Cuenta de acceso. `area_id` es obligatorio para `TECNICO` y `SUPERVISOR`; la reg
 | `hash_contrasena` | `VARCHAR(255)` | No | — | — | BCrypt/Argon2id; nunca texto plano. |
 | `telefono` | `VARCHAR(20)` | Sí | `NULL` | — | Contacto opcional. |
 | `activo` | `TINYINT UNSIGNED` | No | `1` | IDX | Alta/baja lógica. |
-| `debe_cambiar_contrasena` | `TINYINT UNSIGNED` | No | `1` | — | Fuerza cambio de la contraseña inicial. |
+| `estado_cuenta` | `VARCHAR(20)` | No | `'ACTIVA'` | IDX | `PENDIENTE`, `ACTIVA` o `RECHAZADA` (HU-27, HU-28). |
+| `origen_registro` | `VARCHAR(20)` | No | `'ADMINISTRADOR'` | — | `ADMINISTRADOR` (HU-15) o `AUTO_REGISTRO` (HU-27). |
+| `revisado_por_id` | `BIGINT UNSIGNED` | Sí | `NULL` | FK | Administrador que aprobó o rechazó la cuenta. |
+| `revisado_en` | `DATETIME(6)` | Sí | `NULL` | — | Fecha de la aprobación o el rechazo. |
+| `motivo_rechazo` | `TEXT` | Sí | `NULL` | — | Obligatorio cuando `estado_cuenta = 'RECHAZADA'`. |
+| `debe_cambiar_contrasena` | `TINYINT UNSIGNED` | No | `1` | — | Fuerza el cambio de la contraseña inicial o temporal (HU-15, HU-29). En auto-registro vale `0`. |
 | `ultimo_acceso_en` | `DATETIME(6)` | Sí | `NULL` | — | Último login exitoso. |
 | `creado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Alta. |
 | `actualizado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Última modificación. |
 
-**Índices:** `uk_usuarios_correo`, `idx_usuarios_rol_activo (rol_id, activo)`, `idx_usuarios_area_activo (area_id, activo)`.
+**Índices:** `uk_usuarios_correo`, `idx_usuarios_rol_activo (rol_id, activo)`, `idx_usuarios_area_activo (area_id, activo)`, `idx_usuarios_estado_cuenta (estado_cuenta, creado_en)` para la bandeja de cuentas pendientes.
 
 ### 6.3. `sesiones_usuario`
 
@@ -407,7 +420,7 @@ Registro de cumplimiento (HU-19/RF-22). No sustituye al historial de estados: lo
 | `entidad` | `VARCHAR(60)` | No | — | IDX | Tabla afectada. |
 | `entidad_id` | `BIGINT UNSIGNED` | No | — | IDX | PK del registro afectado. |
 | `solicitud_id` | `BIGINT UNSIGNED` | Sí | `NULL` | FK, IDX | Solicitud relacionada, si aplica. |
-| `accion` | `VARCHAR(30)` | No | — | — | `CREAR`, `ACTUALIZAR`, `CAMBIO_ESTADO`, `ASIGNACION`, `COMENTARIO`, `LOGIN`, `LOGOUT`. |
+| `accion` | `VARCHAR(30)` | No | — | — | `CREAR`, `ACTUALIZAR`, `CAMBIO_ESTADO`, `ASIGNACION`, `COMENTARIO`, `LOGIN`, `LOGOUT`, `REGISTRO`, `APROBAR_CUENTA`, `RECHAZAR_CUENTA`, `RESTABLECER_CONTRASENA`, `ADJUNTAR`, `ELIMINAR_ADJUNTO`. |
 | `campo` | `VARCHAR(80)` | Sí | `NULL` | — | Campo modificado. |
 | `valor_anterior` | `TEXT` | Sí | `NULL` | — | Valor previo legible. |
 | `valor_nuevo` | `TEXT` | Sí | `NULL` | — | Valor nuevo legible. |
@@ -586,6 +599,27 @@ Secuencia atómica por año para generar `RES-AAAA-NNNNNN` sin colisiones.
 | `ultimo_valor` | `INT UNSIGNED` | No | `0` | — | Último consecutivo usado. |
 | `actualizado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Última actualización. |
 
+### 6.25. `adjuntos_solicitud`
+
+Metadatos de las evidencias de una solicitud (HU-26). El archivo vive fuera de MySQL: en Supabase Storage (staging y producción) o en un volumen Docker (local).
+
+| Columna | Tipo | Nulo | Default | Clave/Índice | Descripción |
+| --- | --- | --- | --- | --- | --- |
+| `id` | `BIGINT UNSIGNED` | No | `AUTO_INCREMENT` | PK | Identificador. |
+| `solicitud_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Solicitud a la que pertenece. |
+| `autor_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Usuario que subió el archivo. |
+| `nombre_original` | `VARCHAR(255)` | No | — | — | Nombre mostrado al usuario; nunca se usa como ruta. |
+| `proveedor_almacenamiento` | `VARCHAR(20)` | No | `'SUPABASE'` | — | `SUPABASE` o `LOCAL`. |
+| `clave_objeto` | `VARCHAR(500)` | No | — | UK | Ruta en el bucket: `solicitudes/{solicitud_id}/{uuid}.{ext}`. |
+| `tipo_mime` | `VARCHAR(100)` | No | — | — | `image/jpeg`, `image/png` o `application/pdf`, detectado por contenido. |
+| `tamano_bytes` | `INT UNSIGNED` | No | — | — | De 1 byte a 5 MB (5 242 880 bytes). |
+| `hash_sha256` | `CHAR(64)` | No | — | — | Integridad del archivo. |
+| `creado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | IDX | Fecha de carga. |
+| `eliminado_en` | `DATETIME(6)` | Sí | `NULL` | IDX | Borrado lógico; `NULL` si está vigente. |
+| `eliminado_por_id` | `BIGINT UNSIGNED` | Sí | `NULL` | FK | Usuario que la eliminó. |
+
+**Índices:** `uk_adjuntos_clave_objeto`, `idx_adjuntos_solicitud (solicitud_id, eliminado_en, creado_en)`, `idx_adjuntos_autor (autor_id)`.
+
 ---
 
 ## 7. Reglas de integridad y negocio
@@ -709,6 +743,26 @@ Reglas:
 - La cancelación solo procede antes de `fecha + hora_inicio`.
 - Toda transición inserta en `historial_estados_reserva` y en `auditoria_eventos` con `entidad = 'reservas'`.
 - El estado operativo (`PROXIMA`, `EN_CURSO`, `FINALIZADA`) se calcula en `vw_reservas_operativas`; no se persiste.
+
+### 7.9. Cuentas y contraseñas
+
+- El auto-registro (HU-27) crea la cuenta con el rol `ESTUDIANTE`, `area_id = NULL`, `estado_cuenta = 'PENDIENTE'`, `origen_registro = 'AUTO_REGISTRO'` y `debe_cambiar_contrasena = 0`. El rol que envíe el cliente se ignora.
+- Solo se aceptan correos del dominio institucional configurado por variable de entorno. Un correo ya registrado, en cualquier estado, no puede volver a registrarse.
+- `PENDIENTE → ACTIVA` (aprobar) o `PENDIENTE → RECHAZADA` (rechazar con motivo) solo los ejecuta el administrador (HU-28); se guardan `revisado_por_id` y `revisado_en`. `RECHAZADA` es terminal salvo que el administrador la apruebe después.
+- Las cuentas creadas por el administrador (HU-15) nacen `ACTIVA` con `origen_registro = 'ADMINISTRADOR'`.
+- El login exige `activo = 1` y `estado_cuenta = 'ACTIVA'`. Con cuenta pendiente o rechazada responde un mensaje claro sin emitir sesión.
+- El restablecimiento (HU-29) reemplaza `hash_contrasena` por el de una contraseña temporal aleatoria, pone `debe_cambiar_contrasena = 1` y marca `revocada_en` en todas las sesiones vigentes, en una sola transacción. La contraseña temporal no se guarda ni se registra.
+- Cada registro, aprobación, rechazo y restablecimiento inserta una fila en `auditoria_eventos` con `entidad = 'usuarios'`.
+
+### 7.10. Evidencias
+
+- Pueden adjuntar el solicitante, el técnico con asignación activa y el supervisor del área, mientras la solicitud no esté `CERRADO` ni `RECHAZADO`.
+- Máximo 5 evidencias vigentes (`eliminado_en IS NULL`) por solicitud. La cuenta se valida en servicio con `SELECT … FOR UPDATE` sobre la fila de `solicitudes` para evitar carreras.
+- Tipo (`image/jpeg`, `image/png`, `application/pdf`) y tamaño (≤ 5 MB) se validan en el backend por contenido; los `CHECK` son la segunda barrera.
+- Orden de escritura: se sube el objeto al almacenamiento y luego se inserta la fila. Si el `INSERT` falla, se borra el objeto. Al eliminar, se marca `eliminado_en` y `eliminado_por_id` y se borra el objeto.
+- Solo el autor elimina su evidencia, y solo con la solicitud abierta. Ver y descargar exige poder ver la solicitud (misma regla que HU-05).
+- La descarga usa una URL firmada de Supabase con vigencia de 5 minutos, generada por el backend. El bucket es privado y el frontend nunca recibe la clave de servicio.
+- Cada carga y eliminación inserta en `auditoria_eventos` con `entidad = 'adjuntos_solicitud'` y la `solicitud_id` correspondiente.
 
 ---
 
@@ -1095,7 +1149,7 @@ Los seeds son **catálogos de demostración**, no datos reales. Se cargan con un
 | `horarios_espacio` | Lunes a viernes 07:00–22:00; sábado 07:00–13:00 en biblioteca. |
 | `politicas_reserva` | 30–240 min, 30 días de anticipación, 1 h mínima y 2 reservas activas por día. |
 
-> **Usuarios:** no se insertan. El primer administrador se crea con un hash BCrypt/Argon2id generado por la aplicación, `activo = 1` y `debe_cambiar_contrasena = 1`.
+> **Usuarios:** no se insertan. El primer administrador se crea con un hash BCrypt/Argon2id generado por la aplicación, `activo = 1`, `estado_cuenta = 'ACTIVA'` y `debe_cambiar_contrasena = 1`.
 
 ---
 
@@ -1128,6 +1182,10 @@ Los seeds son **catálogos de demostración**, no datos reales. Se cargan con un
 | HU-23 | RF-28 | `reservas`, `historial_estados_reserva`, `estados_reserva`, `auditoria_eventos` |
 | HU-24 | RF-29 | `reservas`, `historial_estados_reserva`, `estados_reserva` |
 | HU-25 | RF-30 | `espacios`, `tipos_espacio`, `horarios_espacio`, `politicas_reserva` |
+| HU-26 | RF-31 | `adjuntos_solicitud`, `solicitudes`, `auditoria_eventos` |
+| HU-27 | RF-32 | `usuarios`, `roles`, `auditoria_eventos` |
+| HU-28 | RF-33 | `usuarios`, `auditoria_eventos` |
+| HU-29 | RF-34 | `usuarios`, `sesiones_usuario`, `auditoria_eventos` |
 
 ---
 
@@ -1151,6 +1209,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON uni_services.* TO 'uni_app'@'%';
 - `sesiones_usuario.hash_token` almacena SHA-256 del token; el token original solo viaja al cliente.
 - El logout actualiza `revocada_en`; el backend rechaza tokens revocados.
 - El login exitoso actualiza `usuarios.ultimo_acceso_en`.
+- El restablecimiento por administrador revoca todas las sesiones del usuario y fuerza el cambio de contraseña (sección 7.9).
 
 ### 13.3. Respaldos
 
@@ -1196,36 +1255,19 @@ spring:
 - No usar `OPTIMIZE TABLE` en caliente sin ventana de mantenimiento.
 - Monitorear crecimiento de `auditoria_eventos`; si supera varios millones de filas, evaluar particionado por año o archivado.
 
+### 13.6. Almacenamiento de evidencias
+
+- Supabase Storage, bucket privado `evidencias-solicitudes`, uno por entorno (staging y producción). En local, volumen Docker.
+- El backend usa la clave de servicio de Supabase desde variables de entorno (RNF-08); nunca llega al frontend, al repositorio ni a los logs.
+- Los backups de MySQL no incluyen los archivos. La retención y el respaldo del bucket se documentan en el runbook de la Fase 4.
+
 ---
 
 ## 14. Extensiones futuras
 
-### 14.1. Adjuntos de solicitud (no exigido por las HU actuales)
+### 14.1. Adjuntos de solicitud
 
-Si se aprueba la carga de evidencias, se añadiría:
-
-```sql
-CREATE TABLE adjuntos_solicitud (
-    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    solicitud_id BIGINT UNSIGNED NOT NULL,
-    autor_id BIGINT UNSIGNED NOT NULL,
-    nombre_original VARCHAR(255) NOT NULL,
-    ruta_almacenamiento VARCHAR(500) NOT NULL,
-    tipo_mime VARCHAR(100) NOT NULL,
-    tamano_bytes BIGINT UNSIGNED NOT NULL,
-    hash_sha256 CHAR(64) NOT NULL,
-    creado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-    PRIMARY KEY (id),
-    KEY idx_adjuntos_solicitud (solicitud_id, creado_en),
-    CONSTRAINT fk_adjuntos_solicitud FOREIGN KEY (solicitud_id)
-        REFERENCES solicitudes (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-    CONSTRAINT fk_adjuntos_autor FOREIGN KEY (autor_id)
-        REFERENCES usuarios (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-    CONSTRAINT chk_adjuntos_tamano CHECK (tamano_bytes > 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-```
-
-Los archivos deben almacenarse fuera de MySQL, en un almacenamiento privado, y validarse por tipo, tamaño y contenido.
+Ya incorporados: ver la tabla 6.25 `adjuntos_solicitud`, las reglas 7.10 y HU-26.
 
 ### 14.2. Otras extensiones
 
@@ -1304,6 +1346,11 @@ CREATE TABLE usuarios (
     hash_contrasena VARCHAR(255) NOT NULL,
     telefono VARCHAR(20) NULL,
     activo TINYINT UNSIGNED NOT NULL DEFAULT 1,
+    estado_cuenta VARCHAR(20) NOT NULL DEFAULT 'ACTIVA',
+    origen_registro VARCHAR(20) NOT NULL DEFAULT 'ADMINISTRADOR',
+    revisado_por_id BIGINT UNSIGNED NULL,
+    revisado_en DATETIME(6) NULL,
+    motivo_rechazo TEXT NULL,
     debe_cambiar_contrasena TINYINT UNSIGNED NOT NULL DEFAULT 1,
     ultimo_acceso_en DATETIME(6) NULL,
     creado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
@@ -1313,13 +1360,23 @@ CREATE TABLE usuarios (
     UNIQUE KEY uk_usuarios_correo (correo),
     KEY idx_usuarios_rol_activo (rol_id, activo),
     KEY idx_usuarios_area_activo (area_id, activo),
+    KEY idx_usuarios_estado_cuenta (estado_cuenta, creado_en),
     CONSTRAINT fk_usuarios_rol FOREIGN KEY (rol_id)
         REFERENCES roles (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
     CONSTRAINT fk_usuarios_area FOREIGN KEY (area_id)
         REFERENCES areas (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
     CONSTRAINT chk_usuarios_activo CHECK (activo IN (0, 1)),
+    CONSTRAINT fk_usuarios_revisor FOREIGN KEY (revisado_por_id)
+        REFERENCES usuarios (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
     CONSTRAINT chk_usuarios_debe_cambiar
-        CHECK (debe_cambiar_contrasena IN (0, 1))
+        CHECK (debe_cambiar_contrasena IN (0, 1)),
+    CONSTRAINT chk_usuarios_estado_cuenta
+        CHECK (estado_cuenta IN ('PENDIENTE', 'ACTIVA', 'RECHAZADA')),
+    CONSTRAINT chk_usuarios_origen
+        CHECK (origen_registro IN ('ADMINISTRADOR', 'AUTO_REGISTRO')),
+    CONSTRAINT chk_usuarios_motivo_rechazo
+        CHECK (estado_cuenta <> 'RECHAZADA'
+               OR (motivo_rechazo IS NOT NULL AND CHAR_LENGTH(TRIM(motivo_rechazo)) > 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ------------------------------------------------------------
@@ -2031,6 +2088,45 @@ CREATE TABLE secuencias_codigo_reserva (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ------------------------------------------------------------
+-- 25. adjuntos_solicitud (HU-26)
+-- ------------------------------------------------------------
+CREATE TABLE adjuntos_solicitud (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    solicitud_id BIGINT UNSIGNED NOT NULL,
+    autor_id BIGINT UNSIGNED NOT NULL,
+    nombre_original VARCHAR(255) NOT NULL,
+    proveedor_almacenamiento VARCHAR(20) NOT NULL DEFAULT 'SUPABASE',
+    clave_objeto VARCHAR(500) NOT NULL,
+    tipo_mime VARCHAR(100) NOT NULL,
+    tamano_bytes INT UNSIGNED NOT NULL,
+    hash_sha256 CHAR(64) NOT NULL,
+    creado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    eliminado_en DATETIME(6) NULL,
+    eliminado_por_id BIGINT UNSIGNED NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_adjuntos_clave_objeto (clave_objeto),
+    KEY idx_adjuntos_solicitud (solicitud_id, eliminado_en, creado_en),
+    KEY idx_adjuntos_autor (autor_id),
+    CONSTRAINT fk_adjuntos_solicitud FOREIGN KEY (solicitud_id)
+        REFERENCES solicitudes (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_adjuntos_autor FOREIGN KEY (autor_id)
+        REFERENCES usuarios (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_adjuntos_eliminado_por FOREIGN KEY (eliminado_por_id)
+        REFERENCES usuarios (id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT chk_adjuntos_nombre
+        CHECK (CHAR_LENGTH(TRIM(nombre_original)) > 0),
+    CONSTRAINT chk_adjuntos_proveedor
+        CHECK (proveedor_almacenamiento IN ('SUPABASE', 'LOCAL')),
+    CONSTRAINT chk_adjuntos_tipo
+        CHECK (tipo_mime IN ('image/jpeg', 'image/png', 'application/pdf')),
+    CONSTRAINT chk_adjuntos_tamano
+        CHECK (tamano_bytes BETWEEN 1 AND 5242880),
+    CONSTRAINT chk_adjuntos_eliminacion
+        CHECK ((eliminado_en IS NULL AND eliminado_por_id IS NULL)
+               OR (eliminado_en IS NOT NULL AND eliminado_por_id IS NOT NULL))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ------------------------------------------------------------
 -- Vistas de reservas
 -- ------------------------------------------------------------
 CREATE OR REPLACE VIEW vw_reservas_detalle AS
@@ -2213,7 +2309,9 @@ LIMIT 20;
 
 ### 16.4. Checklist de aceptación del diseño
 
-- [ ] El DDL crea las 24 tablas y 4 vistas sin errores en MySQL 8.4.13.
+- [ ] El DDL crea las 25 tablas y 4 vistas sin errores en MySQL 8.4.13.
+- [ ] `chk_usuarios_estado_cuenta` y `chk_usuarios_motivo_rechazo` rechazan estados inválidos y rechazos sin motivo.
+- [ ] `chk_adjuntos_tipo` y `chk_adjuntos_tamano` rechazan tipos no permitidos y archivos de más de 5 MB.
 - [ ] Los `CHECK` de reservas rechazan franjas invertidas, textos vacíos y capacidades no positivas.
 - [ ] `uk_reservas_franja_exacta` impide duplicar una franja exacta en el mismo estado.
 - [ ] `EXPLAIN` de disponibilidad usa un índice de `reservas` que cubra `espacio_id` y `fecha` (`idx_reservas_disponibilidad` o `uk_reservas_franja_exacta`).
@@ -2271,7 +2369,9 @@ ORDER BY hora_inicio;
 | Catálogo real de áreas y categorías de la universidad. | Pendiente de validación con el negocio. | Producto / administrador. |
 | Valores definitivos de SLA por prioridad/categoría. | Los seeds son ejemplos demostrativos. | Administrador. |
 | Política de retención de `auditoria_eventos`. | Sin definir; evaluar a partir del volumen real. | Infraestructura / backend. |
-| Implementación de adjuntos. | Fuera de alcance hasta que una HU lo apruebe. | Producto. |
+| Implementación de adjuntos. | Resuelto: HU-26, tabla 6.25 y Supabase Storage (ADR-0004). | — |
+| Dominio institucional permitido en el auto-registro. | Pendiente: definir el valor de la variable de entorno. | Producto / administrador. |
+| Límites definitivos de evidencias (5 archivos, 5 MB, JPG/PNG/PDF). | Valores iniciales del equipo; ajustables. | Producto. |
 | Multi-rol por usuario. | Se asume un rol por usuario (HU-15). | Producto. |
 | Nombres visibles definitivos de los estados. | Editables por administración (HU-17). | Administrador. |
 | Catálogo real de espacios, pabellones y horarios de la universidad. | Pendiente de validación con el negocio. | Producto / administrador. |

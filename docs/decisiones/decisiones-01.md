@@ -9,11 +9,14 @@
 | D2 | Registro de usuarios | **Auto-registro con aprobación del administrador.** El estudiante se registra con correo institucional; la cuenta queda pendiente hasta que el admin la aprueba o rechaza. | Rol por defecto Estudiante, sin correo de verificación, estado de cuenta pendiente, pantalla de registro y bandeja de aprobación para el admin. |
 | D3 | Recuperación de contraseña | **Cambio de contraseña + restablecimiento por el administrador.** Sin recuperación por correo. | El admin genera una contraseña temporal y el usuario debe cambiarla al ingresar. El usuario puede cambiar su contraseña desde el perfil. |
 
-## Pendiente antes de implementar
+## Pendientes resueltos
 
-- [ ] Crear las HU nuevas: evidencias (EP-02), auto-registro y aprobación (EP-01/EP-05), restablecimiento por admin (EP-05).
-- [ ] Actualizar `DISENIO-BD.md`: tabla `adjuntos_solicitud` y estado de cuenta pendiente en `usuarios`.
-- [ ] Elegir el almacén en la nube para evidencias (S3, Cloudinary o Supabase) y registrarlo en `ADR-0004`.
-- [ ] Reflejar D1–D3 en `ALCANCE-POR-ROL.html`.
+- [x] HU nuevas: [HU-26](../requirements/user-stories/EP-02-Solicitudes/HU-26-Adjuntar-Evidencias-Solicitud.md) evidencias, [HU-27](../requirements/user-stories/EP-01-Autenticacion/HU-27-Registrarse-En-El-Sistema.md) auto-registro, [HU-28](../requirements/user-stories/EP-05-Administracion/HU-28-Aprobar-Rechazar-Cuentas.md) aprobar cuentas y [HU-29](../requirements/user-stories/EP-05-Administracion/HU-29-Restablecer-Contrasena-Usuario.md) restablecer contraseña. Requisitos RF-31 a RF-34 y RNF-19.
+- [x] [`DISENIO-BD.md`](../../DISENIO-BD.md): tabla `adjuntos_solicitud` (6.25), estado de cuenta en `usuarios` (6.2) y reglas 7.9 y 7.10.
+- [x] Almacén de evidencias: **Supabase Storage**, bucket privado por entorno ([ADR-0004](../adr/ADR-0004-despliegue-persistencia.md), punto 10).
+- [x] [`ALCANCE-POR-ROL.html`](../ALCANCE-POR-ROL.html) actualizado.
 
-Mientras falten las HU, la IA no debe implementar estas funciones: la regla es no inventar requisitos.
+## Aún por definir
+
+- Dominio institucional permitido en el auto-registro (variable de entorno).
+- Crear la cuenta y los proyectos de Supabase (staging y producción) cuando llegue la Fase 5.

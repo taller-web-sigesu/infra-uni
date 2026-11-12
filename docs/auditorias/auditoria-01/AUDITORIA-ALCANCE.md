@@ -82,9 +82,9 @@ El prototipo HTML/CSS/JS no se reimplementa en estos repositorios. Solo hay que 
 | MVP end-to-end: login → solicitud → MySQL → consulta → cambio de estado | `[PLAN]` | Es el objetivo de la Fase II; falta implementarlo y demostrarlo. |
 | Datos de prueba y seeds | `[PLAN]` | La migración V3 es opcional; definir fixtures deterministas para pruebas y demo. |
 | Informe parcial de la semana 10 | `[FALTA]` | Es un entregable académico de Fase II; no está en el plan técnico. |
-| Decisión: evidencias en la solicitud | `[HECHO]` | Se implementa completo con almacenamiento en la nube (D1, [decisiones 01](../../decisiones/decisiones-01.md)). Faltan HU, tabla en BD y elegir el almacén. |
-| Decisión: auto-registro de usuarios | `[HECHO]` | Auto-registro con aprobación del administrador, sin correo (D2, [decisiones 01](../../decisiones/decisiones-01.md)). Falta la HU. |
-| Decisión: recuperación de contraseña | `[HECHO]` | Cambio de contraseña y restablecimiento por el administrador, sin correo (D3, [decisiones 01](../../decisiones/decisiones-01.md)). Falta la HU. |
+| Decisión: evidencias en la solicitud | `[HECHO]` | Se implementa completo con almacenamiento en la nube (D1, [decisiones 01](../../decisiones/decisiones-01.md)). HU-26, tabla `adjuntos_solicitud` y Supabase Storage (ADR-0004). |
+| Decisión: auto-registro de usuarios | `[HECHO]` | Auto-registro con aprobación del administrador, sin correo (D2, [decisiones 01](../../decisiones/decisiones-01.md)). HU-27 y HU-28. |
+| Decisión: recuperación de contraseña | `[HECHO]` | Cambio de contraseña y restablecimiento por el administrador, sin correo (D3, [decisiones 01](../../decisiones/decisiones-01.md)). HU-29. |
 
 ## 5. Fase III — APIs, cloud, DevOps y seguridad
 

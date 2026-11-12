@@ -82,9 +82,9 @@ El prototipo HTML/CSS/JS no se reimplementa en estos repositorios. Solo hay que 
 | MVP end-to-end: login → solicitud → MySQL → consulta → cambio de estado | `[PLAN]` | Es el objetivo de la Fase II; falta implementarlo y demostrarlo. |
 | Datos de prueba y seeds | `[PLAN]` | La migración V3 es opcional; definir fixtures deterministas para pruebas y demo. |
 | Informe parcial de la semana 10 | `[FALTA]` | Es un entregable académico de Fase II; no está en el plan técnico. |
-| Decisión: evidencias en la solicitud | `[DECISIÓN]` | Ver sección 7.1. Si es obligatorio, agregar Fase 1.5 (backend) y UI en Fase 2. |
-| Decisión: auto-registro de usuarios | `[DECISIÓN]` | Ver sección 7.2. Si se exige, agregar endpoint y pantalla en Fase 1 y 2. |
-| Decisión: recuperación de contraseña | `[DECISIÓN]` | Ver sección 7.3. Si se exige, agregar proveedor de correo y flujo completo. |
+| Decisión: evidencias en la solicitud | `[HECHO]` | Se implementa completo con almacenamiento en la nube (D1, [decisiones 01](../../decisiones/decisiones-01.md)). HU-26, tabla `adjuntos_solicitud` y Supabase Storage (ADR-0004). |
+| Decisión: auto-registro de usuarios | `[HECHO]` | Auto-registro con aprobación del administrador, sin correo (D2, [decisiones 01](../../decisiones/decisiones-01.md)). HU-27 y HU-28. |
+| Decisión: recuperación de contraseña | `[HECHO]` | Cambio de contraseña y restablecimiento por el administrador, sin correo (D3, [decisiones 01](../../decisiones/decisiones-01.md)). HU-29. |
 
 ## 5. Fase III — APIs, cloud, DevOps y seguridad
 
@@ -197,6 +197,7 @@ El prototipo HTML/CSS/JS no se reimplementa en estos repositorios. Solo hay que 
 | Informe parcial de Fase II | `[FALTA]` | Entregable académico de la semana 10; no está en el plan técnico. |
 
 ## 7. Decisiones que bloquean la Fase I–III
+> **Actualización 2026-11-11:** 7.1, 7.2 y 7.3 están resueltas en [decisiones 01](../../decisiones/decisiones-01.md). Siguen abiertas 7.4 y 7.5.
 
 ### 7.1. Evidencias en la solicitud
 

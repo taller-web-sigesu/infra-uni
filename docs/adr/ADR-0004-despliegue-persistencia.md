@@ -1,9 +1,9 @@
 # ADR-0004: Despliegue y persistencia en la nube
 
 - **Estado:** Propuesto
-- **Fecha:** 2026-11-04
+- **Fecha:** 2026-11-04 (actualizado 2026-11-11: almacenamiento de evidencias)
 - **Decisores:** Equipo del proyecto Gestal
-- **Documentos relacionados:** [ARCHITECTURE.md](../ARCHITECTURE.md), [DOCKER.md](../DOCKER.md), [DISENIO-BD.md](../../DISENIO-BD.md)
+- **Documentos relacionados:** [ARCHITECTURE.md](../ARCHITECTURE.md), [DOCKER.md](../DOCKER.md), [DISENIO-BD.md](../../DISENIO-BD.md), [Decisiones 01](../decisiones/decisiones-01.md)
 
 ## Contexto
 
@@ -19,7 +19,8 @@ La arquitectura propone Vercel para el frontend y Render para el backend, pero n
 6. **Secretos:** variables de entorno del proveedor o GitHub Secrets; nunca en el repositorio, la imagen ni los logs.
 7. **Backups:** backup automático diario con retención mínima de 7 días; prueba de restauración documentada antes de la sustentación.
 8. **Rollback:** conservar la imagen anterior del backend y el deployment anterior del frontend; el rollback no revierte migraciones destructivas.
-9. **TLS:** HTTPS obligatorio entre navegador, backend y MySQL gestionado.
+9. **TLS:** HTTPS obligatorio entre navegador, backend, MySQL gestionado y almacenamiento de archivos.
+10. **Almacenamiento de evidencias (HU-26):** Supabase Storage con un bucket privado `evidencias-solicitudes` por entorno (staging y producción). El backend sube, borra y genera URLs firmadas de 5 minutos con la clave de servicio, guardada como secreto del proveedor; el frontend nunca la recibe. En `local` se usa un volumen Docker detrás de la misma interfaz de almacenamiento. MySQL guarda solo los metadatos (`adjuntos_solicitud`).
 
 ## Alternativas consideradas
 
@@ -29,6 +30,8 @@ La arquitectura propone Vercel para el frontend y Render para el backend, pero n
 | Un único VPS con todo | Más operación y un solo punto de fallo. |
 | Microservicios | Contradice el monolito modular y no hay necesidad medida. |
 | Sin staging | Impide validar migraciones y smoke tests antes de producción. |
+| Archivos como `BLOB` en MySQL | Aumenta el tamaño de la base y de los backups, y encarece las consultas. |
+| Amazon S3 o Cloudinary para evidencias | Válidos; se elige Supabase Storage por su plan gratuito, URLs firmadas nativas y configuración simple. |
 
 ## Consecuencias
 
@@ -36,3 +39,4 @@ La arquitectura propone Vercel para el frontend y Render para el backend, pero n
 - Hay que definir el dominio, CORS y cookies `Secure` por entorno.
 - La ventana de despliegue debe coordinar migraciones y rollback.
 - Los backups deben probarse, no solo configurarse.
+- Supabase es un proveedor más: requiere cuenta, proyecto por entorno y rotación de la clave de servicio. Los archivos no entran en los backups de MySQL; su retención se documenta en el runbook de la Fase 4.

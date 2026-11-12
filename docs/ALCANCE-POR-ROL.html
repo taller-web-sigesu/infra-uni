@@ -30,7 +30,7 @@
 <blockquote>
 <p><strong>Propósito:</strong> resumen no técnico de qué se implementará, qué queda fuera y qué está pendiente, agrupado por rol.<br>
 <strong>Fuentes:</strong> <code>docs/ARCHITECTURE.md</code>, <code>docs/EPICS.md</code>, <code>docs/requirements/</code>, <code>docs/adr/</code>, <code>DISENIO-BD.md</code> y <code>docs/superpowers/plans/2026-11-04-ingenieria-pendiente.md</code>.<br>
-<strong>Última actualización:</strong> 2026-11-04.</p>
+<strong>Última actualización:</strong> 2026-11-11 (decisiones 01: evidencias, auto-registro y restablecimiento de contraseña).</p>
 </blockquote>
 <h2 id="1-punto-de-partida">1. Punto de partida </h2>
 <p>Hoy el producto es un <strong>esqueleto</strong>: pantalla de estado en React, <code>GET /api/v1/status</code>, datasource/JPA/Actuator y Compose local. No hay flujos funcionales por rol ni esquema de base de datos creado. Todo lo listado abajo está <strong>por implementar</strong>, salvo lo marcado como existente.</p>
@@ -46,7 +46,15 @@
 <tbody>
 <tr>
 <td>Iniciar y cerrar sesión con correo y contraseña.</td>
-<td>Recuperación de contraseña.</td>
+<td>Recuperación de contraseña por correo (la cubre el restablecimiento por el administrador).</td>
+</tr>
+<tr>
+<td>Registrarse con correo institucional; la cuenta queda pendiente hasta que el administrador la aprueba.</td>
+<td>Verificación de la cuenta por correo.</td>
+</tr>
+<tr>
+<td>Cambiar la propia contraseña desde el perfil.</td>
+<td>—</td>
 </tr>
 <tr>
 <td>Ver solo las opciones y datos permitidos por su rol.</td>
@@ -73,7 +81,11 @@
 <tbody>
 <tr>
 <td>Registrar solicitud con categoría, descripción y ubicación, con validación de campos.</td>
-<td>Adjuntar evidencias, fotos o archivos.</td>
+<td>Evidencias de otros formatos (video, audio) o de más de 5 MB.</td>
+</tr>
+<tr>
+<td>Adjuntar, ver y eliminar evidencias (JPG, PNG o PDF) en sus solicitudes abiertas.</td>
+<td>—</td>
 </tr>
 <tr>
 <td>Ver el listado de sus solicitudes con código, categoría, estado, prioridad y fecha.</td>
@@ -172,6 +184,10 @@
 <td>Aprobar cualquier reserva y ver el dashboard y la auditoría.</td>
 <td>Retención definitiva de la auditoría.</td>
 </tr>
+<tr>
+<td>Aprobar o rechazar con motivo las cuentas auto-registradas y restablecer contraseñas con una temporal.</td>
+<td>Registro con correos de otros dominios distintos de <code>@unmsm.edu.pe</code>.</td>
+</tr>
 </tbody>
 </table>
 <h3 id="26-sistema-e-ingeniería-comportamiento-automático">2.6 Sistema e ingeniería (comportamiento automático) </h3>
@@ -215,8 +231,7 @@
 <li>Chatbot con IA o LLM dentro del producto (sí se registra el uso de IA en el desarrollo).</li>
 <li>Mensajería externa: correo, SMS o chat.</li>
 <li>API Gateway y microservicios.</li>
-<li>Notificaciones internas y recuperación de contraseña.</li>
-<li>Adjuntos o evidencias de solicitud.</li>
+<li>Notificaciones internas y recuperación de contraseña por correo.</li>
 <li>Reservas recurrentes o periódicas.</li>
 <li>Varios roles por usuario.</li>
 <li>Datos personales reales: los datos de demostración son ficticios.</li>

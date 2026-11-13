@@ -37,12 +37,18 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?allowPublicKeyRetrieval=true&sslMode=DISABLED
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      # Solo para local: carga cuentas ficticias (contraseña Demo2026!) y usa un secreto JWT de desarrollo.
+      APP_FLYWAY_LOCATIONS: classpath:db/migration,classpath:db/demo
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-desarrollo-local-no-usar-fuera-de-local-2026}
+      APP_STORAGE_PROVIDER: local
+      APP_STORAGE_LOCAL_DIR: /data/evidencias
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
       - ../backend-uni:/workspace
       - backend_target:/workspace/target
       - maven_cache:/home/app/.m2
+      - evidencias_data:/data/evidencias
     networks:
       - app_net
       - db_internal
@@ -94,4 +100,5 @@ volumes:
   mysql_data:
   backend_target:
   maven_cache:
+  evidencias_data:
   frontend_node_modules:

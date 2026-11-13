@@ -5,7 +5,7 @@
 > **Base de datos:** `uni_services`.
 > **Estado:** diseño propuesto, pendiente de implementación con Flyway en `backend-uni`.
 > **Fuentes:** `docs/requirements/user-stories/HU-01` a `HU-29`, `docs/requirements/Gestal_Requisitos_Funcionales.md`, `docs/requirements/Gestal_Requisitos_No_Funcionales.md`, `docs/EPICS.md`, `docs/ARCHITECTURE.md`, `compose.yaml` y `docs/DOCKER.md`.
-> **Última actualización:** 2026-11-11 (evidencias, auto-registro y restablecimiento de contraseña, [decisiones 01](docs/decisiones/decisiones-01.md)); 2026-11-12 (rol `DOCENTE`, [decisiones 02](docs/decisiones/decisiones-02.md)).
+> **Última actualización:** 2026-11-11 (evidencias, auto-registro y restablecimiento de contraseña, [decisiones 01](docs/decisiones/decisiones-01.md)); 2026-11-12 (rol `DOCENTE`, [decisiones 02](docs/decisiones/decisiones-02.md)); 2026-11-13 (sincronizado con las migraciones de `backend-uni`: D-28 a D-31).
 
 ---
 
@@ -87,6 +87,10 @@ El diseño prioriza:
 | D-25 | El restablecimiento por administrador reutiliza `hash_contrasena`, `debe_cambiar_contrasena = 1` y la revocación de `sesiones_usuario`; no hay tabla de tokens. | HU-29 y decisión D3: sin recuperación por correo. | Tokens de recuperación enviados por correo. |
 | D-26 | Evidencias: metadatos en `adjuntos_solicitud` y archivo en un bucket privado de Supabase Storage; la fila se borra lógicamente (`eliminado_en`) y el objeto se borra del bucket. | HU-26 y RNF-19: no inflar MySQL ni los backups y conservar la trazabilidad. | Guardar el archivo como `BLOB` en MySQL. |
 | D-27 | Rol `DOCENTE` con los mismos permisos que `ESTUDIANTE` (solicitante), sin área y creado solo por el administrador. | Decisiones 02: el docente registra solicitudes y reservas igual que el estudiante; distinguirlo sirve para reportes. | Política de reservas o prioridad propias por rol. |
+| D-28 | Tabla `tokens_refresh_consumidos` con el SHA-256 de cada refresh rotado hasta su vencimiento; se purgan cada hora los vencidos. | ADR-0002: presentar un refresh ya rotado debe revocar la sesión que lo emitió. | Detectar el reúso solo por `sesiones_usuario.hash_token`, que no distingue un token rotado de uno inventado. |
+| D-29 | `uk_reservas_franja_exacta` se reemplaza por la columna generada `franja_activa` (1 si `PENDIENTE` o `CONFIRMADA`, `NULL` si no) y `uk_reservas_franja_activa (espacio_id, fecha, hora_inicio, franja_activa)`. | La clave con `estado_id` impedía cancelar o rechazar por segunda vez una misma franja que se volvió a reservar. Los `NULL` no chocan en un índice único. | Mantener `estado_id` en la clave. |
+| D-30 | `vw_reservas_operativas` compara `fecha + hora` con `CONVERT_TZ(UTC_TIMESTAMP(6), '+00:00', '-05:00')`. | Fechas y horas de reserva son calendario de Lima (UTC−5 sin horario de verano); compararlas con UTC adelantaba cinco horas los estados `EN_CURSO` y `FINALIZADA`. | Guardar las reservas como instantes UTC. |
+| D-31 | Vista `vw_ultimo_responsable (solicitud_id, tecnico_id, tecnico)` con la asignación más reciente de cada solicitud. | Detalle, dashboard y CSV atribuyen las solicitudes cerradas o rechazadas al último técnico, aunque su asignación ya no esté vigente. | Conservar `responsable_actual_id` tras cerrar la solicitud. |
 
 ---
 
@@ -564,15 +568,16 @@ Entidad central de EP-07. Una reserva ocupa una franja de un espacio y pasa por 
 | `motivo_rechazo` | `TEXT` | Sí | `NULL` | — | Obligatorio al rechazar. |
 | `cancelada_por_id` | `BIGINT UNSIGNED` | Sí | `NULL` | FK, IDX | Usuario que cancela. |
 | `cancelada_en` | `DATETIME(6)` | Sí | `NULL` | — | Fecha de cancelación. |
-| `version_fila` | `INT UNSIGNED` | No | `0` | — | Bloqueo optimista JPA. |
+| `version_fila` | `INT UNSIGNED` | No | `0` | — | Bloqueo optimista. |
+| `franja_activa` | `TINYINT UNSIGNED` | Sí | Generada | UK compuesto | `1` si la reserva está `PENDIENTE` o `CONFIRMADA`; `NULL` en otro caso (D-29). |
 | `creado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | IDX | Registro. |
 | `actualizado_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Última modificación. |
 
-**Índices:** `uk_reservas_codigo`, `uk_reservas_franja_exacta (espacio_id, fecha, hora_inicio, estado_id)`, `idx_reservas_disponibilidad (espacio_id, fecha, estado_id, hora_inicio, hora_fin)`, `idx_reservas_solicitante (solicitante_id, fecha)`, `idx_reservas_estado_fecha (estado_id, fecha)`, `idx_reservas_aprobador (aprobada_por_id, aprobada_en)`.
+**Índices:** `uk_reservas_codigo`, `uk_reservas_franja_activa (espacio_id, fecha, hora_inicio, franja_activa)`, `idx_reservas_disponibilidad (espacio_id, fecha, estado_id, hora_inicio, hora_fin)`, `idx_reservas_solicitante (solicitante_id, fecha)`, `idx_reservas_estado_fecha (estado_id, fecha)`, `idx_reservas_aprobador (aprobada_por_id, aprobada_en)`.
 
 **Checks:** `chk_reservas_horas CHECK (hora_fin > hora_inicio)`, `chk_reservas_motivo CHECK (CHAR_LENGTH(TRIM(motivo)) > 0)`, `chk_reservas_asistentes CHECK (num_asistentes IS NULL OR num_asistentes > 0)`, `chk_reservas_aprobacion CHECK ((aprobada_por_id IS NULL AND aprobada_en IS NULL) OR (aprobada_por_id IS NOT NULL AND aprobada_en IS NOT NULL))`.
 
-> **Solapamiento:** MySQL no ofrece exclusion constraints. La aplicación bloquea la fila del espacio con `SELECT … FOR UPDATE`, consulta las reservas activas que se cruzan y recién entonces inserta o aprueba. `uk_reservas_franja_exacta` es la segunda barrera contra duplicados exactos en el mismo estado; incluye `estado_id` para no bloquear una franja que quedó cancelada o rechazada.
+> **Solapamiento:** MySQL no ofrece exclusion constraints. La aplicación bloquea la fila del espacio con `SELECT … FOR UPDATE`, consulta las reservas activas que se cruzan y recién entonces inserta o aprueba. `uk_reservas_franja_activa` es la segunda barrera contra duplicados exactos entre reservas activas; `franja_activa` es `NULL` en las canceladas o rechazadas, así que no bloquean la franja (D-29).
 
 ### 6.23. `historial_estados_reserva`
 
@@ -620,6 +625,20 @@ Metadatos de las evidencias de una solicitud (HU-26). El archivo vive fuera de M
 | `eliminado_por_id` | `BIGINT UNSIGNED` | Sí | `NULL` | FK | Usuario que la eliminó. |
 
 **Índices:** `uk_adjuntos_clave_objeto`, `idx_adjuntos_solicitud (solicitud_id, eliminado_en, creado_en)`, `idx_adjuntos_autor (autor_id)`.
+
+### 6.26. `tokens_refresh_consumidos`
+
+Hashes de refresh ya rotados (D-28). Si se presenta uno de ellos, el backend revoca la sesión que lo emitió. Las filas vencidas se purgan cada hora.
+
+| Columna | Tipo | Nulo | Default | Clave/Índice | Descripción |
+| --- | --- | --- | --- | --- | --- |
+| `id` | `BIGINT UNSIGNED` | No | `AUTO_INCREMENT` | PK | Identificador. |
+| `sesion_id` | `BIGINT UNSIGNED` | No | — | FK, IDX | Sesión que emitió el token rotado. |
+| `hash_token` | `CHAR(64)` | No | — | UK | SHA-256 del refresh consumido; nunca el token en claro. |
+| `consumido_en` | `DATETIME(6)` | No | `CURRENT_TIMESTAMP(6)` | — | Momento de la rotación. |
+| `expira_en` | `DATETIME(6)` | No | — | IDX | Vencimiento absoluto de la sesión; tras él la fila se purga. |
+
+**Índices:** `uk_tokens_consumidos_hash`, `idx_tokens_consumidos_sesion (sesion_id)`, `idx_tokens_consumidos_expira (expira_en)`.
 
 ---
 
@@ -737,7 +756,7 @@ Reglas:
 
 - `RECHAZADA` y `CANCELADA` son terminales: no admiten nuevas transiciones.
 - No puede haber solapamiento para un mismo `espacio_id` + `fecha` entre reservas `PENDIENTE` o `CONFIRMADA`. Hay conflicto cuando `nueva.hora_inicio < existente.hora_fin AND nueva.hora_fin > existente.hora_inicio`.
-- La validación se ejecuta dentro de una transacción: `SELECT id FROM espacios WHERE id = ? FOR UPDATE`, luego la consulta de solapamiento y finalmente el `INSERT` o la aprobación. `uk_reservas_franja_exacta` es la segunda barrera. Incluye `estado_id` para no bloquear una franja liberada por cancelación o rechazo.
+- La validación se ejecuta dentro de una transacción: `SELECT id FROM espacios WHERE id = ? FOR UPDATE`, luego la consulta de solapamiento y finalmente el `INSERT` o la aprobación. `uk_reservas_franja_activa` es la segunda barrera y solo cuenta reservas `PENDIENTE` o `CONFIRMADA`, así que una franja liberada por cancelación o rechazo se puede volver a reservar y cancelar.
 - Duración, anticipación, horario y límite diario se toman de la `politicas_reserva` activa. La fecha pasada se valida en servicio porque un `CHECK` de MySQL no puede usar `CURRENT_DATE`.
 - `num_asistentes`, si se informa, debe ser menor o igual a `espacios.capacidad`.
 - Al aprobar se revalida el solapamiento. Un aprobador no puede aprobar su propia reserva (segregación de funciones).
@@ -797,7 +816,7 @@ Reglas:
 | `idx_espacios_pabellon_activo` | `espacios` | `pabellon, activo` | Filtro por pabellón. |
 | `uk_horarios_espacio_dia` | `horarios_espacio` | `espacio_id, dia_semana` | Un horario por día y espacio. |
 | `uk_reservas_codigo` | `reservas` | `codigo` | Código único de reserva. |
-| `uk_reservas_franja_exacta` | `reservas` | `espacio_id, fecha, hora_inicio, estado_id` | Bloquea duplicados exactos en el mismo estado. |
+| `uk_reservas_franja_activa` | `reservas` | `espacio_id, fecha, hora_inicio, franja_activa` | Bloquea duplicados exactos entre reservas activas. |
 | `idx_reservas_disponibilidad` | `reservas` | `espacio_id, fecha, estado_id, hora_inicio, hora_fin` | Disponibilidad y detección de solapamiento. |
 | `idx_reservas_solicitante` | `reservas` | `solicitante_id, fecha` | “Mis reservas” paginado. |
 | `idx_reservas_estado_fecha` | `reservas` | `estado_id, fecha` | Bandeja de pendientes y agenda. |
@@ -831,9 +850,9 @@ WHERE espacio_id = :espacio_id
 LIMIT 1;
 ```
 
-`idx_reservas_disponibilidad` cubre el filtro por espacio, fecha y estado y permite resolver el solapamiento sin escanear la tabla. En tablas pequeñas MySQL puede elegir `uk_reservas_franja_exacta`, que también cubre `espacio_id` y `fecha`; ambos aparecen en `possible_keys`. Con volumen real, revisar `EXPLAIN` y, si hace falta, forzar `USE INDEX (idx_reservas_disponibilidad)`. Evitar `YEAR(fecha)` o `DATE(fecha)` en los filtros: aplican una función sobre la columna e impiden el uso del índice.
+`idx_reservas_disponibilidad` cubre el filtro por espacio, fecha y estado y permite resolver el solapamiento sin escanear la tabla. En tablas pequeñas MySQL puede elegir `uk_reservas_franja_activa`, que también cubre `espacio_id` y `fecha`; ambos aparecen en `possible_keys`. Con volumen real, revisar `EXPLAIN` y, si hace falta, forzar `USE INDEX (idx_reservas_disponibilidad)`. Evitar `YEAR(fecha)` o `DATE(fecha)` en los filtros: aplican una función sobre la columna e impiden el uso del índice.
 
-**Concurrencia:** la validación se ejecuta dentro de una transacción con `SELECT id FROM espacios WHERE id = :espacio_id FOR UPDATE`; así dos solicitudes concurrentes para el mismo espacio se serializan. `uk_reservas_franja_exacta` evita además el duplicado exacto en el mismo estado.
+**Concurrencia:** la validación se ejecuta dentro de una transacción con `SELECT id FROM espacios WHERE id = :espacio_id FOR UPDATE`; así dos solicitudes concurrentes para el mismo espacio se serializan. `uk_reservas_franja_activa` evita además el duplicado exacto entre reservas activas.
 
 ---
 
@@ -958,7 +977,7 @@ LEFT JOIN usuarios apr ON apr.id = r.aprobada_por_id;
 
 ### 9.4. `vw_reservas_operativas`
 
-Deriva el estado operativo sin persistirlo. Las reservas no confirmadas conservan su estado almacenado.
+Deriva el estado operativo sin persistirlo. Las reservas no confirmadas conservan su estado almacenado. `fecha` y las horas son calendario de Lima, por eso se comparan con la hora actual convertida a UTC−5 (D-30).
 
 ```sql
 CREATE OR REPLACE VIEW vw_reservas_operativas AS
@@ -973,12 +992,29 @@ SELECT
     er.codigo AS estado_codigo,
     CASE
         WHEN er.codigo <> 'CONFIRMADA' THEN er.codigo
-        WHEN TIMESTAMP(r.fecha, r.hora_fin) < UTC_TIMESTAMP(6) THEN 'FINALIZADA'
-        WHEN TIMESTAMP(r.fecha, r.hora_inicio) <= UTC_TIMESTAMP(6) THEN 'EN_CURSO'
+        WHEN TIMESTAMP(r.fecha, r.hora_fin) <= CONVERT_TZ(UTC_TIMESTAMP(6), '+00:00', '-05:00') THEN 'FINALIZADA'
+        WHEN TIMESTAMP(r.fecha, r.hora_inicio) <= CONVERT_TZ(UTC_TIMESTAMP(6), '+00:00', '-05:00') THEN 'EN_CURSO'
         ELSE 'PROXIMA'
     END AS estado_operativo
 FROM reservas r
 JOIN estados_reserva er ON er.id = r.estado_id;
+```
+
+### 9.5. `vw_ultimo_responsable`
+
+Último técnico asignado a cada solicitud, vigente o no (D-31). Detalle, dashboard y CSV la usan para atribuir las solicitudes terminales.
+
+```sql
+CREATE OR REPLACE VIEW vw_ultimo_responsable AS
+SELECT a.solicitud_id, a.tecnico_id, u.nombre_completo AS tecnico
+FROM asignaciones a
+JOIN usuarios u ON u.id = a.tecnico_id
+WHERE a.id = (
+    SELECT a2.id FROM asignaciones a2
+    WHERE a2.solicitud_id = a.solicitud_id
+    ORDER BY a2.asignada_en DESC, a2.id DESC
+    LIMIT 1
+);
 ```
 
 ---
@@ -1398,6 +1434,23 @@ CREATE TABLE sesiones_usuario (
     KEY idx_sesiones_usuario (usuario_id, revocada_en),
     CONSTRAINT fk_sesiones_usuario FOREIGN KEY (usuario_id)
         REFERENCES usuarios (id) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ------------------------------------------------------------
+-- 4.1. tokens_refresh_consumidos (D-28)
+-- ------------------------------------------------------------
+CREATE TABLE tokens_refresh_consumidos (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    sesion_id BIGINT UNSIGNED NOT NULL,
+    hash_token CHAR(64) NOT NULL,
+    consumido_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    expira_en DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_tokens_consumidos_hash (hash_token),
+    KEY idx_tokens_consumidos_sesion (sesion_id),
+    KEY idx_tokens_consumidos_expira (expira_en),
+    CONSTRAINT fk_tokens_consumidos_sesion FOREIGN KEY (sesion_id)
+        REFERENCES sesiones_usuario (id) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ------------------------------------------------------------
@@ -2018,12 +2071,15 @@ CREATE TABLE reservas (
     cancelada_por_id BIGINT UNSIGNED NULL,
     cancelada_en DATETIME(6) NULL,
     version_fila INT UNSIGNED NOT NULL DEFAULT 0,
+    franja_activa TINYINT UNSIGNED GENERATED ALWAYS AS (
+        CASE WHEN estado_id IN (1, 2) THEN 1 ELSE NULL END
+    ) STORED,
     creado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
     actualizado_en DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6)
         ON UPDATE CURRENT_TIMESTAMP(6),
     PRIMARY KEY (id),
     UNIQUE KEY uk_reservas_codigo (codigo),
-    UNIQUE KEY uk_reservas_franja_exacta (espacio_id, fecha, hora_inicio, estado_id),
+    UNIQUE KEY uk_reservas_franja_activa (espacio_id, fecha, hora_inicio, franja_activa),
     KEY idx_reservas_disponibilidad
         (espacio_id, fecha, estado_id, hora_inicio, hora_fin),
     KEY idx_reservas_solicitante (solicitante_id, fecha),
@@ -2178,12 +2234,24 @@ SELECT
     er.codigo AS estado_codigo,
     CASE
         WHEN er.codigo <> 'CONFIRMADA' THEN er.codigo
-        WHEN TIMESTAMP(r.fecha, r.hora_fin) < UTC_TIMESTAMP(6) THEN 'FINALIZADA'
-        WHEN TIMESTAMP(r.fecha, r.hora_inicio) <= UTC_TIMESTAMP(6) THEN 'EN_CURSO'
+        WHEN TIMESTAMP(r.fecha, r.hora_fin) <= CONVERT_TZ(UTC_TIMESTAMP(6), '+00:00', '-05:00') THEN 'FINALIZADA'
+        WHEN TIMESTAMP(r.fecha, r.hora_inicio) <= CONVERT_TZ(UTC_TIMESTAMP(6), '+00:00', '-05:00') THEN 'EN_CURSO'
         ELSE 'PROXIMA'
     END AS estado_operativo
 FROM reservas r
 JOIN estados_reserva er ON er.id = r.estado_id;
+
+-- Último responsable de cada solicitud (D-31)
+CREATE OR REPLACE VIEW vw_ultimo_responsable AS
+SELECT a.solicitud_id, a.tecnico_id, u.nombre_completo AS tecnico
+FROM asignaciones a
+JOIN usuarios u ON u.id = a.tecnico_id
+WHERE a.id = (
+    SELECT a2.id FROM asignaciones a2
+    WHERE a2.solicitud_id = a.solicitud_id
+    ORDER BY a2.asignada_en DESC, a2.id DESC
+    LIMIT 1
+);
 
 -- ------------------------------------------------------------
 -- Datos semilla de reservas (catálogos y ambientes de demostración)
@@ -2311,12 +2379,12 @@ LIMIT 20;
 
 ### 16.4. Checklist de aceptación del diseño
 
-- [ ] El DDL crea las 25 tablas y 4 vistas sin errores en MySQL 8.4.13.
+- [ ] El DDL crea las 26 tablas y 5 vistas sin errores en MySQL 8.4.13.
 - [ ] `chk_usuarios_estado_cuenta` y `chk_usuarios_motivo_rechazo` rechazan estados inválidos y rechazos sin motivo.
 - [ ] `chk_adjuntos_tipo` y `chk_adjuntos_tamano` rechazan tipos no permitidos y archivos de más de 5 MB.
 - [ ] Los `CHECK` de reservas rechazan franjas invertidas, textos vacíos y capacidades no positivas.
-- [ ] `uk_reservas_franja_exacta` impide duplicar una franja exacta en el mismo estado.
-- [ ] `EXPLAIN` de disponibilidad usa un índice de `reservas` que cubra `espacio_id` y `fecha` (`idx_reservas_disponibilidad` o `uk_reservas_franja_exacta`).
+- [ ] `uk_reservas_franja_activa` impide duplicar una franja exacta entre reservas activas y permite repetirla si la anterior se canceló o rechazó.
+- [ ] `EXPLAIN` de disponibilidad usa un índice de `reservas` que cubra `espacio_id` y `fecha` (`idx_reservas_disponibilidad` o `uk_reservas_franja_activa`).
 - [ ] Los seeds cargan tipos de espacio, estados de reserva, espacios, horarios y política.
 - [ ] Los `CHECK` rechazan calificaciones fuera de rango, políticas SLA inválidas y textos vacíos.
 - [ ] `uk_asignaciones_activa` impide dos asignaciones activas.
@@ -2336,7 +2404,7 @@ INSERT INTO reservas
 VALUES
     ('RES-2026-999999', 1, 1, 1, '2026-11-10', '12:00:00', '11:00:00', 'Prueba inválida');
 
--- Debe fallar: duplicado exacto de franja.
+-- Debe fallar: duplicado exacto de franja entre reservas activas.
 INSERT INTO reservas
     (codigo, espacio_id, solicitante_id, estado_id, fecha, hora_inicio, hora_fin, motivo)
 VALUES

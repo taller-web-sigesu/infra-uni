@@ -95,6 +95,7 @@ Todas usan la contraseña `Demo2026!`:
 - **Ramas protegidas:** `main` en los tres repos y `production` en el backend, con PR y checks requeridos.
 - **Aprobación de producción:** environment `production` con revisores `kuki236` y `LuisibrosGD`.
 - **Deploy de producción validado:** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43582054889
+- **Smoke de staging validado:** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43582997332
 
 ## Releases
 

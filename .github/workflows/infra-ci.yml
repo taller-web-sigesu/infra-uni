@@ -65,4 +65,4 @@ jobs:
       - name: Revisar enlaces Markdown
         uses: lycheeverse/lychee-action@v2
         with:
-          args: --no-progress --max-concurrency 4 --accept 200,204,301,302,403,429 './**/*.md'
+          args: --no-progress --max-concurrency 4 --accept 200,204,301,302,403,429 --exclude 'localhost|127\.0\.0\.1' './**/*.md'

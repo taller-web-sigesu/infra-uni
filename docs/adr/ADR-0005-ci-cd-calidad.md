@@ -1,7 +1,7 @@
 # ADR-0005: CI/CD y puertas de calidad
 
-- **Estado:** Propuesto
-- **Fecha:** 2026-11-04
+- **Estado:** Aceptado
+- **Fecha:** 2026-11-04 (aceptado 2026-11-14)
 - **Decisores:** Equipo del proyecto Gestal
 - **Requisitos afectados:** RNF-14
 - **Documentos relacionados:** [ARCHITECTURE.md](../ARCHITECTURE.md)
@@ -37,3 +37,13 @@ Los tres repositorios no tienen workflows de integración continua. La arquitect
 - Testcontainers requiere Docker en el runner.
 - Los tiempos de CI aumentan con integración, SAST y E2E; se aceptan por la calidad exigida.
 - La protección de `main` y la revisión por otro integrante son obligatorias.
+
+## Resultado de la implementación (2026-11-14)
+
+- **Frontend:** `ci.yml` con lint, Vitest, build y Playwright; deploy automático de staging y producción desde Vercel.
+- **Backend:** `backend-ci.yml` con OpenAPI, `mvn verify` y Testcontainers, imagen, smoke, CodeQL y revisión de dependencias.
+- **Infraestructura:** `infra-ci.yml` con `docker compose config`, variables, scripts, secretos y enlaces.
+- **Ramas:** `main` protegida en los tres repos con PR y checks requeridos.
+- **Smoke de API:** workflow contra staging para health, login y estado.
+- **Despliegue:** staging desde `main`; frontend de producción desde la rama `production`.
+- **Pendiente de la decisión:** DAST con OWASP ZAP y pruebas de carga quedan para la siguiente etapa de calidad.

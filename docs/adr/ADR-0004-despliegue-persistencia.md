@@ -1,7 +1,7 @@
 # ADR-0004: Despliegue y persistencia en la nube
 
-- **Estado:** Propuesto
-- **Fecha:** 2026-11-04 (actualizado 2026-11-11: almacenamiento de evidencias)
+- **Estado:** Aceptado
+- **Fecha:** 2026-11-04 (aceptado 2026-11-14; actualizado 2026-11-11: almacenamiento de evidencias)
 - **Decisores:** Equipo del proyecto Gestal
 - **Documentos relacionados:** [ARCHITECTURE.md](../ARCHITECTURE.md), [DOCKER.md](../DOCKER.md), [DISENIO-BD.md](../../DISENIO-BD.md), [Decisiones 01](../decisiones/decisiones-01.md)
 
@@ -13,7 +13,7 @@ La arquitectura propone Vercel para el frontend y Render para el backend, pero n
 
 1. **Frontend:** Vercel, build estático de Vite, variables de entorno por entorno y dominio con HTTPS.
 2. **Backend:** Render con imagen Docker de producción; healthcheck en `/actuator/health`; variables de entorno y secretos del proveedor.
-3. **Base de datos:** MySQL gestionado compatible (Aiven, Railway o Clever Cloud; se elige por costo, backup y latencia). No se publica el puerto de MySQL a Internet.
+3. **Base de datos:** MySQL gestionado en **Railway** (elegido por costo, backup y latencia). No se publica el puerto de MySQL a Internet; el backend usa el proxy TCP con credenciales por entorno.
 4. **Entornos:** `staging` y `production` separados, con bases de datos y credenciales distintas. `local` sigue con Docker Compose.
 5. **Migraciones:** Flyway se ejecuta al desplegar; las migraciones son versionadas y no destructivas. Los cambios de esquema se prueban primero en staging.
 6. **Secretos:** variables de entorno del proveedor o GitHub Secrets; nunca en el repositorio, la imagen ni los logs.
@@ -40,3 +40,11 @@ La arquitectura propone Vercel para el frontend y Render para el backend, pero n
 - La ventana de despliegue debe coordinar migraciones y rollback.
 - Los backups deben probarse, no solo configurarse.
 - Supabase es un proveedor más: requiere cuenta, proyecto por entorno y rotación de la clave de servicio. Los archivos no entran en los backups de MySQL; su retención se documenta en el runbook de la Fase 4.
+
+## Resultado de la implementación (2026-11-14)
+
+- **Staging:** Vercel (`frontend-uni-tdk7.vercel.app`), Render (`uniservice-backend-staging.onrender.com`) y MySQL en Railway.
+- **Producción:** Vercel (`frontend-uni-wx9m.vercel.app`), Render (`uniservice-backend-prod.onrender.com`) y una instancia MySQL separada en Railway.
+- **Frontend:** proxy same-origin `/api/*` hacia Render; la cookie `HttpOnly` funciona entre frontend y backend.
+- **Base de datos:** Flyway aplica solo `classpath:db/migration` en producción; sin datos demo.
+- **Evidencias:** almacenamiento local temporal en Render para este Release Candidate. La integración con Supabase Storage queda como evolución acordada, sin bloquear la disponibilidad del sistema.

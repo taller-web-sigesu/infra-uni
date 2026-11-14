@@ -82,15 +82,19 @@ Todas usan la contraseña `Demo2026!`:
 | Contrato OpenAPI | Validado y comparado en CI |
 | CodeQL | En verde |
 | Dependencias | Revisión en PR |
-| Smoke de API staging | Health, login y estado en verde (`staging-smoke`) |
+| Smoke de API staging | Health, login, estado y flujo real de solicitud en verde (`staging-smoke`) |
+| Deploy de producción | Hook de Render, espera de health y smoke en verde (`deploy-production`) |
 
 ## CI/CD
 
 - **Frontend staging:** GitHub Actions `ci` + deploy automático de Vercel al pushear a `main`.
 - **Frontend producción:** deploy automático al pushear a la rama `production`; la promoción se hace mergeando `main` → `production`.
-- **Backend:** GitHub Actions `backend-ci` + auto-deploy de Render al pushear a `main`.
+- **Backend staging:** GitHub Actions `backend-ci` + auto-deploy de Render al pushear a `main`.
+- **Backend producción:** rama `production` protegida, Render con `Auto-Deploy: Off` y workflow `deploy-production` con environment `production` (aprobación de revisores), Deploy Hook de Render y smoke automático.
 - **Infraestructura:** workflow `infra-ci` con validación de compose, variables y scripts.
-- **Ramas `main`:** protegidas en los tres repos con PR y checks requeridos.
+- **Ramas protegidas:** `main` en los tres repos y `production` en el backend, con PR y checks requeridos.
+- **Aprobación de producción:** environment `production` con revisores `kuki236` y `LuisibrosGD`.
+- **Deploy de producción validado:** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43582054889
 
 ## Releases
 

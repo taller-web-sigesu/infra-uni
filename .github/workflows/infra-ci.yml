@@ -57,12 +57,12 @@ jobs:
     name: Enlaces de documentación
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # Los enlaces externos pueden fallar por red o por rate limiting; no bloquean el PR.
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
       - name: Revisar enlaces Markdown
         uses: lycheeverse/lychee-action@v2
         with:
+          # Los enlaces externos pueden fallar por red o rate limiting; el reporte es informativo.
+          fail: false
           args: --no-progress --max-concurrency 4 --accept 200,204,301,302,403,429 --exclude 'localhost|127\.0\.0\.1' './**/*.md'

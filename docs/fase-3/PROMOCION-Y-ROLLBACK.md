@@ -16,6 +16,11 @@
 
 Cada entorno tiene su rama y su base de datos. El frontend de producción usa la rama `production` porque su `vercel.json` apunta al backend de producción.
 
+| Entorno | Frontend | Backend |
+| --- | --- | --- |
+| Staging | https://frontend-uni-tdk7.vercel.app | https://uniservice-backend-staging.onrender.com |
+| Producción | https://frontend-uni-wx9m.vercel.app | https://uniservice-backend-prod.onrender.com |
+
 El backend de producción **no tiene auto-deploy**: Render está configurado con la rama `production` y `Auto-Deploy: Off`. El único disparador es el workflow `deploy-production.yml`, que exige aprobación del environment `production` antes de llamar al Deploy Hook.
 
 ## 2. Promoción a producción

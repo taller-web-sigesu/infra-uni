@@ -82,6 +82,7 @@ Todas usan la contraseña `Demo2026!`:
 | Contrato OpenAPI | Validado y comparado en CI |
 | CodeQL | En verde |
 | Dependencias | Revisión en PR |
+| Smoke de API staging | Health, login y estado en verde (`staging-smoke`) |
 
 ## CI/CD
 
@@ -94,11 +95,14 @@ Todas usan la contraseña `Demo2026!`:
 ## Releases
 
 - Tag `v1.0.0` en los tres repos.
+- **Release Candidate `v1.0.0-rc.1`:**
+  - https://github.com/taller-web-sigesu/frontend-uni/releases/tag/v1.0.0-rc.1
+  - https://github.com/taller-web-sigesu/backend-uni/releases/tag/v1.0.0-rc.1
+  - https://github.com/taller-web-sigesu/infra-uni/releases/tag/v1.0.0-rc.1
 
 ## Pendiente
 
 - Configurar almacenamiento persistente de evidencias (Supabase o disco).
 - Ejecutar ZAP baseline y revisar logs de staging.
-- Crear el tag/release del Release Candidate.
 - Definir el dominio definitivo, si se solicita.
 - Documentar la rotación de secretos y backups.

@@ -15,6 +15,24 @@
 | Swagger | https://uniservice-backend-staging.onrender.com/swagger-ui.html |
 | OpenAPI | https://uniservice-backend-staging.onrender.com/v3/api-docs |
 
+## Producción
+
+| Servicio | URL |
+| --- | --- |
+| Frontend | https://frontend-uni-wx9m.vercel.app |
+| Backend | https://uniservice-backend-prod.onrender.com |
+| Salud del backend | https://uniservice-backend-prod.onrender.com/actuator/health |
+| API a través del frontend | https://frontend-uni-wx9m.vercel.app/api/v1/status |
+| Swagger | https://uniservice-backend-prod.onrender.com/swagger-ui.html |
+| OpenAPI | https://uniservice-backend-prod.onrender.com/v3/api-docs |
+
+- **Vercel:** proyecto `frontend-uni-wx9m`, repo `taller-web-sigesu/frontend-uni`, rama de producción `production`.
+- **Render:** servicio `uniservice-backend-prod`, repo `taller-web-sigesu/backend-uni`, branch `main`.
+- **MySQL:** instancia de producción en Railway.
+- **Admin inicial:** `admin@uniservice.app`; la contraseña se entrega por separado y el sistema obliga a cambiarla en el primer ingreso.
+- **Datos demo:** no se cargan en producción (`APP_FLYWAY_LOCATIONS=classpath:db/migration`).
+- **Evidencias:** almacenamiento local temporal en Render; persistencia pendiente.
+
 ## Infraestructura
 
 | Componente | Proveedor | Detalle |
@@ -67,19 +85,20 @@ Todas usan la contraseña `Demo2026!`:
 
 ## CI/CD
 
-- **Frontend:** GitHub Actions `ci` + deploy automático de Vercel al pushear a `main`.
+- **Frontend staging:** GitHub Actions `ci` + deploy automático de Vercel al pushear a `main`.
+- **Frontend producción:** deploy automático al pushear a la rama `production`; la promoción se hace mergeando `main` → `production`.
 - **Backend:** GitHub Actions `backend-ci` + auto-deploy de Render al pushear a `main`.
 - **Infraestructura:** workflow `infra-ci` con validación de compose, variables y scripts.
-- **Rama `main`:** protegida en frontend y backend con PR y checks requeridos.
+- **Ramas `main`:** protegidas en los tres repos con PR y checks requeridos.
 
 ## Releases
 
 - Tag `v1.0.0` en los tres repos.
 
-## Pendiente para producción
+## Pendiente
 
-- Crear base, backend y frontend de producción separados.
-- Configurar promoción manual staging → producción.
-- Configurar almacenamiento persistente de evidencias.
+- Configurar almacenamiento persistente de evidencias (Supabase o disco).
 - Ejecutar ZAP baseline y revisar logs de staging.
 - Crear el tag/release del Release Candidate.
+- Definir el dominio definitivo, si se solicita.
+- Documentar la rotación de secretos y backups.

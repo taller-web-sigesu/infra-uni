@@ -2,11 +2,13 @@
 
 > **Propósito:** resumen no técnico de qué se implementará, qué queda fuera y qué está pendiente, agrupado por rol.
 > **Fuentes:** `docs/ARCHITECTURE.md`, `docs/EPICS.md`, `docs/requirements/`, `docs/adr/`, `DISENIO-BD.md` y `docs/superpowers/plans/2026-11-04-ingenieria-pendiente.md`.
-> **Última actualización:** 2026-11-12 (decisiones 01 y 02).
+> **Última actualización:** 2026-11-14 (Fase III cerrada y desplegada).
+>
+> **Estado:** implementado y desplegado en staging y producción. El detalle de la entrega está en [`docs/fase-3/INFORME-FASE-III.md`](fase-3/INFORME-FASE-III.md).
 
 ## 1. Punto de partida
 
-Hoy el producto es un **esqueleto**: pantalla de estado en React, `GET /api/v1/status`, datasource/JPA/Actuator y Compose local. No hay flujos funcionales por rol ni esquema de base de datos creado. Todo lo listado abajo está **por implementar**, salvo lo marcado como existente.
+El producto ya no es un esqueleto: las HU-01 a HU-29 están implementadas, con API REST documentada, base MySQL versionada con Flyway, autenticación, autorización, pruebas automatizadas y dos despliegues (staging y producción). Lo que sigue abajo describe el alcance por rol y lo que quedó fuera o pendiente.
 
 ## 2. Alcance por rol
 
@@ -66,12 +68,14 @@ El docente tiene los mismos permisos que el estudiante. Su cuenta la crea el adm
 
 | Se implementará | Pendiente de verificación o decisión |
 | --- | --- |
-| Código único y estado inicial por solicitud y por reserva. | Arranque real con Docker (no verificado). |
-| Máquina de estados; bloqueo de transiciones no permitidas. | Primera instalación de dependencias del frontend. |
-| Cálculo de SLA, solicitudes vencidas y próximas a vencer. | Workflows de CI/CD (aún inexistentes). |
-| Auditoría con campo, valor anterior, valor nuevo y actor; historial visible. | Observabilidad (logs, métricas, trazas, alertas). |
-| Prevención de reservas solapadas incluso con peticiones concurrentes. | Staging, producción, backups y rollback. |
-| Migraciones versionadas y pruebas unitarias e integración. | Aprobación formal de ADR-0002 a ADR-0005. |
+| Código único y estado inicial por solicitud y por reserva. | Verificado en local y en los despliegues. |
+| Máquina de estados; bloqueo de transiciones no permitidas. | Verificado con pruebas de integración. |
+| Cálculo de SLA, solicitudes vencidas y próximas a vencer. | Implementado; falta definir la regla exacta de vencimiento con producto. |
+| Auditoría con campo, valor anterior, valor nuevo y actor; historial visible. | Implementado; retención definitiva pendiente de decisión. |
+| Prevención de reservas solapadas incluso con peticiones concurrentes. | Implementado y probado con Testcontainers. |
+| Migraciones versionadas y pruebas unitarias e integración. | Implementado; CI en verde. |
+| CI/CD, staging, producción y rollback. | Implementado; backups automáticos quedan para Fase IV. |
+| Aprobación formal de ADR. | ADR-0004 y ADR-0005 aceptados; ADR-0001 a ADR-0003 siguen propuestos. |
 
 ## 3. Fuera de alcance del producto (no se implementará)
 
@@ -103,6 +107,7 @@ No son funcionalidades faltantes: el mecanismo está diseñado y se implementa i
 
 ## 5. Notas de estado
 
-- Los ADR-0001 a ADR-0005 figuran como **Propuesto**; el plan de ingeniería los trata como aprobados. Falta formalizar la aprobación.
-- La reserva de ambientes (EP-07) está aprobada como alcance, pero depende de autenticación y solicitudes, que aún no existen.
-- El entorno local no se ha ejecutado: el motor Docker devolvió permiso denegado y el registro npm no fue accesible.
+- ADR-0004 (despliegue y persistencia) y ADR-0005 (CI/CD) están aceptados. ADR-0001, ADR-0002 y ADR-0003 siguen propuestos, aunque sus mecanismos están implementados.
+- La reserva de ambientes (EP-07) está implementada y probada.
+- El entorno local se ejecutó con Docker Compose; staging y producción están desplegados y verificados. Ver [`docs/fase-3/EVIDENCIAS.md`](fase-3/EVIDENCIAS.md).
+- Quedan pendientes de Fase IV: backups automáticos, restauración, alertas, retención centralizada de logs y pruebas de carga/DAST.

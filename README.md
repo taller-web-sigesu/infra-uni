@@ -3,6 +3,37 @@
 Docker Compose reúne `frontend`, `backend` y `mysql` bajo el proyecto
 `universidad-sm`.
 
+## Despliegues
+
+Hay **dos despliegues separados**:
+
+| Entorno | Frontend | Backend | Rama frontend | Rama backend |
+| --- | --- | --- | --- | --- |
+| Staging | https://frontend-uni-tdk7.vercel.app | https://uniservice-backend-staging.onrender.com | `main` | `main` |
+| Producción | https://frontend-uni-wx9m.vercel.app | https://uniservice-backend-prod.onrender.com | `production` | `production` |
+
+Producción usa una base MySQL distinta y no tiene auto-deploy en Render: se despliega con el workflow `deploy-production.yml`, que exige aprobación del environment `production` y ejecuta un smoke.
+
+### Usuarios de prueba (staging)
+
+Todas las cuentas usan la contraseña **`Demo2026!`**:
+
+| Correo | Rol |
+| --- | --- |
+| `admin.demo@universidad.example` | Administrador |
+| `supervisor.ti.demo@universidad.example` | Supervisor TI |
+| `supervisor.mant.demo@universidad.example` | Supervisor Mantenimiento |
+| `supervisor.bib.demo@universidad.example` | Supervisor Biblioteca |
+| `tecnico.ti.demo@universidad.example` | Técnico TI |
+| `tecnica.ti.demo@universidad.example` | Técnica TI |
+| `tecnico.mant.demo@universidad.example` | Técnico Mantenimiento |
+| `ana.demo@universidad.example` | Estudiante |
+| `pedro.demo@universidad.example` | Docente |
+
+Producción no carga cuentas demo. Su administrador inicial es `admin@uniservice.app` y la contraseña se entrega por el canal privado.
+
+El informe completo está en [`docs/fase-3/INFORME-FASE-III.md`](docs/fase-3/INFORME-FASE-III.md).
+
 ## Iniciar
 
 1. Clona los tres repositorios en carpetas hermanas y abre Docker Desktop.
@@ -30,8 +61,9 @@ ni el secreto JWT del Compose fuera de tu computadora.
 
 Las evidencias adjuntas a las solicitudes se guardan en el volumen
 `evidencias_data`. Se conservan al reiniciar y se borran solo con
-`docker compose down -v`. En staging y producción se guardan en Supabase
-Storage (ADR-0004).
+`docker compose down -v`. En staging y producción se usa almacenamiento local
+temporal en Render (`/tmp/evidencias`); la integración con Supabase Storage
+queda como evolución acordada (ADR-0004).
 
 ## Trabajo en equipo
 

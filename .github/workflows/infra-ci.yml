@@ -1,0 +1,68 @@
+name: infra-ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: infra-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Compose, variables y scripts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validar docker compose
+        run: docker compose --env-file .env.example -f compose.yaml config --quiet
+
+      - name: Validar variables obligatorias
+        run: |
+          for key in MYSQL_DATABASE MYSQL_USER MYSQL_PASSWORD MYSQL_ROOT_PASSWORD; do
+            if ! grep -q "^${key}=" .env.example; then
+              echo "Falta ${key} en .env.example"
+              exit 1
+            fi
+          done
+
+      - name: Validar scripts de inicio y detención
+        run: |
+          test -f iniciar.bat
+          test -f detener.bat
+          grep -q "docker compose" iniciar.bat
+          grep -q "docker compose" detener.bat
+
+      - name: Escanear secretos versionados
+        run: |
+          if git ls-files | grep -E '(^|/)\.env$'; then
+            echo "No se debe versionar un archivo .env real."
+            exit 1
+          fi
+          if git grep -nE 'BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY' -- .; then
+            echo "Hay una clave privada versionada."
+            exit 1
+          fi
+          if git grep -nE '(ghp|gho|github_pat)_[A-Za-z0-9_]{20,}' -- .; then
+            echo "Hay un token de GitHub versionado."
+            exit 1
+          fi
+
+  links:
+    name: Enlaces de documentación
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Los enlaces externos pueden fallar por red o por rate limiting; no bloquean el PR.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Revisar enlaces Markdown
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --no-progress --max-concurrency 4 --accept 200,204,301,302,403,429 './**/*.md'

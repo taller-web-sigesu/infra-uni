@@ -2,7 +2,7 @@
 
 - **Proyecto:** UniService / Universidad Actúa
 - **Fecha:** 14/11/2026
-- **Producto entregado:** Release Candidate `v1.0.0-rc.1`
+- **Producto entregado:** Release Candidate `v1.0.0-rc.2`
 - **Repositorios:**
   - [frontend-uni](https://github.com/taller-web-sigesu/frontend-uni)
   - [backend-uni](https://github.com/taller-web-sigesu/backend-uni)
@@ -22,9 +22,9 @@ Los dos entornos tienen bases de datos separadas, variables de entorno propias y
 
 El Release Candidate está publicado como **pre-release** en los tres repositorios:
 
-- https://github.com/taller-web-sigesu/frontend-uni/releases/tag/v1.0.0-rc.1
-- https://github.com/taller-web-sigesu/backend-uni/releases/tag/v1.0.0-rc.1
-- https://github.com/taller-web-sigesu/infra-uni/releases/tag/v1.0.0-rc.1
+- https://github.com/taller-web-sigesu/frontend-uni/releases/tag/v1.0.0-rc.2
+- https://github.com/taller-web-sigesu/backend-uni/releases/tag/v1.0.0-rc.2
+- https://github.com/taller-web-sigesu/infra-uni/releases/tag/v1.0.0-rc.2
 
 ## 2. Los dos despliegues
 
@@ -134,7 +134,7 @@ El smoke real de staging verifica: login de estudiante, login de supervisor, sel
 | Seguridad | Cumplido | Auth, roles, validación, secretos, OWASP y cabeceras |
 | Pruebas | Cumplido | Unitarias, integración, E2E y smoke |
 | Evidencias de automatización | Cumplido | `EVIDENCIAS.md`, runs de GitHub Actions y reportes |
-| Release Candidate | Cumplido | `v1.0.0-rc.1` publicado y desplegado |
+| Release Candidate | Cumplido | `v1.0.0-rc.2` publicado y desplegado en producción |
 
 ## 4. Pipeline CI/CD y ramas
 
@@ -158,10 +158,10 @@ El smoke real de staging verifica: login de estudiante, login de supervisor, sel
 
 ### 4.3 Evidencia de ejecución
 
-- **Deploy de producción en verde:** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43582054889
-- **Smoke real de staging en verde:** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43582997332
-- **CI del frontend:** workflow `ci` en https://github.com/taller-web-sigesu/frontend-uni/actions
-- **CI de infraestructura:** workflow `infra-ci` en https://github.com/taller-web-sigesu/infra-uni/actions
+- **Deploy de producción en verde (RC.2):** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43963809965
+- **Smoke real de staging en verde (RC.2):** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43964310054
+- **CI de producción del frontend (RC.2):** https://github.com/taller-web-sigesu/frontend-uni/actions/runs/43963845675
+- **CI de infraestructura:** https://github.com/taller-web-sigesu/infra-uni/actions/runs/43959633229
 
 ## 5. Usuarios de prueba
 
@@ -210,13 +210,14 @@ Todas las cuentas usan la contraseña **`Demo2026!`** y están activas sin cambi
 
 ## 7. Limitaciones y trabajo futuro
 
-1. **Evidencias persistentes:** staging y producción usan almacenamiento local temporal en Render (`/tmp/evidencias`). La integración con Supabase Storage queda como evolución acordada; no bloquea la entrega.
-2. **DAST:** no se ejecutó OWASP ZAP. CodeQL, revisión de dependencias, pruebas de autorización y smoke sí están en verde.
-3. **OWASP:** el mapeo está completo; quedan mejoras opcionales (threat model formal, restricción de Swagger/Actuator en producción y alertas centralizadas).
-4. **Arranque en frío:** Render free puede tardar 30–60 segundos en despertar. El frontend ya muestra el login a los 8 segundos aunque la restauración de sesión siga esperando.
-5. **Revisión independiente:** la protección de ramas exige revisión, pero en la recta final se usó el bypass de administrador para integraciones del equipo. La revisión independiente de las PRs queda como tarea de gobierno del equipo.
-6. **Docker del frontend de producción:** el frontend productivo se construye en Vercel. Docker está cubierto para desarrollo (frontend y backend) y para el backend de producción.
+1. **Staging desactualizado:** el backend de staging aún responde `403` al supervisor en `/api/v1/admin/catalogs/priorities`; producción sí está actualizada y los E2E reales de HU-16/HU-19 pasan contra el Compose local. Se requiere redeploy de staging para la demo.
+2. **Evidencias persistentes:** staging y producción usan almacenamiento local temporal en Render (`/tmp/evidencias`). La integración con Supabase Storage queda como evolución acordada; no bloquea la entrega.
+3. **DAST:** no se ejecutó OWASP ZAP. CodeQL, revisión de dependencias, pruebas de autorización y smoke sí están en verde.
+4. **OWASP:** el mapeo está completo; quedan mejoras opcionales (CSP, threat model formal, restricción de Swagger/Actuator en producción y alertas centralizadas).
+5. **Arranque en frío:** Render free puede tardar 30–60 segundos en despertar. El frontend ya muestra el login a los 8 segundos aunque la restauración de sesión siga esperando.
+6. **Revisión independiente:** la protección de ramas exige revisión, pero en la recta final se usó el bypass de administrador para integraciones del equipo. La revisión independiente de las PRs queda como tarea de gobierno del equipo.
+7. **Docker del frontend de producción:** el frontend productivo se construye en Vercel. Docker está cubierto para desarrollo (frontend y backend) y para el backend de producción.
 
 ## 8. Conclusión
 
-La Fase III queda cumplida: hay dos despliegues reales y separados, API REST documentada y probada, seguridad implementada, CI/CD con aprobación y smoke, pruebas automatizadas y un Release Candidate publicado. Las limitaciones restantes son de evolución (almacenamiento persistente de evidencias, DAST y endurecimiento OWASP), no bloqueantes para la demostración.
+La Fase III queda cumplida: hay dos despliegues reales y separados, API REST documentada y probada, seguridad implementada, CI/CD con aprobación y smoke, pruebas automatizadas y el Release Candidate `v1.0.0-rc.2` publicado. Las limitaciones restantes son de evolución (redeploy de staging, almacenamiento persistente de evidencias, DAST y endurecimiento OWASP), no bloqueantes para la demostración en producción o en el Compose local.

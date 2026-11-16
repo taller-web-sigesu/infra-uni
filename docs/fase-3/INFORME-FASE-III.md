@@ -210,14 +210,13 @@ Todas las cuentas usan la contraseña **`Demo2026!`** y están activas sin cambi
 
 ## 7. Limitaciones y trabajo futuro
 
-1. **Staging desactualizado:** el backend de staging aún responde `403` al supervisor en `/api/v1/admin/catalogs/priorities`; producción sí está actualizada y los E2E reales de HU-16/HU-19 pasan contra el Compose local. Se requiere redeploy de staging para la demo.
-2. **Evidencias persistentes:** staging y producción usan almacenamiento local temporal en Render (`/tmp/evidencias`). La integración con Supabase Storage queda como evolución acordada; no bloquea la entrega.
-3. **DAST:** no se ejecutó OWASP ZAP. CodeQL, revisión de dependencias, pruebas de autorización y smoke sí están en verde.
-4. **OWASP:** el mapeo está completo; quedan mejoras opcionales (CSP, threat model formal, restricción de Swagger/Actuator en producción y alertas centralizadas).
-5. **Arranque en frío:** Render free puede tardar 30–60 segundos en despertar. El frontend ya muestra el login a los 8 segundos aunque la restauración de sesión siga esperando.
-6. **Revisión independiente:** la protección de ramas exige revisión, pero en la recta final se usó el bypass de administrador para integraciones del equipo. La revisión independiente de las PRs queda como tarea de gobierno del equipo.
-7. **Docker del frontend de producción:** el frontend productivo se construye en Vercel. Docker está cubierto para desarrollo (frontend y backend) y para el backend de producción.
+1. **Evidencias persistentes:** staging y producción usan almacenamiento local temporal en Render (`/tmp/evidencias`). La integración con Supabase Storage queda como evolución acordada; no bloquea la entrega.
+2. **DAST:** no se ejecutó OWASP ZAP. CodeQL, revisión de dependencias, pruebas de autorización y smoke sí están en verde.
+3. **OWASP:** el mapeo está completo; quedan mejoras opcionales (CSP, threat model formal, restricción de Swagger/Actuator en producción y alertas centralizadas).
+4. **Arranque en frío:** Render free puede tardar 30–60 segundos en despertar. El frontend ya muestra el login a los 8 segundos aunque la restauración de sesión siga esperando.
+5. **Revisión independiente:** la protección de ramas exige revisión, pero en la recta final se usó el bypass de administrador para integraciones del equipo. La revisión independiente de las PRs queda como tarea de gobierno del equipo.
+6. **Docker del frontend de producción:** el frontend productivo se construye en Vercel. Docker está cubierto para desarrollo (frontend y backend) y para el backend de producción.
 
 ## 8. Conclusión
 
-La Fase III queda cumplida: hay dos despliegues reales y separados, API REST documentada y probada, seguridad implementada, CI/CD con aprobación y smoke, pruebas automatizadas y el Release Candidate `v1.0.0-rc.2` publicado. Las limitaciones restantes son de evolución (redeploy de staging, almacenamiento persistente de evidencias, DAST y endurecimiento OWASP), no bloqueantes para la demostración en producción o en el Compose local.
+La Fase III queda cumplida: hay dos despliegues reales y separados, API REST documentada y probada, seguridad implementada, CI/CD con aprobación y smoke, pruebas automatizadas y el Release Candidate `v1.0.0-rc.2` publicado. Staging y producción están alineados al commit `b00e92b`; las limitaciones restantes son de evolución (almacenamiento persistente de evidencias, DAST y endurecimiento OWASP), no bloqueantes para la demostración.

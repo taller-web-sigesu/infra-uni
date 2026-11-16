@@ -14,7 +14,7 @@
 
 Staging se actualiza al integrar en `main`. Producción se promueve con `main` → `production` y exige aprobación del environment `production`; Render producción tiene `Auto-Deploy: Off`.
 
-> **Nota del RC.2:** producción está actualizada al commit `b00e92b` y el deploy/smoke pasó. El backend de staging aún no refleja el cambio de lectura de prioridades para el supervisor: responde `403` en `/api/v1/admin/catalogs/priorities`. El smoke de staging pasó, pero el redeploy de Render staging queda pendiente.
+> **Nota del RC.2:** staging se redesplegó manualmente al commit `b00e92b`; el catálogo de prioridades ya responde al supervisor. Producción también está en `b00e92b` y el deploy/smoke pasó.
 
 ## URLs de staging
 
@@ -60,7 +60,7 @@ Staging se actualiza al integrar en `main`. Producción se promueve con `main` �
 | Repo | Staging (commit verificado) | Producción (commit verificado) |
 | --- | --- | --- |
 | `frontend-uni` | `cb282cf` — `main` con RC.2 | `019baa0` — `production` con proxy a producción |
-| `backend-uni` | `b00e92b` — `main`; Render staging pendiente de redeploy | `b00e92b` — `production` desplegada y smoke OK |
+| `backend-uni` | `b00e92b` — `main`; redeploy manual verificado | `b00e92b` — `production` desplegada y smoke OK |
 | `infra-uni` | `main` — documentación del RC.2 | No aplica |
 
 La referencia estable de la entrega es el tag **`v1.0.0-rc.2`** en los tres repos:
@@ -89,9 +89,9 @@ La referencia estable de la entrega es el tag **`v1.0.0-rc.2`** en los tres repo
 | Smoke de staging | ✅ Health, login y flujo real de solicitud | [run 43964310054](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43964310054) |
 | Producción: backend | ✅ `health = UP`, `/api/v1/status = UP` | https://uniservice-backend-prod.onrender.com |
 | Producción: frontend/proxy | ✅ `/login = 200`, `/api/v1/status = UP` | https://frontend-uni-wx9m.vercel.app |
-| E2E reales nuevos | ✅ 2/2: HU-16 y HU-19 contra el Compose local | `E2E_API=real npx playwright test -g "HU-1[69]" --project=chromium` |
+| E2E reales nuevos | ✅ 2/2: HU-16 y HU-19 contra staging y Compose local | `E2E_API=real npx playwright test -g "HU-1[69]" --project=chromium` |
 
-**Limitación:** el backend de staging sigue en el deployment anterior y devuelve `403` al supervisor en `/api/v1/admin/catalogs/priorities`. Por eso los E2E reales nuevos se ejecutaron contra el Compose local, que sí tiene el código del RC.2. Producción sí está actualizada.
+**Verificación:** staging y producción quedaron alineados al commit `b00e92b`. El catálogo de prioridades responde `200` al supervisor en staging y los E2E reales de HU-16/HU-19 pasaron contra staging y contra el Compose local.
 
 ## Cuentas de demostración (staging)
 
@@ -117,7 +117,7 @@ Producción no carga cuentas demo. Su administrador inicial es `admin@uniservice
 | --- | --- |
 | Frontend unitarias | 284 pruebas; suites focalizadas en verde (la suite completa en Windows/Node 24 tiene fallos preexistentes de jsdom/MSW; CI usa Node 22) |
 | Frontend E2E simulado | 52 en verde, 2 omitidas por diseño |
-| Frontend E2E real | 24 de 24 en la pasada previa + **2 de 2** en HU-16/HU-19 contra el Compose local del RC.2 |
+| Frontend E2E real | 24 de 24 en la pasada previa + **2 de 2** en HU-16/HU-19 contra staging y Compose local |
 | Backend unitarias | 13 en verde |
 | Backend integración | 80 pruebas (incluye el nuevo caso de prioridades del supervisor) |
 | Contrato OpenAPI | Validado y comparado en CI |
@@ -151,7 +151,6 @@ Producción no carga cuentas demo. Su administrador inicial es `admin@uniservice
 
 ## Pendiente
 
-- **Redeploy de staging:** el backend de staging aún no refleja el cambio de lectura de prioridades para el supervisor (responde `403`); producción y el Compose local sí están actualizados.
 - Configurar almacenamiento persistente de evidencias (Supabase o disco).
 - Ejecutar OWASP ZAP baseline / DAST y revisar logs de staging.
 - Completar la revisión independiente de las PRs (en la recta final se usó bypass de administrador).

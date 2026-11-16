@@ -114,8 +114,8 @@ El smoke real de staging verifica: login de estudiante, login de supervisor, sel
 
 | Punto | Estado | Evidencia |
 | --- | --- | --- |
-| Pruebas unitarias | Cumplido | 274 pruebas de frontend y 13 de backend |
-| Pruebas de integración | Cumplido | 79 pruebas de backend con Testcontainers y MySQL |
+| Pruebas unitarias | Cumplido | 284 pruebas de frontend y 13 de backend |
+| Pruebas de integración | Cumplido | 80 pruebas de backend con Testcontainers y MySQL |
 | Automatización | Cumplido | CI, Playwright y smoke programado/manual |
 | Criterios de aceptación | Cumplido | `frontend-uni/docs/verificacion/matriz-hu.md`: HU-01 a HU-29 con unitarias y E2E |
 | Pruebas de API | Cumplido | Contrato, integración y smoke real de negocio |

@@ -96,11 +96,11 @@ Producción no carga cuentas demo. Su administrador inicial es `admin@uniservice
 
 | Suite | Resultado |
 | --- | --- |
-| Frontend unitarias | 274 en verde |
-| Frontend E2E simulado | 46 en verde, 2 omitidas por diseño |
-| Frontend E2E real | 24 de 24 en verde |
+| Frontend unitarias | 284 pruebas; suites focalizadas en verde (la suite completa en Windows/Node 24 tiene fallos preexistentes de jsdom/MSW; CI usa Node 22) |
+| Frontend E2E simulado | 52 en verde, 2 omitidas por diseño |
+| Frontend E2E real | 24 de 24 en la última pasada; los E2E nuevos de HU-16/HU-19 se repiten tras el despliegue |
 | Backend unitarias | 13 en verde |
-| Backend integración | 79 en verde |
+| Backend integración | 80 pruebas (incluye el nuevo caso de prioridades del supervisor) |
 | Contrato OpenAPI | Validado y comparado en CI |
 | CodeQL | En verde |
 | Dependencias | Revisión en PR |

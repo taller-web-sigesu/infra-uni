@@ -179,15 +179,18 @@ No ejecutado: pruebas de carga y DAST (Fase IV)
 | Dato | Resultado |
 |---|---|
 | **Fecha** | 2026-11-16 |
-| **Comando E2E** | `npm run test:e2e` |
-| **Resultado E2E** | **52 en verde y 2 omitidas** (proyectos `chromium` y `mobile`) |
+| **Comando E2E simulado** | `npm run test:e2e` |
+| **Resultado E2E simulado** | **52 en verde y 2 omitidas** (proyectos `chromium` y `mobile`) |
+| **Comando E2E real** | `E2E_API=real npx playwright test -g "HU-1[69]" --project=chromium` |
+| **Resultado E2E real** | **2 de 2 en verde** (`HU-16` y `HU-19`) contra el Compose local del RC.2 |
 | **Casos nuevos** | `administracion › HU-16…` y `solicitudes › HU-19…` |
 | **Reporte** | `frontend-uni/playwright-report/` |
 | **Trazas de fallo** | `frontend-uni/test-results/` |
 | **Unitarias afectadas** | **57 pruebas en verde** en 6 archivos: catálogos, gestión, dashboard, detalle y mocks |
 | **Lint / build** | `npm run lint` y `npm run build` en verde |
-| **No ejecutado** | `E2E_API=real` y `mvn -B verify`: requieren el Compose de `infra-uni`, Java 21 y Docker activos |
+| **Backend** | `mvn -B verify` en CI de `main` y en el deploy de producción del RC.2 |
+| **No ejecutado en host** | `mvn -B verify` local: requiere Java 21/Maven; sí se ejecutó en GitHub Actions |
 
-**Lectura correcta:** las pruebas nuevas se validaron contra la API simulada, que replica los contratos y permisos del backend. La pasada real se repite después del despliegue del cambio de prioridades.
+**Lectura correcta:** los E2E nuevos se validaron en simulado y en real contra el Compose local. El backend de staging aún no refleja el cambio de prioridades; producción sí está actualizada y el deploy/smoke pasó.
 
 > **Recordatorio:** el objetivo no es tener muchas pruebas, sino tener pruebas que puedan fallar por la razón correcta. Una prueba que no puede fallar no protege nada.

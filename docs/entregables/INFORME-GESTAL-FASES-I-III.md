@@ -1113,7 +1113,7 @@ El curso exige mantener un **registro de uso de IA** por cada utilización signi
 | Despliegue | ✅ | Staging y producción con URLs públicas; producción actualizada al `main` del RC.2. |
 | Pipeline CI/CD | ✅ | `deploy-production` con aprobación, Deploy Hook, health y smoke; `staging-smoke` manual/programado. |
 
-**Evidencia del cierre:** deploy de producción [run 43963809965](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43963809965), CI de producción del frontend [run 43963845675](https://github.com/taller-web-sigesu/frontend-uni/actions/runs/43963845675), smoke de staging [run 43964310054](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43964310054), redeploy manual de staging a `b00e92b` y E2E reales de HU-16/HU-19 **2 de 2** contra staging.
+**Evidencia del cierre:** deploy de producción [run 43963809965](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43963809965), CI de producción del frontend [run 43963845675](https://github.com/taller-web-sigesu/frontend-uni/actions/runs/43963845675), smoke de staging [run 43970286002](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43970286002), redeploy manual de staging a `b00e92b` y E2E reales de HU-16/HU-19 **2 de 2** contra staging.
 
 ### 17.2 API REST
 

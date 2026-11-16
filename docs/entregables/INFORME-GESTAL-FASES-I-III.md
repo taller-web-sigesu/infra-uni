@@ -1072,7 +1072,7 @@ El equipo completó la primera versión funcional con datos reales:
 
 • **Frontend (`frontend-uni`, rama `main`)**: aplicación React 19 + Vite con las pantallas de inicio de sesión, inicio por rol, listado, registro, detalle, bandeja del técnico, gestión de área, dashboard, reservas y administración, conectada a la API real mediante `fetch`, con manejo de estados de carga, vacío y error, y protección de rutas por rol.
 
-Flujo verificado de extremo a extremo: inicio de sesión, registro de solicitud, guardado en MySQL, consulta según el rol, asignación de responsable, ajuste de prioridad, inicio de atención, resolución y cierre; además, se verificaron las transiciones inválidas y el acceso a recursos ajenos (respuesta 404 fuera de alcance y 403 cuando falta permiso). HU-07 y HU-08 leen el catálogo de prioridades activas desde `GET /api/v1/admin/catalogs/priorities` (solo lectura para los roles autenticados) y lo usan en el filtro y en la asignación. La evidencia incluye E2E con Playwright (52 en verde y 2 omitidas en el build simulado; 24 de 24 en la pasada real previa y 2 de 2 en la verificación real de HU-16/HU-19 contra el Compose local), 284 pruebas unitarias de frontend (las suites de las áreas modificadas pasan en local; CI usa Node 22), 13 unitarias y 80 de integración de backend (el nuevo caso de prioridades se ejecuta con `mvn -B verify` y Docker/Java 21), la colección Postman, la matriz HU → prueba y el registro de QA. La estrategia y el prompt de pruebas se documentan en [`PROMPT-PRUEBAS.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/testing/PROMPT-PRUEBAS.md).
+Flujo verificado de extremo a extremo: inicio de sesión, registro de solicitud, guardado en MySQL, consulta según el rol, asignación de responsable, ajuste de prioridad, inicio de atención, resolución y cierre; además, se verificaron las transiciones inválidas y el acceso a recursos ajenos (respuesta 404 fuera de alcance y 403 cuando falta permiso). HU-07 y HU-08 leen el catálogo de prioridades activas desde `GET /api/v1/admin/catalogs/priorities` (solo lectura para los roles autenticados) y lo usan en el filtro y en la asignación. La evidencia incluye E2E con Playwright (52 en verde y 2 omitidas en el build simulado; 24 de 24 en la pasada real previa y 2 de 2 en la verificación real de HU-16/HU-19 contra staging y el Compose local), 284 pruebas unitarias de frontend (las suites de las áreas modificadas pasan en local; CI usa Node 22), 13 unitarias y 80 de integración de backend (el nuevo caso de prioridades se ejecuta con `mvn -B verify` y Docker/Java 21), la colección Postman, la matriz HU → prueba y el registro de QA. La estrategia y el prompt de pruebas se documentan en [`PROMPT-PRUEBAS.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/testing/PROMPT-PRUEBAS.md).
 
 ### 15.3 Fase III — APIs, nube, DevOps y seguridad
 
@@ -1113,7 +1113,7 @@ El curso exige mantener un **registro de uso de IA** por cada utilización signi
 | Despliegue | ✅ | Staging y producción con URLs públicas; producción actualizada al `main` del RC.2. |
 | Pipeline CI/CD | ✅ | `deploy-production` con aprobación, Deploy Hook, health y smoke; `staging-smoke` manual/programado. |
 
-**Evidencia del cierre:** deploy de producción [run 43963809965](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43963809965), CI de producción del frontend [run 43963845675](https://github.com/taller-web-sigesu/frontend-uni/actions/runs/43963845675) y smoke de staging [run 43964310054](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43964310054).
+**Evidencia del cierre:** deploy de producción [run 43963809965](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43963809965), CI de producción del frontend [run 43963845675](https://github.com/taller-web-sigesu/frontend-uni/actions/runs/43963845675), smoke de staging [run 43964310054](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43964310054), redeploy manual de staging a `b00e92b` y E2E reales de HU-16/HU-19 **2 de 2** contra staging.
 
 ### 17.2 API REST
 
@@ -1164,7 +1164,7 @@ El curso exige mantener un **registro de uso de IA** por cada utilización signi
 | Generación asistida por IA | ✅ | `PRUEBAS-IA.md` y registro de uso de IA. |
 | Revisión de pruebas generadas por IA | ✅ | Checklist y validación en `PRUEBAS-IA.md`. |
 
-**E2E del RC.2:** 52 en verde y 2 omitidas en el build simulado; 24 de 24 en la pasada real previa y **2 de 2** en la verificación real de HU-16/HU-19 contra el Compose local.
+**E2E del RC.2:** 52 en verde y 2 omitidas en el build simulado; 24 de 24 en la pasada real previa y **2 de 2** en la verificación real de HU-16/HU-19 contra staging y el Compose local.
 
 ### 17.5 Demostración y producto
 
@@ -1197,10 +1197,10 @@ El detalle está en [`DELIBERADAMENTE-NO-HECHO.md`](https://github.com/taller-we
 
 ### 17.7 Limitaciones conocidas del RC.2
 
-1. **Staging desactualizado:** el backend de staging aún responde `403` al supervisor en el catálogo de prioridades; producción sí está actualizada y los E2E reales de HU-16/HU-19 pasan contra el Compose local. Se requiere redeploy de staging antes de una demo que use esa URL.
-2. **Evidencias:** staging y producción usan almacenamiento local temporal; Supabase queda para Fase IV.
-3. **Revisión independiente:** las PRs finales se integraron con bypass de administrador; queda como tarea de gobierno del equipo.
-4. **Registro de IA:** el informe contiene el resumen; el archivo histórico del repositorio conserva filas con “Responsable: Completar”.
+1. **Evidencias:** staging y producción usan almacenamiento local temporal; Supabase queda para Fase IV.
+2. **Revisión independiente:** las PRs finales se integraron con bypass de administrador; queda como tarea de gobierno del equipo.
+3. **Registro de IA:** el informe contiene el resumen; el archivo histórico del repositorio conserva filas con “Responsable: Completar”.
+4. **E2E reales:** los escenarios nuevos de HU-16/HU-19 pasan contra staging y contra el Compose local; la regresión completa de 24 escenarios se conserva de la pasada real previa.
 
 ## Anexo A — Acuerdos de arranque
 

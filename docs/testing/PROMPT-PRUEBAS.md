@@ -181,8 +181,8 @@ No ejecutado: pruebas de carga y DAST (Fase IV)
 | **Fecha** | 2026-11-16 |
 | **Comando E2E simulado** | `npm run test:e2e` |
 | **Resultado E2E simulado** | **52 en verde y 2 omitidas** (proyectos `chromium` y `mobile`) |
-| **Comando E2E real** | `E2E_API=real npx playwright test -g "HU-1[69]" --project=chromium` |
-| **Resultado E2E real** | **2 de 2 en verde** (`HU-16` y `HU-19`) contra el Compose local del RC.2 |
+| **Comando E2E real** | `E2E_API=real npx playwright test -g "HU-1[69]" --project=chromium` (Compose local); para staging se usó un config temporal con `baseURL` de staging. |
+| **Resultado E2E real** | **2 de 2 en verde** (`HU-16` y `HU-19`) contra staging y **2 de 2** contra el Compose local del RC.2 |
 | **Casos nuevos** | `administracion › HU-16…` y `solicitudes › HU-19…` |
 | **Reporte** | `frontend-uni/playwright-report/` |
 | **Trazas de fallo** | `frontend-uni/test-results/` |
@@ -191,6 +191,6 @@ No ejecutado: pruebas de carga y DAST (Fase IV)
 | **Backend** | `mvn -B verify` en CI de `main` y en el deploy de producción del RC.2 |
 | **No ejecutado en host** | `mvn -B verify` local: requiere Java 21/Maven; sí se ejecutó en GitHub Actions |
 
-**Lectura correcta:** los E2E nuevos se validaron en simulado y en real contra el Compose local. El backend de staging aún no refleja el cambio de prioridades; producción sí está actualizada y el deploy/smoke pasó.
+**Lectura correcta:** los E2E nuevos se validaron en simulado, en staging y en el Compose local. Staging y producción quedaron alineados al commit `b00e92b`; el backend de staging ya expone el catálogo de prioridades al supervisor.
 
 > **Recordatorio:** el objetivo no es tener muchas pruebas, sino tener pruebas que puedan fallar por la razón correcta. Una prueba que no puede fallar no protege nada.

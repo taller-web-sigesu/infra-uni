@@ -86,7 +86,7 @@ La referencia estable de la entrega es el tag **`v1.0.0-rc.2`** en los tres repo
 | --- | --- | --- |
 | Deploy de producción (backend) | ✅ Aprobado, health UP y smoke OK | [run 43963809965](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43963809965) |
 | CI de producción (frontend) | ✅ 52 E2E en verde, 2 omitidas | [run 43963845675](https://github.com/taller-web-sigesu/frontend-uni/actions/runs/43963845675) |
-| Smoke de staging | ✅ Health, login y flujo real de solicitud | [run 43964310054](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43964310054) |
+| Smoke de staging | ✅ Health, login y flujo real de solicitud | [run 43970286002](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43970286002) |
 | Producción: backend | ✅ `health = UP`, `/api/v1/status = UP` | https://uniservice-backend-prod.onrender.com |
 | Producción: frontend/proxy | ✅ `/login = 200`, `/api/v1/status = UP` | https://frontend-uni-wx9m.vercel.app |
 | E2E reales nuevos | ✅ 2/2: HU-16 y HU-19 contra staging y Compose local | `E2E_API=real npx playwright test -g "HU-1[69]" --project=chromium` |
@@ -137,7 +137,7 @@ Producción no carga cuentas demo. Su administrador inicial es `admin@uniservice
 - **Aprobación de producción:** environment `production` con revisores `kuki236` y `LuisibrosGD`.
 - **Deploy de producción validado (RC.2):** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43963809965
 - **Frontend producción validado (RC.2):** https://github.com/taller-web-sigesu/frontend-uni/actions/runs/43963845675
-- **Smoke de staging validado (RC.2):** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43964310054
+- **Smoke de staging validado (RC.2):** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43970286002
 - **Infra CI validado:** https://github.com/taller-web-sigesu/infra-uni/actions/runs/43959633229
 
 ## Releases

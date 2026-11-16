@@ -159,7 +159,7 @@ El smoke real de staging verifica: login de estudiante, login de supervisor, sel
 ### 4.3 Evidencia de ejecución
 
 - **Deploy de producción en verde (RC.2):** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43963809965
-- **Smoke real de staging en verde (RC.2):** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43964310054
+- **Smoke real de staging en verde (RC.2):** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43970286002
 - **CI de producción del frontend (RC.2):** https://github.com/taller-web-sigesu/frontend-uni/actions/runs/43963845675
 - **CI de infraestructura:** https://github.com/taller-web-sigesu/infra-uni/actions/runs/43959633229
 

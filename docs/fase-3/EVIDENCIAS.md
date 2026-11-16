@@ -1,8 +1,8 @@
 # Evidencias de Fase III — Staging y producción
 
-- **Fecha:** 14/11/2026
+- **Fecha:** 16/11/2026
 - **Entornos:** staging y producción
-- **Estado:** dos despliegues separados, con frontend, backend y base de datos conectados.
+- **Estado:** dos despliegues separados, con frontend, backend y base de datos conectados. Release Candidate `v1.0.0-rc.2`.
 - **Informe completo:** [INFORME-FASE-III.md](INFORME-FASE-III.md)
 
 ## Dos despliegues
@@ -13,6 +13,8 @@
 | Producción | https://frontend-uni-wx9m.vercel.app | https://uniservice-backend-prod.onrender.com | `production` | `production` | Railway producción |
 
 Staging se actualiza al integrar en `main`. Producción se promueve con `main` → `production` y exige aprobación del environment `production`; Render producción tiene `Auto-Deploy: Off`.
+
+> **Nota del RC.2:** producción está actualizada al commit `b00e92b` y el deploy/smoke pasó. El backend de staging aún no refleja el cambio de lectura de prioridades para el supervisor: responde `403` en `/api/v1/admin/catalogs/priorities`. El smoke de staging pasó, pero el redeploy de Render staging queda pendiente.
 
 ## URLs de staging
 
@@ -57,11 +59,15 @@ Staging se actualiza al integrar en `main`. Producción se promueve con `main` �
 
 | Repo | Staging (commit verificado) | Producción (commit verificado) |
 | --- | --- | --- |
-| `frontend-uni` | `a03afde` — restauración de sesión sin bloqueo | `3971af6` — merge de `main` con proxy a producción |
-| `backend-uni` | `544e3d7` — smoke real de staging | `50caa78` — workflow de deploy de producción |
-| `infra-uni` | `main` — documentación de Fase III | No aplica |
+| `frontend-uni` | `cb282cf` — `main` con RC.2 | `019baa0` — `production` con proxy a producción |
+| `backend-uni` | `b00e92b` — `main`; Render staging pendiente de redeploy | `b00e92b` — `production` desplegada y smoke OK |
+| `infra-uni` | `main` — documentación del RC.2 | No aplica |
 
-La referencia estable de la entrega es el tag **`v1.0.0-rc.1`** en los tres repos.
+La referencia estable de la entrega es el tag **`v1.0.0-rc.2`** en los tres repos:
+
+- https://github.com/taller-web-sigesu/frontend-uni/releases/tag/v1.0.0-rc.2
+- https://github.com/taller-web-sigesu/backend-uni/releases/tag/v1.0.0-rc.2
+- https://github.com/taller-web-sigesu/infra-uni/releases/tag/v1.0.0-rc.2
 
 ## Flujo verificado en staging
 
@@ -73,6 +79,19 @@ La referencia estable de la entrega es el tag **`v1.0.0-rc.1`** en los tres repo
 - [x] Render sirve el backend y aplica Flyway.
 - [x] Railway responde con MySQL.
 - [x] Cabeceras de seguridad: HSTS, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`.
+
+## Cierre del RC.2
+
+| Verificación | Resultado | Evidencia |
+| --- | --- | --- |
+| Deploy de producción (backend) | ✅ Aprobado, health UP y smoke OK | [run 43963809965](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43963809965) |
+| CI de producción (frontend) | ✅ 52 E2E en verde, 2 omitidas | [run 43963845675](https://github.com/taller-web-sigesu/frontend-uni/actions/runs/43963845675) |
+| Smoke de staging | ✅ Health, login y flujo real de solicitud | [run 43964310054](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43964310054) |
+| Producción: backend | ✅ `health = UP`, `/api/v1/status = UP` | https://uniservice-backend-prod.onrender.com |
+| Producción: frontend/proxy | ✅ `/login = 200`, `/api/v1/status = UP` | https://frontend-uni-wx9m.vercel.app |
+| E2E reales nuevos | ✅ 2/2: HU-16 y HU-19 contra el Compose local | `E2E_API=real npx playwright test -g "HU-1[69]" --project=chromium` |
+
+**Limitación:** el backend de staging sigue en el deployment anterior y devuelve `403` al supervisor en `/api/v1/admin/catalogs/priorities`. Por eso los E2E reales nuevos se ejecutaron contra el Compose local, que sí tiene el código del RC.2. Producción sí está actualizada.
 
 ## Cuentas de demostración (staging)
 
@@ -98,7 +117,7 @@ Producción no carga cuentas demo. Su administrador inicial es `admin@uniservice
 | --- | --- |
 | Frontend unitarias | 284 pruebas; suites focalizadas en verde (la suite completa en Windows/Node 24 tiene fallos preexistentes de jsdom/MSW; CI usa Node 22) |
 | Frontend E2E simulado | 52 en verde, 2 omitidas por diseño |
-| Frontend E2E real | 24 de 24 en la última pasada; los E2E nuevos de HU-16/HU-19 se repiten tras el despliegue |
+| Frontend E2E real | 24 de 24 en la pasada previa + **2 de 2** en HU-16/HU-19 contra el Compose local del RC.2 |
 | Backend unitarias | 13 en verde |
 | Backend integración | 80 pruebas (incluye el nuevo caso de prioridades del supervisor) |
 | Contrato OpenAPI | Validado y comparado en CI |
@@ -116,21 +135,23 @@ Producción no carga cuentas demo. Su administrador inicial es `admin@uniservice
 - **Infraestructura:** workflow `infra-ci` con validación de compose, variables y scripts.
 - **Ramas protegidas:** `main` en los tres repos y `production` en el backend, con PR y checks requeridos.
 - **Aprobación de producción:** environment `production` con revisores `kuki236` y `LuisibrosGD`.
-- **Deploy de producción validado:** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43582054889
-- **Smoke de staging validado:** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43582997332
-- **Frontend CI validado:** https://github.com/taller-web-sigesu/frontend-uni/actions/runs/43587160904
-- **Infra CI validado:** https://github.com/taller-web-sigesu/infra-uni/actions/runs/43583112971
+- **Deploy de producción validado (RC.2):** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43963809965
+- **Frontend producción validado (RC.2):** https://github.com/taller-web-sigesu/frontend-uni/actions/runs/43963845675
+- **Smoke de staging validado (RC.2):** https://github.com/taller-web-sigesu/backend-uni/actions/runs/43964310054
+- **Infra CI validado:** https://github.com/taller-web-sigesu/infra-uni/actions/runs/43959633229
 
 ## Releases
 
 - Tag `v1.0.0` en los tres repos.
-- **Release Candidate `v1.0.0-rc.1`:**
-  - https://github.com/taller-web-sigesu/frontend-uni/releases/tag/v1.0.0-rc.1
-  - https://github.com/taller-web-sigesu/backend-uni/releases/tag/v1.0.0-rc.1
-  - https://github.com/taller-web-sigesu/infra-uni/releases/tag/v1.0.0-rc.1
+- **Release Candidate `v1.0.0-rc.1`:** histórico.
+- **Release Candidate `v1.0.0-rc.2`:**
+  - https://github.com/taller-web-sigesu/frontend-uni/releases/tag/v1.0.0-rc.2
+  - https://github.com/taller-web-sigesu/backend-uni/releases/tag/v1.0.0-rc.2
+  - https://github.com/taller-web-sigesu/infra-uni/releases/tag/v1.0.0-rc.2
 
 ## Pendiente
 
+- **Redeploy de staging:** el backend de staging aún no refleja el cambio de lectura de prioridades para el supervisor (responde `403`); producción y el Compose local sí están actualizados.
 - Configurar almacenamiento persistente de evidencias (Supabase o disco).
 - Ejecutar OWASP ZAP baseline / DAST y revisar logs de staging.
 - Completar la revisión independiente de las PRs (en la recta final se usó bypass de administrador).

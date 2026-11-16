@@ -51,7 +51,7 @@ El trabajo comprendió las 16 semanas del curso y culminó en una aplicación fu
 
 * **Operación: contenedores (Docker), integración y entrega continuas, pruebas automatizadas y base de observabilidad (salud, logs y correlación).**
 
-El primer entregable se ubicó en la Fase I del plan del curso (análisis, especificación y prototipo) e incluyó una muestra de desarrollo en JavaScript, conservada en la carpeta `frontend-uni/docs/fase-1/`. Sobre esa base, el equipo construyó la primera versión funcional (Fase II) con React, Spring Boot y MySQL, y cerró la Fase III con el Release Candidate `v1.0.0-rc.1`, desplegado en staging y producción. El estado actual se resume en la sección 15\. El producto se despliega como **UniService / Universidad Actúa**; **Gestal** es el nombre del proyecto académico.
+El primer entregable se ubicó en la Fase I del plan del curso (análisis, especificación y prototipo) e incluyó una muestra de desarrollo en JavaScript, conservada en la carpeta `frontend-uni/docs/fase-1/`. Sobre esa base, el equipo construyó la primera versión funcional (Fase II) con React, Spring Boot y MySQL, y cerró la Fase III con el Release Candidate `v1.0.0-rc.2`, desplegado en staging y producción. El estado actual se resume en la sección 15\. El producto se despliega como **UniService / Universidad Actúa**; **Gestal** es el nombre del proyecto académico.
 
 ## 3\. Planteamiento y descripción del problema
 
@@ -977,7 +977,7 @@ Responsabilidad de cada componente:
 
 • Infraestructura (Docker, GitHub Actions, Vercel, Render, Railway): ejecuta el entorno local, automatiza pruebas y despliegues, y separa staging de producción.
 
-Decisiones adoptadas en la versión funcional: autenticación con JWT de 15 minutos y refresh token en cookie `HttpOnly`; códigos `SOL-AAAA-NNNNNN` para solicitudes y `RES-AAAA-NNNNNN` para reservas; persistencia en MySQL con Flyway; tres repositorios (`frontend-uni`, `backend-uni` e `infra-uni`); y despliegue en staging y producción con Release Candidate `v1.0.0-rc.1`.
+Decisiones adoptadas en la versión funcional: autenticación con JWT de 15 minutos y refresh token en cookie `HttpOnly`; códigos `SOL-AAAA-NNNNNN` para solicitudes y `RES-AAAA-NNNNNN` para reservas; persistencia en MySQL con Flyway; tres repositorios (`frontend-uni`, `backend-uni` e `infra-uni`); y despliegue en staging y producción con Release Candidate `v1.0.0-rc.2`.
 
 Las decisiones de arquitectura se registran como **ADR** (*Architecture Decision Records*): ADR-0001 incorpora la reserva de ambientes, ADR-0002 define la autenticación y sesión, ADR-0003 la observabilidad y retención, ADR-0004 el despliegue y la persistencia, y ADR-0005 el CI/CD y las puertas de calidad. Las decisiones ya implementadas se reflejan en este informe; no se listan como pendientes.
 
@@ -1072,11 +1072,11 @@ El equipo completó la primera versión funcional con datos reales:
 
 • **Frontend (`frontend-uni`, rama `main`)**: aplicación React 19 + Vite con las pantallas de inicio de sesión, inicio por rol, listado, registro, detalle, bandeja del técnico, gestión de área, dashboard, reservas y administración, conectada a la API real mediante `fetch`, con manejo de estados de carga, vacío y error, y protección de rutas por rol.
 
-Flujo verificado de extremo a extremo: inicio de sesión, registro de solicitud, guardado en MySQL, consulta según el rol, asignación de responsable, ajuste de prioridad, inicio de atención, resolución y cierre; además, se verificaron las transiciones inválidas y el acceso a recursos ajenos (respuesta 404 fuera de alcance y 403 cuando falta permiso). HU-07 y HU-08 leen el catálogo de prioridades activas desde `GET /api/v1/admin/catalogs/priorities` (solo lectura para los roles autenticados) y lo usan en el filtro y en la asignación. La evidencia incluye E2E con Playwright (52 en verde y 2 omitidas en el build simulado; 24 de 24 en la pasada real previa), 284 pruebas unitarias de frontend (las suites de las áreas modificadas pasan en local; CI usa Node 22), 13 unitarias y 80 de integración de backend (el nuevo caso de prioridades se ejecuta con `mvn -B verify` y Docker/Java 21), la colección Postman, la matriz HU → prueba y el registro de QA. La estrategia y el prompt de pruebas se documentan en [`PROMPT-PRUEBAS.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/testing/PROMPT-PRUEBAS.md).
+Flujo verificado de extremo a extremo: inicio de sesión, registro de solicitud, guardado en MySQL, consulta según el rol, asignación de responsable, ajuste de prioridad, inicio de atención, resolución y cierre; además, se verificaron las transiciones inválidas y el acceso a recursos ajenos (respuesta 404 fuera de alcance y 403 cuando falta permiso). HU-07 y HU-08 leen el catálogo de prioridades activas desde `GET /api/v1/admin/catalogs/priorities` (solo lectura para los roles autenticados) y lo usan en el filtro y en la asignación. La evidencia incluye E2E con Playwright (52 en verde y 2 omitidas en el build simulado; 24 de 24 en la pasada real previa y 2 de 2 en la verificación real de HU-16/HU-19 contra el Compose local), 284 pruebas unitarias de frontend (las suites de las áreas modificadas pasan en local; CI usa Node 22), 13 unitarias y 80 de integración de backend (el nuevo caso de prioridades se ejecuta con `mvn -B verify` y Docker/Java 21), la colección Postman, la matriz HU → prueba y el registro de QA. La estrategia y el prompt de pruebas se documentan en [`PROMPT-PRUEBAS.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/testing/PROMPT-PRUEBAS.md).
 
 ### 15.3 Fase III — APIs, nube, DevOps y seguridad
 
-El equipo cerró la Fase III con el Release Candidate `v1.0.0-rc.1` publicado en los tres repositorios y dos despliegues separados:
+El equipo cerró la Fase III con el Release Candidate `v1.0.0-rc.2` publicado en los tres repositorios y dos despliegues separados:
 
 | Entorno | Frontend | Backend | Base de datos |
 | --- | --- | --- | --- |
@@ -1097,6 +1097,110 @@ El curso exige mantener un **registro de uso de IA** por cada utilización signi
 | 2026-11-14 | Calidad y despliegue | frontend-uni | OpenCode | Generar y revisar pruebas de historial, encuesta y cierre de sesión | Pruebas de historial, encuesta y acciones | Sí | Vitest y E2E; revisión de aserciones | Ajustes de aserciones y animación | Equipo |
 | 2026-11-14 | Despliegue staging/producción | 3 repos | OpenCode | Configurar Vercel, Render, Railway, proxy `/api` y smoke | Staging y producción desplegados | Sí | Health, login, refresh, creación de solicitud y cabeceras | Ajustes de branch, CORS y fallback SPA | Equipo |
 | 2026-11-16 | Informe final | infra-uni | OpenCode | Actualizar el informe con el estado real de los repositorios | Este informe | Sí | Contraste con código, docs y workflows | Correcciones de alcance, arquitectura y evidencias | Equipo |
+
+## 17\. Cumplimiento de la rúbrica de Fase III
+
+### 17.1 Cloud + CI/CD
+
+| Punto de la rúbrica | Estado | Evidencia |
+| --- | --- | --- |
+| Selección de plataforma cloud | ✅ | ADR-0004: Vercel (frontend), Render (backend) y Railway (MySQL). |
+| Docker | ✅ | `backend-uni/Dockerfile` de producción, `Dockerfile.dev` de frontend/backend y `infra-uni/compose.yaml`. |
+| Ambientes de desarrollo/prueba/producción | ✅ | Local, CI, staging y producción, con bases MySQL separadas. |
+| Git | ✅ | Tres repositorios con historial, PRs y ramas protegidas. |
+| Ramas | ✅ | `main` para staging, `production` para producción y ramas `feature/`, `fix/` y `docs/`. |
+| Integración continua | ✅ | `backend-ci`, `frontend ci` e `infra-ci` en verde sobre `main`. |
+| Despliegue | ✅ | Staging y producción con URLs públicas; producción actualizada al `main` del RC.2. |
+| Pipeline CI/CD | ✅ | `deploy-production` con aprobación, Deploy Hook, health y smoke; `staging-smoke` manual/programado. |
+
+**Evidencia del cierre:** deploy de producción [run 43963809965](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43963809965), CI de producción del frontend [run 43963845675](https://github.com/taller-web-sigesu/frontend-uni/actions/runs/43963845675) y smoke de staging [run 43964310054](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43964310054).
+
+### 17.2 API REST
+
+| Punto de la rúbrica | Estado | Evidencia |
+| --- | --- | --- |
+| Diseño de recursos | ✅ | Solicitudes, reservas, usuarios, catálogos, SLA, auditoría, dashboard y adjuntos. |
+| Rutas | ✅ | Prefijo versionado `/api/v1` y recursos anidados. |
+| Parámetros | ✅ | Filtros, paginación, fechas, estado, categoría, prioridad y búsqueda. |
+| Códigos HTTP | ✅ | `200`, `201`, `204`, `400`, `401`, `403`, `404`, `409`, `429` y `500`; errores `application/problem+json`. |
+| Documentación | ✅ | `docs/api/openapi.yaml`, Swagger UI y `/v3/api-docs`. |
+| Pruebas de API | ✅ | Contrato OpenAPI, integración con Testcontainers y smoke real de staging. |
+| GraphQL/gRPC/webhooks | ✅ | Panorama y decisión de no implementarlos en `API-PANORAMA.md`. |
+| API Gateway | ✅ | Análisis y decisión de no usar gateway propio en `API-PANORAMA.md`. |
+
+### 17.3 Seguridad
+
+| Punto de la rúbrica | Estado | Evidencia |
+| --- | --- | --- |
+| Autenticación | ✅ | Login, logout, refresh rotativo y bloqueo por intentos. |
+| Autorización | ✅ | RBAC y alcance por recurso; 404 fuera de alcance y 403 sin permiso. |
+| Roles | ✅ | Estudiante, docente, técnico, supervisor y administrador. |
+| JWT o sesión | ✅ | JWT de 15 minutos y refresh opaco en cookie `HttpOnly`. |
+| Validación de entradas | ✅ | Bean Validation, validación de archivos por contenido y manejo global de errores. |
+| Protección de secretos | ✅ | Variables de entorno, GitHub Secrets y secretos de Render/Railway. |
+| Variables de entorno | ✅ | Configuración separada por entorno. |
+| Prevención de hardcode | ✅ | Sin credenciales reales en el repositorio; datos demo aislados en `db/demo`. |
+| Principios OWASP | ✅/🟡 | `OWASP-TOP-10.md` con controles y riesgos residuales. |
+
+**Decisiones de seguridad del RC.2:**
+
+| Tema | Decisión | Motivo |
+| --- | --- | --- |
+| CSP | Se acepta el riesgo para el RC. | Vercel ya envía HSTS, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` y `Permissions-Policy`; una CSP no probada podía romper la demo. Se implementa en Fase IV. |
+| Swagger/Actuator públicos | Swagger/OpenAPI se mantienen públicos para la demo; Actuator solo expone `health` sin detalles. | La rúbrica exige API documentada. Se restringirán por red/rol en Fase IV. |
+| Rotación de secretos | Se documenta como procedimiento de Fase IV. | Rotar durante el RC invalidaría sesiones y credenciales de la demo. |
+| Threat model formal | No se elabora para el RC. | El mapeo OWASP y las pruebas de autorización cubren los riesgos principales; se considera documentación de Fase IV. |
+| DAST / OWASP ZAP | Fase IV. | La Fase III cubre SAST (CodeQL), dependencias y pruebas de autorización. |
+
+### 17.4 Testing
+
+| Punto de la rúbrica | Estado | Evidencia |
+| --- | --- | --- |
+| Pruebas unitarias | ✅ | 284 de frontend y 13 de backend. |
+| Pruebas de integración | ✅ | 80 de backend con Testcontainers y MySQL. |
+| Automatización | ✅ | GitHub Actions, Playwright y smoke programado/manual. |
+| Criterios de aceptación | ✅ | `matriz-hu.md` con las 29 HU. |
+| Pruebas de API | ✅ | Contrato OpenAPI, integración y smoke real. |
+| Generación asistida por IA | ✅ | `PRUEBAS-IA.md` y registro de uso de IA. |
+| Revisión de pruebas generadas por IA | ✅ | Checklist y validación en `PRUEBAS-IA.md`. |
+
+**E2E del RC.2:** 52 en verde y 2 omitidas en el build simulado; 24 de 24 en la pasada real previa y **2 de 2** en la verificación real de HU-16/HU-19 contra el Compose local.
+
+### 17.5 Demostración y producto
+
+| Punto de la rúbrica | Estado | Evidencia |
+| --- | --- | --- |
+| Aplicación desplegada | ✅ | Staging y producción; producción actualizada al RC.2. |
+| API documentada | ✅ | Swagger, OpenAPI y `/v3/api-docs`. |
+| CI/CD | ✅ | Workflows en verde y deploy de producción aprobado. |
+| Autenticación | ✅ | Verificada en staging, producción y Compose. |
+| Autorización | ✅ | Pruebas por rol y por recurso. |
+| Seguridad | ✅ | Auth, RBAC, validación, secretos, OWASP y cabeceras. |
+| Pruebas | ✅ | Unitarias, integración, E2E y smoke. |
+| Evidencias de automatización | ✅ | `EVIDENCIAS.md`, runs de GitHub Actions y reportes. |
+| Release Candidate | ✅ | `v1.0.0-rc.2` en los tres repositorios. |
+
+**Release Candidate:**
+- https://github.com/taller-web-sigesu/frontend-uni/releases/tag/v1.0.0-rc.2
+- https://github.com/taller-web-sigesu/backend-uni/releases/tag/v1.0.0-rc.2
+- https://github.com/taller-web-sigesu/infra-uni/releases/tag/v1.0.0-rc.2
+
+### 17.6 Lo deliberadamente no hecho
+
+El detalle está en [`DELIBERADAMENTE-NO-HECHO.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/entregables/DELIBERADAMENTE-NO-HECHO.md). En resumen:
+
+- **Arquitectura/API:** GraphQL, gRPC, webhooks y API Gateway propio.
+- **Producto:** notificaciones, recuperación por correo, integraciones externas, reservas recurrentes, multi-rol y chatbot.
+- **Infraestructura:** Docker de producción del frontend (Vercel construye el frontend), observabilidad completa, DAST, k6, backups/restauración y rotación de secretos.
+- **Datos:** almacenamiento persistente de evidencias en Supabase; el RC usa almacenamiento local temporal.
+- **Documentación:** manuales de usuario/técnico e informe final de Fase IV.
+
+### 17.7 Limitaciones conocidas del RC.2
+
+1. **Staging desactualizado:** el backend de staging aún responde `403` al supervisor en el catálogo de prioridades; producción sí está actualizada y los E2E reales de HU-16/HU-19 pasan contra el Compose local. Se requiere redeploy de staging antes de una demo que use esa URL.
+2. **Evidencias:** staging y producción usan almacenamiento local temporal; Supabase queda para Fase IV.
+3. **Revisión independiente:** las PRs finales se integraron con bypass de administrador; queda como tarea de gobierno del equipo.
+4. **Registro de IA:** el informe contiene el resumen; el archivo histórico del repositorio conserva filas con “Responsable: Completar”.
 
 ## Anexo A — Acuerdos de arranque
 

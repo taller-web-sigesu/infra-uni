@@ -1,6 +1,7 @@
 # Deliberadamente no hecho — Gestal / UniService
 
-> **Alcance:** decisiones de exclusión y diferimiento del Release Candidate `v1.0.0-rc.2` de la Fase III.  
+> **Alcance:** decisiones de exclusión y diferimiento del Release Candidate `v1.0.0-rc.2` de la Fase III y propuestas de alcance para la Fase IV.
+>
 > **Regla:** lo que aparece aquí no es un olvido ni un requisito roto; es una decisión de alcance, una exclusión académica o una tarea asignada a la Fase IV.
 
 ---
@@ -64,11 +65,21 @@
 - Pruebas unitarias, integración, API, aceptación, automatización y revisión de pruebas asistidas por IA.
 - Aplicación desplegada, API documentada, CI/CD y Release Candidate `v1.0.0-rc.2`.
 
-## 7. Referencias
+## 7. Exclusiones propuestas para la Fase IV
+
+| Elemento | Decisión propuesta | Motivo |
+| --- | --- | --- |
+| Detección, bloqueo y vinculación automáticos de duplicados | Diferir a una evolución | Se conserva el rechazo motivado por el supervisor, previsto en HU-11. |
+| Asignación de solicitudes por el administrador | Fuera del alcance de la Fase IV | HU-08 asigna esta función al supervisor del área. |
+| Transferencia de solicitudes entre áreas | Diferir salvo que el equipo la confirme como P0 | Primero hay que definir quién puede transferir y cómo quedan la asignación, la visibilidad y el historial. |
+
+Ver [DECISIONES-FASE-IV.md](DECISIONES-FASE-IV.md) para revisar la política propuesta y sus criterios de verificación.
+
+## 8. Referencias
 
 - Informe final: [`INFORME-GESTAL-FASES-I-III.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/entregables/INFORME-GESTAL-FASES-I-III.md)
 - Evidencias: [`EVIDENCIAS.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/fase-3/EVIDENCIAS.md)
 - OWASP: [`OWASP-TOP-10.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/fase-3/OWASP-TOP-10.md)
 - API: [`API-PANORAMA.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/fase-3/API-PANORAMA.md)
 
-> **Criterio de lectura:** si algo no está aquí ni en el informe, no debe asumirse como hecho. Si está aquí, fue una decisión consciente del equipo.
+> **Criterio de lectura:** las decisiones del RC.2 son históricas. Las propuestas de la sección 7 están en revisión.

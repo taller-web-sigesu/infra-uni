@@ -1,8 +1,6 @@
 # Deliberadamente no hecho — Gestal / UniService
 
-> **Alcance:** decisiones de exclusión y diferimiento del Release Candidate `v1.0.0-rc.2` de la Fase III y propuestas de alcance para la Fase IV.
->
-> **Regla:** lo que aparece aquí no es un olvido ni un requisito roto; es una decisión de alcance, una exclusión académica o una tarea asignada a la Fase IV.
+> Las primeras secciones documentan el alcance del Release Candidate `v1.0.0-rc.2` de la Fase III. Las secciones 7 y 8 recogen las exclusiones de alcance y el trabajo pendiente para el cierre de la Fase IV, la última del proyecto.
 
 ---
 
@@ -65,21 +63,31 @@
 - Pruebas unitarias, integración, API, aceptación, automatización y revisión de pruebas asistidas por IA.
 - Aplicación desplegada, API documentada, CI/CD y Release Candidate `v1.0.0-rc.2`.
 
-## 7. Exclusiones propuestas para la Fase IV
+## 7. Exclusiones de la entrega final
 
-| Elemento | Decisión propuesta | Motivo |
+| Elemento | Decisión | Motivo |
 | --- | --- | --- |
-| Detección, bloqueo y vinculación automáticos de duplicados | Diferir a una evolución | Se conserva el rechazo motivado por el supervisor, previsto en HU-11. |
+| Detección, bloqueo y vinculación automáticos de duplicados | Fuera de `v1.0.0` | El supervisor revisa los posibles duplicados y registra el motivo del rechazo conforme a HU-11. |
 | Asignación de solicitudes por el administrador | Fuera del alcance de la Fase IV | HU-08 asigna esta función al supervisor del área. |
-| Transferencia de solicitudes entre áreas | Diferir salvo que el equipo la confirme como P0 | Primero hay que definir quién puede transferir y cómo quedan la asignación, la visibilidad y el historial. |
+| Transferencia directa de solicitudes entre áreas | Exclusión definitiva de `v1.0.0` | El supervisor rechaza el reporte mal dirigido con un motivo e indica la categoría correcta. El solicitante registra un nuevo reporte que se dirige al área correspondiente. |
 
-Ver [DECISIONES-FASE-IV.md](DECISIONES-FASE-IV.md) para revisar la política propuesta y sus criterios de verificación.
+Ver [DECISIONES-FASE-IV.md](DECISIONES-FASE-IV.md#4-transferencia-de-solicitudes-entre-áreas) para consultar el flujo completo y su criterio de verificación.
 
-## 8. Referencias
+## 8. Trabajo que debe cerrarse en la Fase IV actual
+
+| Frente | Entregable o verificación |
+| --- | --- |
+| Reglas de negocio y datos de demostración | Implementar la sesión única, verificar las cuatro decisiones de alcance y comprobar los datos de Laboratorio 10, cancha y cuentas de Servicios Generales. |
+| Observabilidad y operación | Verificar métricas, trazas, logs, alertas y runbook. Implementar y probar el respaldo y la restauración previstos. |
+| Seguridad y rendimiento | Completar la revisión de controles, las pruebas de seguridad y las pruebas de carga y estrés con sus evidencias. |
+| Interfaz y aceptación | Completar los cambios acordados de UI/UX y registrar los resultados de las pruebas funcionales, accesibilidad, navegadores, UAT y usabilidad. |
+| Documentación y entrega | Consolidar los 13 PDF, verificar el Drive y ensayar la demo. Publicar `v1.0.0` después de la verificación y aprobación del equipo. |
+
+Los diferimientos del RC.2 describen lo que quedó abierto al terminar la Fase III. El trabajo requerido para la entrega se cierra en la Fase IV actual. Un cambio se registra como cerrado cuando se cuenta con la verificación correspondiente.
+
+## 9. Referencias
 
 - Informe final: [`INFORME-GESTAL-FASES-I-III.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/entregables/INFORME-GESTAL-FASES-I-III.md)
 - Evidencias: [`EVIDENCIAS.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/fase-3/EVIDENCIAS.md)
 - OWASP: [`OWASP-TOP-10.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/fase-3/OWASP-TOP-10.md)
 - API: [`API-PANORAMA.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/fase-3/API-PANORAMA.md)
-
-> **Criterio de lectura:** las decisiones del RC.2 son históricas. Las propuestas de la sección 7 están en revisión.

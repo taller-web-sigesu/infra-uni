@@ -1,0 +1,408 @@
+{
+  "root_group": {
+    "name": "",
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
+    "groups": [],
+    "checks": []
+  },
+  "options": {
+    "summaryTimeUnit": "",
+    "noColor": true,
+    "summaryTrendStats": [
+      "med",
+      "p(95)",
+      "p(99)",
+      "max"
+    ]
+  },
+  "state": {
+    "isStdOutTTY": false,
+    "isStdErrTTY": false,
+    "testRunDurationMs": 7962.0801
+  },
+  "metrics": {
+    "vus_max": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 1,
+        "min": 1,
+        "max": 1
+      }
+    },
+    "http_req_failed{scenario:staging_smoke,flow:status}": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 3
+      },
+      "thresholds": {
+        "rate==0": {
+          "ok": true
+        }
+      }
+    },
+    "data_sent": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 2035,
+        "rate": 255.58647670474957
+      }
+    },
+    "http_req_waiting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 224.5506,
+        "p(95)": 497.973425,
+        "p(99)": 564.149725,
+        "max": 580.6938
+      }
+    },
+    "checks{scenario:staging_smoke,flow:status}": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "fails": 0,
+        "rate": 1,
+        "passes": 6
+      },
+      "thresholds": {
+        "rate==1": {
+          "ok": true
+        }
+      }
+    },
+    "checks{scenario:staging_smoke}": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 1,
+        "passes": 12,
+        "fails": 0
+      },
+      "thresholds": {
+        "rate==1": {
+          "ok": true
+        }
+      }
+    },
+    "api_5xx": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 6
+      }
+    },
+    "http_reqs{scenario:staging_smoke}": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 6,
+        "rate": 0.7535719214882051
+      },
+      "thresholds": {
+        "count>0": {
+          "ok": true
+        }
+      }
+    },
+    "api_5xx{scenario:staging_smoke,flow:status}": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "fails": 3,
+        "rate": 0,
+        "passes": 0
+      },
+      "thresholds": {
+        "rate<=1": {
+          "ok": true
+        }
+      }
+    },
+    "checks": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 1,
+        "passes": 12,
+        "fails": 0
+      }
+    },
+    "api_5xx{scenario:staging_smoke}": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 6
+      },
+      "thresholds": {
+        "rate<=1": {
+          "ok": true
+        }
+      }
+    },
+    "http_reqs": {
+      "contains": "default",
+      "values": {
+        "count": 6,
+        "rate": 0.7535719214882051
+      },
+      "thresholds": {
+        "count==6": {
+          "ok": true
+        }
+      },
+      "type": "counter"
+    },
+    "http_req_duration{expected_response:true}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(99)": 575.1975150000001,
+        "max": 580.6938,
+        "med": 225.13479999999998,
+        "p(95)": 553.2123750000001
+      }
+    },
+    "http_req_receiving": {
+      "contains": "time",
+      "values": {
+        "med": 0,
+        "p(95)": 166.33975,
+        "p(99)": 210.56187000000006,
+        "max": 221.6174
+      },
+      "type": "trend"
+    },
+    "http_req_duration{scenario:staging_smoke,flow:health}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 580.6938,
+        "med": 470.7681,
+        "p(95)": 569.70123,
+        "p(99)": 578.495286
+      },
+      "thresholds": {
+        "max<5000": {
+          "ok": true
+        }
+      }
+    },
+    "iterations": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 3,
+        "rate": 0.37678596074410253
+      }
+    },
+    "vus": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "min": 1,
+        "max": 1,
+        "value": 1
+      }
+    },
+    "iteration_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 2670.8577,
+        "p(95)": 2830.07355,
+        "p(99)": 2844.22607,
+        "max": 2847.7642
+      }
+    },
+    "http_req_duration{scenario:staging_smoke}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 553.2123750000001,
+        "p(99)": 575.1975150000001,
+        "max": 580.6938,
+        "med": 225.13479999999998
+      },
+      "thresholds": {
+        "max<5000": {
+          "ok": true
+        }
+      }
+    },
+    "http_reqs{scenario:staging_smoke,flow:health}": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 3,
+        "rate": 0.37678596074410253
+      },
+      "thresholds": {
+        "count>0": {
+          "ok": true
+        }
+      }
+    },
+    "http_req_blocked": {
+      "values": {
+        "p(95)": 57.236325,
+        "p(99)": 72.49934500000002,
+        "max": 76.3151,
+        "med": 0
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "api_5xx{scenario:staging_smoke,flow:health}": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "fails": 3,
+        "rate": 0,
+        "passes": 0
+      },
+      "thresholds": {
+        "rate<=1": {
+          "ok": true
+        }
+      }
+    },
+    "checks{scenario:staging_smoke,flow:health}": {
+      "contains": "default",
+      "values": {
+        "rate": 1,
+        "passes": 6,
+        "fails": 0
+      },
+      "thresholds": {
+        "rate==1": {
+          "ok": true
+        }
+      },
+      "type": "rate"
+    },
+    "http_req_failed{scenario:staging_smoke,flow:health}": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 3
+      },
+      "thresholds": {
+        "rate==0": {
+          "ok": true
+        }
+      }
+    },
+    "http_req_sending": {
+      "values": {
+        "max": 0.5313,
+        "med": 0,
+        "p(95)": 0.398475,
+        "p(99)": 0.504735
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "http_req_duration": {
+      "values": {
+        "max": 580.6938,
+        "med": 225.13479999999998,
+        "p(95)": 553.2123750000001,
+        "p(99)": 575.1975150000001
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "http_req_duration{scenario:staging_smoke,flow:status}": {
+      "values": {
+        "med": 192.0498,
+        "p(95)": 199.16043,
+        "p(99)": 199.792486,
+        "max": 199.9505
+      },
+      "thresholds": {
+        "max<5000": {
+          "ok": true
+        }
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "http_req_connecting": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 0,
+        "p(95)": 2.8533,
+        "p(99)": 3.6141800000000006,
+        "max": 3.8044
+      }
+    },
+    "data_received": {
+      "values": {
+        "count": 5659,
+        "rate": 710.7439172836255
+      },
+      "type": "counter",
+      "contains": "data"
+    },
+    "http_req_failed": {
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 6
+      },
+      "type": "rate",
+      "contains": "default"
+    },
+    "http_req_failed{scenario:staging_smoke}": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "fails": 6,
+        "rate": 0,
+        "passes": 0
+      },
+      "thresholds": {
+        "rate==0": {
+          "ok": true
+        }
+      }
+    },
+    "http_reqs{scenario:staging_smoke,flow:status}": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 3,
+        "rate": 0.37678596074410253
+      },
+      "thresholds": {
+        "count>0": {
+          "ok": true
+        }
+      }
+    },
+    "http_req_tls_handshaking": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 41.915625000000006,
+        "p(99)": 53.093125000000015,
+        "max": 55.8875,
+        "med": 0
+      }
+    }
+  }
+}

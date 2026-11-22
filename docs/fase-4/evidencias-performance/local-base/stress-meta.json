@@ -1,0 +1,17 @@
+{
+  "scenario": "stress",
+  "project": "gestal-perf-main",
+  "endpoint": "http://127.0.0.1:18080",
+  "availability_date": "2026-11-23",
+  "infra_sha": "8672ed6aec899fb3c5a058fb1531d3484f0c8a23",
+  "backend_sha": "b00e92b3500c1a85526372a9bb5c00a6f6ca4dc0",
+  "backend_image": "sha256:6d11c076634f6a2cabe6611a8fb1d4cca84cb255179ebcea7a7b1731ba4c1b6e",
+  "mysql_image": "sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902",
+  "docker": "29.9.3 / 29.9.3",
+  "compose": "5.7.0",
+  "docker_engine": "Docker Desktop / x86_64 / CPU=12 / RAM=8215810048",
+  "k6": "k6.exe v2.4.0 (commit/dd9395906d, go1.26.11, windows/amd64)",
+  "start_utc": "2026-11-22T01:30:47.9077243Z",
+  "end_utc": "2026-11-22T01:34:42.3602239Z",
+  "exit_code": 0
+}

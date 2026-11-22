@@ -1,0 +1,16 @@
+{
+  "start_utc": "2026-11-22T01:53:49.5734372+00:00",
+  "end_utc": "2026-11-22T01:53:50.3440173+00:00",
+  "exit_code": 0,
+  "backend_sha": "b00e92b3500c1a85526372a9bb5c00a6f6ca4dc0",
+  "docker_image": "sha256:6d11c076634f6a2cabe6611a8fb1d4cca84cb255179ebcea7a7b1731ba4c1b6e",
+  "k6": "k6.exe v2.4.0 (commit/dd9395906d, go1.26.11, windows/amd64)",
+  "setup_requests": 5,
+  "measured_requests": 10,
+  "measured_checks_passed": 20,
+  "stdout_has_same_summary": true,
+  "setup_data_matches": 0,
+  "jwt_matches": 0,
+  "stdout_sha256": "21adbb3507354bffe92959c366c2b18cd0058e4b4060b99e6b95320a4c299220",
+  "summary_sha256": "74157773f749be1fb0c5f809aeb81bbadeb89bf46835f7b0f685d9ec6cb5d0ca"
+}

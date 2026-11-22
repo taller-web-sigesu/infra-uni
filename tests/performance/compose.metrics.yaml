@@ -1,0 +1,4 @@
+services:
+  backend:
+    environment:
+      APP_TELEMETRY_PASSWORD_HASH: ${APP_TELEMETRY_PASSWORD_HASH:?Configura el hash BCrypt del recolector local}

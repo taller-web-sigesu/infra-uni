@@ -1,0 +1,11 @@
+{
+  "start_utc": "2026-11-22T01:14:04.6628951Z",
+  "end_utc": "2026-11-22T01:14:12.7246089Z",
+  "exit_code": 0,
+  "deployed_sha": null,
+  "classification": "Línea base de staging. SHA desplegado sin confirmar.",
+  "workflow_reference_id": 43970286002,
+  "workflow_head_sha": "b00e92b3500c1a85526372a9bb5c00a6f6ca4dc0",
+  "endpoint": "https://uniservice-backend-staging.onrender.com",
+  "k6": "k6.exe v2.4.0 (commit/dd9395906d, go1.26.11, windows/amd64)"
+}

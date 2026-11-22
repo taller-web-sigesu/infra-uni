@@ -1,0 +1,21 @@
+{
+  "backendSha": "fc6bbbea54eab85b4a52fd76e389ec9b614e2edb",
+  "response": {
+    "status": 200,
+    "X-Correlation-ID": "fase-iv-p2b-af87fc3b7d3d"
+  },
+  "log": {
+    "timestamp": "2026-11-21T18:55:55.65026831Z",
+    "message": "Petición HTTP completada",
+    "status": 200,
+    "correlationId": "fase-iv-p2b-af87fc3b7d3d",
+    "traceId": "0bb543feb1d94592af0c3837da6fd59f",
+    "spanId": "57dce6644760b42d"
+  },
+  "span": {
+    "spanId": "57dce6644760b42d",
+    "traceId": "0bb543feb1d94592af0c3837da6fd59f",
+    "fuente": "Tempo por OTLP/HTTP",
+    "name": "http get /api/v1/status"
+  }
+}

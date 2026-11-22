@@ -1,0 +1,200 @@
+{
+  "operacionFicticiaHttp": 201,
+  "rechazoFicticioHttp": 401,
+  "retencionPrometheus": "15d",
+  "consultas": {
+    "up{job=~\"gestal-.*\"}": [
+      {
+        "metric": {
+          "__name__": "up",
+          "instance": "backend:8080",
+          "job": "gestal-backend"
+        },
+        "value": [
+          1795287405.655,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "up",
+          "instance": "deploy:9101",
+          "job": "gestal-deploy"
+        },
+        "value": [
+          1795287405.655,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "up",
+          "instance": "http://backend:8080/actuator/health",
+          "job": "gestal-health"
+        },
+        "value": [
+          1795287405.655,
+          "1"
+        ]
+      }
+    ],
+    "probe_success{job=\"gestal-health\"}": [
+      {
+        "metric": {
+          "__name__": "probe_success",
+          "instance": "http://backend:8080/actuator/health",
+          "job": "gestal-health"
+        },
+        "value": [
+          1795287405.673,
+          "1"
+        ]
+      }
+    ],
+    "gestal:http_requests_per_second:rate5m": [
+      {
+        "metric": {
+          "__name__": "gestal:http_requests_per_second:rate5m"
+        },
+        "value": [
+          1795287405.68,
+          "0.062448000000000004"
+        ]
+      }
+    ],
+    "gestal:http_5xx_ratio:rate5m": [
+      {
+        "metric": {
+          "__name__": "gestal:http_5xx_ratio:rate5m"
+        },
+        "value": [
+          1795287405.685,
+          "0"
+        ]
+      }
+    ],
+    "gestal:http_p95_seconds:rate5m": [
+      {
+        "metric": {
+          "__name__": "gestal:http_p95_seconds:rate5m"
+        },
+        "value": [
+          1795287405.69,
+          "0.007829366599999998"
+        ]
+      }
+    ],
+    "gestal:hikari_utilization:ratio": [
+      {
+        "metric": {
+          "__name__": "gestal:hikari_utilization:ratio",
+          "instance": "backend:8080",
+          "job": "gestal-backend",
+          "pool": "HikariPool-1"
+        },
+        "value": [
+          1795287405.695,
+          "0"
+        ]
+      }
+    ],
+    "sum by (area) (jvm_memory_used_bytes{job=\"gestal-backend\"})": [
+      {
+        "metric": {
+          "area": "heap"
+        },
+        "value": [
+          1795287405.701,
+          "48467280"
+        ]
+      },
+      {
+        "metric": {
+          "area": "nonheap"
+        },
+        "value": [
+          1795287405.701,
+          "110652456"
+        ]
+      }
+    ],
+    "gestal_business_operations_total{job=\"gestal-backend\"}": [
+      {
+        "metric": {
+          "__name__": "gestal_business_operations_total",
+          "instance": "backend:8080",
+          "job": "gestal-backend",
+          "operation": "request_created"
+        },
+        "value": [
+          1795287405.707,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "gestal_business_operations_total",
+          "instance": "backend:8080",
+          "job": "gestal-backend",
+          "operation": "reservation_created"
+        },
+        "value": [
+          1795287405.707,
+          "0"
+        ]
+      }
+    ],
+    "gestal_auth_login_rejections_total{job=\"gestal-backend\"}": [
+      {
+        "metric": {
+          "__name__": "gestal_auth_login_rejections_total",
+          "instance": "backend:8080",
+          "job": "gestal-backend",
+          "reason": "invalid_credentials"
+        },
+        "value": [
+          1795287405.713,
+          "1"
+        ]
+      },
+      {
+        "metric": {
+          "__name__": "gestal_auth_login_rejections_total",
+          "instance": "backend:8080",
+          "job": "gestal-backend",
+          "reason": "rate_limited"
+        },
+        "value": [
+          1795287405.713,
+          "0"
+        ]
+      }
+    ],
+    "gestal_deployment_workflow_failed{job=\"gestal-deploy\"}": [
+      {
+        "metric": {
+          "__name__": "gestal_deployment_workflow_failed",
+          "instance": "deploy:9101",
+          "job": "gestal-deploy"
+        },
+        "value": [
+          1795287405.719,
+          "0"
+        ]
+      }
+    ],
+    "gestal_deployment_workflow_run_id{job=\"gestal-deploy\"}": [
+      {
+        "metric": {
+          "__name__": "gestal_deployment_workflow_run_id",
+          "instance": "deploy:9101",
+          "job": "gestal-deploy"
+        },
+        "value": [
+          1795287405.733,
+          "43963809965"
+        ]
+      }
+    ]
+  }
+}

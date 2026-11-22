@@ -2,6 +2,8 @@
 
 Revisión del 21 de noviembre de 2026. La revisión cruza `docs/api/openapi.yaml`, `docs/SECURITY.md`, `docs/OBSERVABILITY.md`, los controladores bajo `src/main/java/pe/edu/universidad/servicios`, `SecurityConfiguration`, los servicios de cada dominio y las pruebas de `src/test/java`. `OpenApiContractIT` comprueba las 64 operaciones publicadas en el contrato generado. La matriz incluye Actuator y Swagger.
 
+La referencia de verificación es `backend-uni@79c5cdd17e5ffb944b3c9057e892a5f140b190ce`, que incorpora las regresiones de seguridad sobre el candidato local de E. El [informe](INFORME-SEGURIDAD-P2.md) registra los resultados locales, de CI y de staging.
+
 **E** estudiante, **D** docente, **T** técnico, **S** supervisor, **A** administrador. **JWT** indica una sesión vigente con cuenta activa. Para rutas privadas, se espera `401` sin sesión, `403` para rol sin permiso y `404` para un recurso de negocio fuera de alcance cuando la operación comprueba su visibilidad. Los listados filtran antes de contar. El primer ingreso solo habilita cambio de contraseña, refresh y logout entre las operaciones autenticadas. Se omite el prefijo `/api/v1` en las rutas de negocio.
 
 **Evidencia** identifica regresiones que cubren una parte o la totalidad de cada fila. **Pendiente** indica una combinación específica que no se ha ejercitado de forma directa. Los códigos `2xx` se refieren a peticiones válidas.

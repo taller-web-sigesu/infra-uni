@@ -16,11 +16,17 @@
 
 ## Verificación local
 
-- Clon aislado `p2c-backend`. No había candidato de E en las referencias disponibles al iniciar. Base `b00e92b`, insumos `8001dc9` (#16), `6e7d20c` (#17), `fc6bbbea54eab85b4a52fd76e389ec9b614e2edb` (A), `b3a53da38b5fc7b0684d1276a14b8162b039ee23` y `02144df719be36bdaf1752f2eb7cdfcbfe404b3a` (B). El segundo commit de B incluye el primero. Candidato previo `21b223ecbc2619f4bf934ebe291be89ddb9671b9`. En `docs/DATABASE.md` se conservaron las filas de `R__consolidar_sesiones_vigentes.sql` y `db/demo/V1001__ambientes_y_cuentas_fase_iv.sql`.
+- Clon aislado `p2c-backend`. La primera revisión comenzó antes de recibir el candidato de E. Base `b00e92b`, insumos `8001dc9` (#16), `6e7d20c` (#17), `fc6bbbea54eab85b4a52fd76e389ec9b614e2edb` (A), `b3a53da38b5fc7b0684d1276a14b8162b039ee23` y `02144df719be36bdaf1752f2eb7cdfcbfe404b3a` (B). El segundo commit de B incluye el primero. Candidato inicial de seguridad `21b223ecbc2619f4bf934ebe291be89ddb9671b9`. En `docs/DATABASE.md` se conservaron las filas de `R__consolidar_sesiones_vigentes.sql` y `db/demo/V1001__ambientes_y_cuentas_fase_iv.sql`.
 - `backend-uni` rama auxiliar `fix/fase-4-p2-seguridad`, commit propio `79262803162332bf6ca4018077d3a7341758cf8f`. E puede aplicar ese único commit sobre su candidato con los insumos citados. Cambia cinco archivos de pruebas: `OpenApiContractIT.java`, `TelemetryIT.java`, `AttachmentIT.java`, `SignedDownloadIT.java` y `RequestLifecycleIT.java`. Se añadieron comprobaciones de UI de Swagger, rechazo de JWT E y métodos no permitidos para telemetría, historial y comentarios ajenos, carga ajena y ausencia de firma al descargar sin autorización. El código productivo de A se conservó.
 - Java 21.0.5, Maven 3.9.11, Docker Desktop y Testcontainers con `mysql:8.4.13`. `mvn -B -ntp verify` en el candidato inicial pasó con 13 unitarias y 93 integraciones. `mvn -B -ntp clean verify` en el candidato con las nuevas pruebas pasó con **13 unitarias, 94 integraciones, 0 fallos, 0 errores y 0 omitidas**. La ejecución local en Windows fijó `JAVA_HOME` al JDK 21 y `-Dmaven.repo.local` al caché de Maven de la máquina.
 - `AuthIT` y `RegistrationRateLimitIT` cubrieron la revocación de JWT y refresh, concurrencia, reutilización, cuentas ficticias y límites `429`. `RequestLifecycleIT` y `ReservationIT` cubrieron propiedad, asignación y área. Las pruebas de adjuntos emplearon almacenamiento local y adaptador de firma simulado. `TelemetryIT` verificó `UP` mínimo público; `401` para anónimo y JWT de administrador y estudiante; `200` para la cuenta recolectora válida; `403` con dicha cuenta para endpoints ajenos de Actuator o métodos no habilitados. `OpenApiContractIT` verificó Swagger y sus 64 operaciones de API.
 - Evidencia local reproducible en `target/surefire-reports`, `target/failsafe-reports` y `target/openapi.yaml` del clon. `output/p2c-maven-resumen.txt` conserva los conteos y extractos filtrados. La salida completa puede incluir credenciales efímeras de la autoconfiguración de pruebas. `git diff --check` pasó antes del commit.
+
+### Candidato entregado por E
+
+- Base exacta `backend-uni@3fd0c0dfd84d6bc4c73130044a3f6ab221a1fa53`, rama de E `feature/fase-4-p2-candidato-local`, importada desde su bundle. Según el traspaso de E, esa base pasó `mvn -o -B -ntp verify` con 13 unitarias y 93 integraciones y un smoke con `infra-uni@979090d912505ded349e3ac7bf029bf168a0b450`. La evidencia de esa corrida está en `p2e-integracion/TRASPASO.md` del workspace.
+- La única diferencia entre la base temporal de C y la de E es el orden de las dos filas en `docs/DATABASE.md`. El SHA `79c5cdd17e5ffb944b3c9057e892a5f140b190ce` aplica el mismo parche de seguridad sobre el candidato exacto de E, en la rama aislada `verify/fase-4-p2-seguridad-en-e`. `git patch-id --stable` confirmó la equivalencia con `79262803162332bf6ca4018077d3a7341758cf8f` y `git diff --check` pasó. E debe integrar solo una de las dos versiones del parche.
+- La corrida de C sobre `79c5cdd17e5ffb944b3c9057e892a5f140b190ce` ejecutó `mvn -o -B -ntp clean verify` con Java 21.0.5 y MySQL 8.4.13 de Testcontainers. Resultado `BUILD SUCCESS`, **13 unitarias y 94 integraciones, sin fallos, errores ni omitidas**. El resumen redactado por clase está en `output/p2c-maven-candidato-e-resumen.txt`. El smoke Compose de E corresponde a su base `3fd0c0d`. La revisión de staging corresponde al tráfico desplegado que se describe más abajo, con SHA pendiente de confirmar.
 
 ## CI
 
@@ -52,10 +58,10 @@ gitleaks dir versionado --redact=100 --report-format=json --report-path=arbol.js
 
 | Repositorio | Historia | Árbol versionado | Disposición |
 | --- | --- | --- | --- |
-| `backend-uni` | 39 commits, 1 coincidencia | 1 coincidencia | Es el mismo valor ficticio en `src/test/java/pe/edu/universidad/servicios/attachments/SupabaseAttachmentStorageTest.java:30`. Introducido en `ae0721c7d550b0150bcf2fbf607bfd8522030884`. Valor `[redactado]`. |
-| `infra-uni` | 32 commits, 0 coincidencias | 0 coincidencias en el árbol revisado para entrega | Sin coincidencias en el alcance indicado. |
+| `backend-uni` | 40 commits de las referencias con el candidato de E, 1 coincidencia | 1 coincidencia en `79c5cdd` | Es el mismo valor ficticio en `src/test/java/pe/edu/universidad/servicios/attachments/SupabaseAttachmentStorageTest.java:30`. Introducido en `ae0721c7d550b0150bcf2fbf607bfd8522030884`. Valor `[redactado]`. |
+| `infra-uni` | 33 commits, 0 coincidencias | 0 coincidencias en el árbol revisado para entrega | Sin coincidencias en el alcance indicado. |
 
-Evidencias redactadas en `output/p2c-*-gitleaks-history.json` y `output/p2c-*-gitleaks-versionado.json`. La pasada exploratoria que incluyó `target/` explica SEG-04. Sin credenciales reales identificadas por estas reglas dentro del alcance versionado; los valores locales y demo conocidos se clasificaron por su definición y uso, sin intentar autenticarlos en servicios reales.
+Evidencias redactadas en `output/p2c-backend-candidato-e-gitleaks-{history,versionado}.json` y `output/p2c-infra-gitleaks-{history,versionado}.json`. La pasada exploratoria que incluyó `target/` explica SEG-04. Sin credenciales reales identificadas por estas reglas dentro del alcance versionado. Los valores locales y demo conocidos se clasificaron por su definición y uso.
 
 ### Procedimiento de rotación ante una credencial real
 

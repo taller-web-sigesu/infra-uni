@@ -1,0 +1,63 @@
+Gestal | Fase IV | P2
+21 de noviembre de 2026, America/Lima
+Backend base: b00e92b3500c1a85526372a9bb5c00a6f6ca4dc0
+Backend instrumentado (A): fc6bbbea54eab85b4a52fd76e389ec9b614e2edb
+JAR local SHA-256: 823B35E46B53E817D104540FD98CA8E7BA6149999C02359807C4BE3B5AF27D48
+
+Ramas auxiliares
+  Consulta GitHub de los dos refs main, git bundle create, git clone -b main,
+  git switch -c, git rev-parse HEAD, git diff --cached --check, git commit.
+  Los main locales coinciden con las bases consultadas en GitHub.
+
+Docker Compose 2.39.4
+  docker compose -f observability/compose.yaml config -q
+  docker compose -f compose.prueba.yaml up -d
+  docker compose -p gestal-p2b-monitor -f observability/compose.yaml up -d
+  docker compose -p gestal-p2b-monitor -f observability/compose.yaml ps -a
+  Resultado: cinco componentes Up. Health del backend HTTP 200, status UP.
+
+Prometheus 3.5.0
+  promtool check rules observability/prometheus/gestal.rules.yml
+  SUCCESS: 10 rules found
+  promtool test rules observability/prometheus/gestal.test.yml
+  SUCCESS (activación y recuperación de las seis alertas más el escenario de datos ausentes)
+  docker compose exec -T prometheus promtool check config /etc/prometheus/prometheus.yml
+  SUCCESS: 1 rule files found; valid prometheus config file syntax; 10 rules found
+  docker compose exec -T prometheus promtool test rules /etc/prometheus/gestal.test.yml
+  SUCCESS
+  GET /api/v1/targets: gestal-backend UP, gestal-deploy UP, gestal-health UP.
+  GET /api/v1/status/flags: storage.tsdb.retention.time=15d
+
+Tempo 2.8.2
+  GET /status/config?mode=diff desde la red de Compose.
+  compactor.compaction.block_retention: 168h0m0s
+  GET /api/datasources/proxy/uid/gestal-tempo/api/traces/<traceId> en Grafana.
+  El span HTTP y el log JSON del backend coinciden. Ver peticion-correlacionada.json.
+
+Carga ficticia y captura
+  GET /actuator/health: 200 y UP.
+  GET /api/v1/status con X-Correlation-ID y traceparent ficticios: 200 y cabecera coincidente.
+  POST /api/v1/auth/login, GET /api/v1/catalogs/categories y POST /api/v1/requests
+  con la cuenta demo. Se confirmó 201 en la solicitud y 401 en un login ficticio inválido.
+  24 GET /api/v1/status adicionales con intervalo de 2 s.
+  GET /api/v1/query para las series guardadas en prometheus-local.json.
+  Edge headless, perfil aislado, captura de Grafana en loopback con rango fijo.
+
+GitHub Actions
+  python -B (fixtures del exportador): failure, timed_out, success, cancelled y vacío, OK.
+  gh api repos/taller-web-sigesu/backend-uni/actions/workflows/deploy-production.yml/runs
+  con branch=production, status=completed, per_page=1: 43963809965, completed, success.
+  gh api repos/taller-web-sigesu/backend-uni/actions/runs/43963809965/jobs:
+  hook de Render, disponibilidad y smoke con conclusión success.
+  gh run list --repo taller-web-sigesu/backend-uni --commit fc6bbbea54eab85b4a52fd76e389ec9b614e2edb:
+  no se listaron ejecuciones para ese SHA.
+  gh api repos/taller-web-sigesu/backend-uni/actions/workflows/staging-smoke.yml/runs
+  con status=completed y per_page=1: 43970286002, completed, success, 2026-11-16.
+
+Maven en la rama auxiliar de backend
+  JDK 21, mvn -B -ntp -o -Dmaven.repo.local=<caché-local> test
+  13 pruebas, 0 fallos, 0 errores, 0 omitidas. BUILD SUCCESS.
+
+Staging público
+curl.exe --silent --show-error --max-time 55 https://uniservice-backend-staging.onrender.com/actuator/health
+HTTP 200, status UP, grupos liveness y readiness.

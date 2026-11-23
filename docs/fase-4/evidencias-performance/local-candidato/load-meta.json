@@ -1,0 +1,17 @@
+{
+  "scenario": "load",
+  "project": "gestal-perf-candidate",
+  "endpoint": "http://127.0.0.1:18081",
+  "availability_date": "2026-11-23",
+  "infra_sha": "979090d912505ded349e3ac7bf029bf168a0b450",
+  "backend_sha": "3fd0c0dfd84d6bc4c73130044a3f6ab221a1fa53",
+  "backend_image": "sha256:ffe205e71c7882ab489f0165ce93a8b0d9208380dd0788cc323e37f21d80dc71",
+  "mysql_image": "sha256:a81d043930e51745522bd5c430961cf8286f0a23f0a9a2a6e0108f7ea71b0902",
+  "docker": "29.9.3 / 29.9.3",
+  "compose": "5.7.0",
+  "docker_engine": "Docker Desktop / x86_64 / CPU=12 / RAM=8215810048",
+  "k6": "k6.exe v2.4.0 (commit/dd9395906d, go1.26.11, windows/amd64)",
+  "start_utc": "2026-11-22T01:23:24.0173483Z",
+  "end_utc": "2026-11-22T01:26:01.7585499Z",
+  "exit_code": 0
+}

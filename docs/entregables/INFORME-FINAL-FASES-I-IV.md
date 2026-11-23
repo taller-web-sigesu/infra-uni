@@ -1,0 +1,1519 @@
+<div class="portada">
+
+**UNIVERSIDAD NACIONAL MAYOR DE SAN MARCOS**  
+*Universidad del Perú, Decana de América*
+
+**Facultad de Ingeniería de Sistemas e Informática**
+
+# Informe final — Fases I a IV
+
+**Gestal / UniService**  
+Sistema Web Inteligente para la Gestión Integral de Servicios Universitarios
+
+**Grupo 3**
+
+Sebastian Andree Tejeda Alata (líder)  
+Marcos Luis Basualdo Ale  
+Bizarro Ortiz Luis Junior Alfredo  
+Gianpierre Rodrigo Dulanto Romero  
+Albert Marco Aurelio Huaman Ñahuinlla
+
+**Curso:** Taller de construcción de software web  
+**Profesor:** Candela Arce, David Felix  
+**2026-II**
+
+Versión `v1.0.0` · Última actualización: 22/11/2026
+
+</div>
+
+## 2\. Descripción general del proyecto
+
+**Gestal es la plataforma web con la que el equipo busca que la universidad concentre en un único canal la atención de los servicios que solicitan estudiantes, docentes y personal administrativo.**
+
+El sistema atiende, entre otros, estos tipos de requerimientos:
+
+* Mantenimiento de instalaciones y equipos;
+
+* Incidencias en la infraestructura del campus;
+
+* Soporte informático;
+
+* Trámites administrativos.
+
+Con Gestal, cada requerimiento puede registrarse, derivarse a una persona responsable, seguirse paso a paso mediante estados y prioridades, medirse en plazos de atención (SLA) y auditarse para saber quién realizó cada cambio.
+
+El trabajo comprendió las 16 semanas del curso y culminó en una aplicación full-stack con:
+
+* **Cliente web: JavaScript moderno en la primera fase y React en la construcción posterior;**
+
+* **Servidor: Spring Boot, API REST y una organización por capas;**
+
+* **Datos: MySQL como motor de persistencia;**
+
+* **Acceso: autenticación con JWT y control de roles;**
+
+* **Operación: contenedores (Docker), integración y entrega continuas, pruebas automatizadas y observabilidad (métricas, trazas, logs correlacionados y alertas).**
+
+El primer entregable se ubicó en la Fase I del plan del curso (análisis, especificación y prototipo) e incluyó una muestra de desarrollo en JavaScript, conservada en la carpeta `frontend-uni/docs/fase-1/`. Sobre esa base, el equipo construyó la primera versión funcional (Fase II) con React, Spring Boot y MySQL, cerró la Fase III con el Release Candidate `v1.0.0-rc.2`, desplegado en staging y producción, y completó la Fase IV con la versión final `v1.0.0`: sesión única, observabilidad, pruebas de seguridad y de rendimiento, mejoras de UI/UX y documentación de cierre. El estado de cada fase se resume en la sección 15 y la Fase IV se detalla en la sección 18\. El producto se despliega como **UniService / Universidad Actúa**; **Gestal** es el nombre del proyecto académico.
+
+## 3\. Planteamiento y descripción del problema
+
+Hoy, buena parte de las solicitudes de la universidad circula por canales dispersos: correos, formatos sueltos, llamadas o aplicaciones que trabajan por separado y no comparten información.
+
+Ese escenario trae varias consecuencias:
+
+* Se pierden o se registran dos veces los mismos pedidos;
+
+* Cada caso avanza sin un seguimiento claro;
+
+* No queda un rastro verificable de lo que ocurrió;
+
+* Cuesta identificar a la persona encargada de cada atención;
+
+* Se conoce poco sobre los plazos en que se responde;
+
+* Resulta difícil juzgar la calidad del servicio;
+
+* No hay datos suficientes para tomar decisiones.
+
+Los principales afectados son:
+
+* **Estudiantes**, que necesitan reportar problemas y conocer el estado de sus solicitudes;
+
+* **Docentes y personal administrativo**, que realizan solicitudes de soporte y servicios;
+
+* **Áreas de soporte** (mantenimiento, infraestructura, informática, administración), que atienden los requerimientos;
+
+* **Autoridades y supervisores**, que necesitan información para tomar decisiones.
+
+En consecuencia, no existe un canal único, ordenado y trazable para registrar, priorizar, atender y monitorear las solicitudes de servicios universitarios.
+
+## 4\. Justificación
+
+Contar con una plataforma web centralizada permitirá:
+
+* **Eliminar la pérdida y duplicación de solicitudes**, al tener un único canal de registro;
+
+* **Garantizar trazabilidad**, registrando quién creó, modificó o atendió cada solicitud y cuándo;
+
+* **Asignar responsables** de forma explícita y evitar solicitudes huérfanas;
+
+* **Priorizar y controlar tiempos de atención** mediante prioridades y SLA con vencimientos;
+
+* **Medir la calidad del servicio** con indicadores de atención y encuestas de satisfacción;
+
+* **Facilitar la toma de decisiones** con un dashboard de indicadores y reportes exportables;
+
+* **Mejorar la experiencia de los usuarios** con una interfaz clara, usable y con control de acceso por roles.
+
+Además, el proyecto es viable en el ciclo académico: el alcance está delimitado, las funcionalidades están priorizadas y el plan del curso contempla las fases necesarias para construirlo, probarlo, asegurarlo, desplegarlo y monitorearlo.
+
+No se calificará únicamente que el sistema funcione: el proyecto debe demostrar el ciclo completo de construcción de software web, desde la especificación hasta la observabilidad.
+
+## 5\. Objetivo general y objetivos específicos
+
+### 5.1 Objetivo general
+
+Construir una plataforma web que permita registrar, gestionar, priorizar, atender y monitorear solicitudes de servicios universitarios, garantizando usabilidad, seguridad, calidad, rendimiento y disponibilidad.
+
+### 5.2 Objetivos específicos
+
+1. Analizar y especificar el problema, los actores, el alcance y los requerimientos iniciales del sistema.
+
+2. Diseñar la arquitectura preliminar, los wireframes, los mockups y un prototipo coherente con los requerimientos.
+
+3. Redactar las épicas e historias de usuario priorizadas, con criterios de aceptación y escenarios BDD verificables.
+
+4. Implementar la autenticación y la gestión de roles (estudiante, docente, técnico, supervisor y administrador) mediante JWT y sesión con refresh token.
+
+5. Desarrollar el registro y el ciclo de vida completo de las solicitudes: categoría, prioridad, estados, asignación de responsables y evidencias adjuntas.
+
+6. Incorporar SLA por prioridad o categoría, con control de vencimientos, y trazabilidad de cambios mediante auditoría.
+
+7. Construir un dashboard con los indicadores de atención acordados, junto con reportes exportables y encuestas de satisfacción.
+
+8. Asegurar la calidad mediante pruebas automatizadas, criterios de aceptación verificables y prácticas de seguridad basadas en OWASP.
+
+9. Desplegar la aplicación con Docker y un pipeline CI/CD, y habilitar la observabilidad para monitorear su operación.
+
+10. Incorporar la reserva de ambientes con consulta de disponibilidad, registro, aprobación, rechazo y cancelación.
+
+11. Implementar el auto-registro con aprobación de cuentas, el restablecimiento de contraseñas y las evidencias adjuntas a las solicitudes.
+
+## 6\. Actores y usuarios
+
+| ID | Actor | Descripción | Necesidades | Responsabilidades |
+| ----- | ----- | ----- | ----- | ----- |
+| AC-01 | Estudiante (solicitante) | Miembro de la comunidad universitaria que reporta un problema o pide un servicio. | Contar con un canal único para registrar solicitudes; conocer el estado de sus solicitudes y quién las atiende. | Registrar solicitudes con datos completos y veraces; consultar el estado y el historial de sus solicitudes; añadir comentarios. |
+| AC-02 | Técnico | Personal de un área de soporte (mantenimiento, infraestructura, informática o administración) que atiende solicitudes. | Ver de forma ordenada las solicitudes asignadas y su prioridad; registrar el avance sin depender de correos o llamadas. | Atender las solicitudes asignadas; actualizar su estado; registrar comentarios sobre la atención realizada. |
+| AC-03 | Supervisor | Responsable de un área de soporte que organiza el trabajo de los técnicos. | Ver las solicitudes de su área; decidir prioridades; repartir la carga de trabajo; conocer los indicadores de atención. | Asignar o reasignar responsables; ajustar prioridades; cerrar o rechazar solicitudes; supervisar los indicadores del dashboard. |
+| AC-04 | Administrador | Encargado de la configuración y el mantenimiento del sistema. | Mantener actualizados los usuarios y catálogos sin modificar el código. | Gestionar usuarios y roles; gestionar categorías, prioridades, estados y áreas responsables; aprobar cuentas y restablecer contraseñas. |
+| AC-05 | Docente | Miembro de la comunidad universitaria que realiza solicitudes de servicio y reservas. | Contar con el mismo canal y los mismos permisos que el estudiante para registrar, seguir y comentar sus solicitudes. | Registrar solicitudes y reservas propias; consultar su estado; comentar y responder la encuesta de satisfacción. |
+
+## 7\. Alcance y límites
+
+### 7.1 Alcance implementado
+
+El alcance implementado de Gestal incluye:
+
+| ID | Funcionalidad | Actores |
+| ----- | ----- | ----- |
+| AL-01 | Inicio y cierre de sesión, auto-registro de estudiantes y acceso según el rol del usuario. | Todos |
+| AL-02 | Registro de solicitudes con código, solicitante, categoría, descripción, ubicación, prioridad, fecha, estado y evidencias adjuntas. | Estudiante, Docente, Técnico, Supervisor |
+| AL-03 | Consulta del listado, el detalle y el historial de estados de una solicitud, con comentarios. | Estudiante, Docente, Técnico, Supervisor |
+| AL-04 | Gestión del ciclo de vida: asignación de responsable, ajuste de prioridad y cambios de estado (Nuevo, Asignado, En proceso, Resuelto, Cerrado y Rechazado). | Técnico, Supervisor |
+| AL-05 | Dashboard con los indicadores de atención, filtros y reportes exportables. | Supervisor, Administrador |
+| AL-06 | Administración de usuarios, roles, categorías, prioridades, estados y áreas responsables; aprobación de cuentas y restablecimiento de contraseñas. | Administrador |
+| AL-07 | SLA con control de vencimientos, auditoría de cambios y encuesta de satisfacción. | Sistema, Supervisor, Estudiante, Docente |
+| AL-08 | Reserva de ambientes: consulta de espacios y disponibilidad, registro, aprobación o rechazo, cancelación y administración de espacios, horarios y política. | Todos, Supervisor, Administrador |
+
+El alcance implementado cubre AL-01 a AL-08, incluidos SLA, auditoría, reportes exportables y encuestas de satisfacción.
+
+### 7.2 Exclusiones
+
+No forman parte del alcance implementado:
+
+| ID | Exclusión | Motivo |
+| ----- | ----- | ----- |
+| EX-01 | Notificaciones (in-app o correo) | Dependen de un proveedor de mensajería y de reglas de negocio adicionales; quedan como evolución posterior. |
+| EX-02 | Recuperación de contraseña por correo | Se cubre con el cambio de contraseña y el restablecimiento por el administrador; no se envía correo. |
+| EX-03 | Integración con otros sistemas de la universidad | No forma parte del problema planteado. |
+| EX-04 | Reservas recurrentes o periódicas | La reserva simple está implementada; la recurrencia requiere reglas adicionales. |
+| EX-05 | Varios roles por usuario | Cada cuenta tiene un rol principal. |
+
+En el primer entregable (Fase I) no se implementaron el backend, la base de datos ni la autenticación real: se entregó la especificación, el diseño y un prototipo con datos simulados. Las fases II y III completaron el backend real, MySQL, autenticación, reservas, evidencias, pruebas y despliegue (sección 15).
+
+### 7.3 Límites
+
+* Gestal gestiona solicitudes de servicio y reservas de ambientes; no ejecuta los trabajos ni gestiona inventarios, compras o personal.  
+* Solo los usuarios registrados pueden acceder; el auto-registro crea una cuenta pendiente de aprobación.  
+* Los seis estados del ciclo de vida son fijos en la primera versión; solo se puede cambiar su nombre visible.  
+* Cada usuario tiene un rol principal: estudiante, docente, técnico, supervisor o administrador.
+
+### 7.4 Supuestos
+
+| ID | Supuesto |
+| ----- | ----- |
+| S-01 | Cada técnico y cada supervisor pertenecen a una sola área responsable. |
+| S-02 | Cada categoría de solicitud está asociada a un área responsable, lo que permite dirigir la solicitud al supervisor correcto. |
+| S-03 | La prioridad inicial de una solicitud se asigna por defecto según su categoría, y el supervisor puede ajustarla. |
+| S-04 | Los usuarios y catálogos iniciales se cargan con datos de prueba; no se usan datos personales reales. |
+| S-05 | La aplicación se usará en navegadores web modernos de escritorio y móviles. |
+| S-06 | El docente no tiene área y comparte los permisos del estudiante; su cuenta la crea el administrador. |
+
+## 8\. Requerimientos iniciales
+
+### 8.1 Criterios de priorización
+
+| Prioridad | Significado |
+| ----- | ----- |
+| Alta | Imprescindible para el flujo principal; sin él no hay una versión funcional. |
+| Media | Aporta valor importante, pero el flujo principal funciona sin él. |
+| Baja | Valor adicional si el tiempo lo permite. |
+
+### 8.2 Requerimientos funcionales
+
+| ID | Requerimiento | Actor | Alcance | Prioridad |
+| ----- | ----- | ----- | ----- | ----- |
+| RF-01 | El sistema debe permitir iniciar y cerrar sesión con correo y contraseña. | Todos | AL-01 | Alta |
+| RF-02 | El sistema debe mostrar solo las opciones y datos permitidos al rol del usuario. | Todos | AL-01 | Alta |
+| RF-03 | El sistema debe permitir registrar una solicitud indicando categoría, descripción y ubicación. | Estudiante, Docente | AL-02 | Alta |
+| RF-04 | El sistema debe validar los campos obligatorios antes de registrar la solicitud y mostrar mensajes claros cuando falten datos. | Estudiante, Docente | AL-02 | Alta |
+| RF-05 | El sistema debe asignar automáticamente a cada solicitud un código, la fecha de registro, el solicitante, la prioridad inicial y el estado Nuevo. | Sistema | AL-02 | Alta |
+| RF-06 | El sistema debe mostrar al solicitante el listado de sus solicitudes con código, categoría, estado, prioridad y fecha. | Estudiante, Docente | AL-03 | Alta |
+| RF-07 | El sistema debe mostrar el detalle de una solicitud con sus datos, responsable, estado actual e historial de estados. | Estudiante, Docente, Técnico, Supervisor | AL-03 | Alta |
+| RF-08 | El sistema debe permitir añadir comentarios a una solicitud, registrando autor y fecha. | Estudiante, Docente, Técnico, Supervisor | AL-03 | Alta |
+| RF-09 | El sistema debe mostrar al supervisor las solicitudes de su área, con filtros por estado, categoría y prioridad. | Supervisor | AL-04 | Alta |
+| RF-10 | El sistema debe permitir al supervisor asignar o reasignar una solicitud a un técnico de su área. | Supervisor | AL-04 | Alta |
+| RF-11 | El sistema debe permitir al supervisor ajustar la prioridad de una solicitud. | Supervisor | AL-04 | Alta |
+| RF-12 | El sistema debe mostrar al técnico las solicitudes asignadas, ordenadas por prioridad y fecha. | Técnico | AL-04 | Alta |
+| RF-13 | El sistema debe permitir al técnico cambiar el estado de una solicitud asignada a En proceso y a Resuelto. | Técnico | AL-04 | Alta |
+| RF-14 | El sistema debe permitir al supervisor cerrar una solicitud resuelta o rechazar una solicitud indicando el motivo. | Supervisor | AL-04 | Alta |
+| RF-15 | El sistema debe impedir los cambios de estado no permitidos por el ciclo de vida de la solicitud. | Sistema | AL-04 | Alta |
+| RF-16 | El sistema debe mostrar un dashboard con solicitudes registradas, pendientes, atendidas, por categoría, por prioridad y por responsable, tiempo promedio de atención, porcentaje de resueltas y solicitudes vencidas. | Supervisor, Administrador | AL-05 | Alta |
+| RF-17 | El sistema debe permitir filtrar los indicadores del dashboard por rango de fechas y área. | Supervisor, Administrador | AL-05 | Media |
+| RF-18 | El sistema debe permitir crear, consultar, editar y desactivar usuarios, y asignarles un rol y un área. | Administrador | AL-06 | Alta |
+| RF-19 | El sistema debe permitir gestionar categorías y áreas responsables, asociando cada categoría a un área. | Administrador | AL-06 | Alta |
+| RF-20 | El sistema debe permitir gestionar prioridades y los nombres visibles de los estados. | Administrador | AL-06 | Media |
+| RF-21 | El sistema debe permitir definir un tiempo máximo de atención (SLA) por prioridad o categoría y marcar las solicitudes vencidas o próximas a vencer. | Administrador, Sistema | AL-07 | Media |
+| RF-22 | El sistema debe registrar cada cambio de una solicitud (campo, valor anterior, valor nuevo, usuario y fecha). | Sistema | AL-07 | Media |
+| RF-23 | El sistema debe permitir exportar reportes de solicitudes e indicadores. | Supervisor, Administrador | AL-05 | Baja |
+| RF-24 | El sistema debe permitir al solicitante responder una encuesta de satisfacción cuando su solicitud se cierra. | Estudiante, Docente | AL-07 | Baja |
+| RF-25 | El sistema debe permitir consultar los espacios reservables y su disponibilidad por fecha y hora. | Todos | AL-08 | Alta |
+| RF-26 | El sistema debe permitir registrar una reserva indicando espacio, fecha, hora de inicio, hora de fin y motivo; la reserva queda pendiente de aprobación. | Todos | AL-08 | Alta |
+| RF-27 | El sistema debe impedir reservas solapadas o duplicadas y las que incumplan horario, duración, anticipación o capacidad. | Sistema | AL-08 | Alta |
+| RF-28 | El sistema debe permitir al supervisor del área del espacio o al administrador aprobar o rechazar reservas pendientes, registrando responsable, fecha y motivo. | Supervisor, Administrador | AL-08 | Alta |
+| RF-29 | El sistema debe permitir al solicitante consultar y cancelar sus reservas vigentes. | Todos | AL-08 | Alta |
+| RF-30 | El sistema debe permitir administrar espacios, tipos de espacio, horarios y la política de reservas. | Administrador | AL-08 | Media |
+| RF-31 | El sistema debe permitir adjuntar, consultar y eliminar evidencias (JPG, PNG o PDF) en una solicitud abierta, con límites de tipo, tamaño y cantidad. | Estudiante, Docente, Técnico, Supervisor | AL-02 | Media |
+| RF-32 | El sistema debe permitir que un estudiante se registre con su correo institucional; la cuenta queda pendiente de aprobación con el rol Estudiante. | Visitante | AL-01 | Media |
+| RF-33 | El sistema debe permitir al administrador aprobar o rechazar con motivo las cuentas pendientes de aprobación. | Administrador | AL-06 | Media |
+| RF-34 | El sistema debe permitir al administrador restablecer la contraseña de un usuario con una contraseña temporal de cambio obligatorio, y a cada usuario cambiar su propia contraseña. | Administrador, Todos | AL-06 | Media |
+
+### 8.3 Requerimientos no funcionales
+
+| ID | Categoría | Requerimiento | Prioridad |
+| :---: | :---: | ----- | :---: |
+| RNF-01 | Usabilidad | La interfaz debe ser responsive y usable desde 360 px de ancho (móvil) hasta escritorio. | Alta |
+| RNF-02 | Usabilidad | Un solicitante debe poder registrar una solicitud en no más de 3 pasos después de iniciar sesión. | Alta |
+| RNF-03 | Usabilidad | Los formularios deben mostrar mensajes de validación junto a cada campo, confirmaciones de las acciones y estados vacíos. | Alta |
+| RNF-04 | Usabilidad | La interfaz debe cumplir buenas prácticas básicas de accesibilidad: etiquetas en los campos, contraste suficiente y navegación con teclado. | Media |
+| RNF-05 | Seguridad | Las contraseñas deben almacenarse con un algoritmo de hash seguro, nunca en texto plano. | Alta |
+| RNF-06 | Seguridad | Toda operación, salvo el inicio de sesión y el auto-registro (HU-27), debe requerir autenticación (JWT o sesión) y respetar la autorización por rol. | Alta |
+| RNF-07 | Seguridad | Las entradas deben validarse en el frontend y en el backend para prevenir inyección y XSS, siguiendo los principios OWASP. | Alta |
+| RNF-08 | Seguridad | Los secretos (claves, credenciales de base de datos) deben gestionarse con variables de entorno, sin valores fijos en el código. | Alta |
+| RNF-09 | Rendimiento | Las operaciones habituales (listar, consultar detalle, registrar) deben responder en menos de 2 segundos con la carga de demostración. | Media |
+| RNF-10 | Rendimiento | Los listados de solicitudes deben paginarse. | Media |
+| RNF-11 | Disponibilidad | La aplicación debe estar accesible desde Internet o desde una infraestructura de demostración durante el periodo de evaluación. | Alta |
+| RNF-12 | Disponibilidad | Ante un fallo, el sistema debe mostrar mensajes de error comprensibles sin exponer detalles técnicos. | Media |
+| RNF-13 | Calidad | El backend debe seguir una arquitectura por capas (controladores, servicios, DTO y acceso a datos). | Alta |
+| RNF-14 | Calidad | El sistema debe contar con pruebas automatizadas unitarias y de integración ejecutadas en el pipeline CI/CD. | Alta |
+| RNF-15 | Calidad | El sistema debe generar logs y métricas que permitan identificar incidentes y depurar errores. | Media |
+| RNF-16 | Integridad | El servidor debe garantizar que no existan dos reservas activas solapadas para un mismo espacio, incluso con solicitudes concurrentes. | Alta |
+| RNF-17 | Seguridad | Un usuario solo accede a sus reservas; el supervisor a las de los espacios de su área; el administrador a todas. | Alta |
+| RNF-18 | Rendimiento | La consulta de disponibilidad de un espacio y día debe responder en menos de 2 segundos con la carga de demostración. | Media |
+| RNF-19 | Seguridad | Las evidencias se guardan fuera de la base de datos en un almacenamiento privado (Supabase Storage en la nube) y solo se entregan a usuarios autorizados mediante URLs firmadas de corta duración. | Alta |
+
+### 8.4 Verificación de coherencia
+
+| Verificación | Resultado |
+| ----- | ----- |
+| Cada actor tiene requerimientos asociados. | Estudiante: RF-03 a RF-08, RF-24, RF-31. Docente: RF-03 a RF-08, RF-24, RF-31. Técnico: RF-07, RF-08, RF-12, RF-13, RF-31. Supervisor: RF-07 a RF-11, RF-14, RF-16, RF-17, RF-28, RF-31. Administrador: RF-16 a RF-21, RF-28, RF-30, RF-33, RF-34. |
+| Cada funcionalidad del alcance tiene requerimientos. | AL-01: RF-01, RF-02, RF-32. AL-02: RF-03 a RF-05, RF-31. AL-03: RF-06 a RF-08. AL-04: RF-09 a RF-15. AL-05: RF-16, RF-17, RF-23. AL-06: RF-18 a RF-20, RF-33, RF-34. AL-07: RF-21, RF-22, RF-24. AL-08: RF-25 a RF-30. |
+| Ninguna exclusión aparece como requerimiento. | No hay requerimientos de notificaciones, recuperación por correo, integraciones, reservas recurrentes ni multi-rol. |
+| Las responsabilidades de la sección 6 coinciden con los requerimientos. | Cada responsabilidad de la tabla de actores tiene al menos un RF. |
+| Los RNF cubren las cualidades del objetivo general. | Usabilidad (RNF-01 a 04), seguridad (05 a 08, 17, 19), rendimiento (09, 10, 18), disponibilidad (11, 12), calidad (13 a 15) e integridad (16). |
+
+## 9\. Épicas e historias de usuario
+
+### 9.1 Épicas del sistema
+
+| ID | Épica | Descripción | Alcance | Prioridad |
+| ----- | ----- | ----- | ----- | ----- |
+| EP-01 | Autenticación y control de acceso | Inicio y cierre de sesión, auto-registro de estudiantes, control de sesión y restricción de vistas y operaciones según el rol del usuario. | AL-01 | Alta |
+| EP-02 | Registro y seguimiento de solicitudes | Creación de solicitudes de servicio por parte de los solicitantes, evidencias adjuntas, consulta de listados, visualización del detalle, historial de estados y registro de comentarios. | AL-02, AL-03 | Alta |
+| EP-03 | Gestión del ciclo de vida de solicitudes | Evaluación, filtrado por área, ajuste de prioridad, asignación de técnicos responsables, actualización del estado de atención, cierre y rechazo motivado. | AL-04 | Alta |
+| EP-04 | Dashboard e indicadores de atención | Visualización de métricas operativas de atención, filtros por fechas y área responsable, y exportación de reportes. | AL-05 | Alta |
+| EP-05 | Administración y configuración | Gestión de usuarios, asignación de roles y áreas, mantenimiento de catálogos de categorías, áreas responsables, prioridades y nombres visibles de estados, aprobación de cuentas y restablecimiento de contraseñas. | AL-06 | Alta |
+| EP-06 | SLA, auditoría y calidad del servicio | Definición de tiempos máximos de atención (SLA) con control de vencimientos, trazabilidad de cambios por auditoría y encuestas de satisfacción. | AL-07 | Media |
+| EP-07 | Reserva de ambientes | Consulta de espacios y disponibilidad, registro de reservas, aprobación o rechazo, cancelación y administración de espacios, horarios y política de reservas. | AL-08 | Media |
+
+### 9.2 Historias de usuario priorizadas
+
+| ID | Épica | Historia de usuario  | RF asociados | Prioridad | Pantalla vinculada (Fase I) |
+| ----- | ----- | ----- | ----- | ----- | ----- |
+| HU-01 | EP-01 | Como usuario registrado, quiero iniciar y cerrar sesión con mi correo institucional y contraseña, para acceder de forma segura a la plataforma. | RF-01 | Alta | 1\. Inicio de sesión |
+| HU-02 | EP-01 | Como usuario autenticado, quiero visualizar únicamente las opciones de navegación y los datos permitidos para mi rol, para operar sin confusiones y mantener la seguridad de la información. | RF-02 | Alta | Todas |
+| HU-03 | EP-02 | Como estudiante o docente, quiero registrar una solicitud de servicio indicando su categoría, descripción y ubicación, para reportar un problema o requerimiento en la universidad y que sea atendido. | RF-03, RF-04, RF-05 | Alta | 3\. Formulario de registro |
+| HU-04 | EP-02 | Como estudiante o docente, quiero consultar el listado de mis solicitudes registradas viendo su código, categoría, estado, prioridad y fecha, para conocer rápidamente el estado general de mis trámites. | RF-06 | Alta | 2\. Listado de solicitudes |
+| HU-05 | EP-02 | Como solicitante (estudiante o docente), técnico o supervisor, quiero consultar el detalle completo de una solicitud junto con su responsable asignado y su historial de estados, para conocer la trazabilidad de la atención. | RF-07 | Alta | 4\. Detalle y seguimiento |
+| HU-06 | EP-02 | Como solicitante (estudiante o docente), técnico o supervisor, quiero añadir comentarios en una solicitud dejando constancia de mi usuario y la fecha, para comunicar avances, consultas o precisiones durante la atención. | RF-08 | Alta | 4\. Detalle y seguimiento |
+| HU-07 | EP-03 | Como supervisor, quiero visualizar las solicitudes dirigidas a mi área filtrándolas por estado, categoría y prioridad, para organizar y supervisar la carga de trabajo pendiente. | RF-09 | Alta | 2\. Listado / 5\. Vista de gestión |
+| HU-08 | EP-03 | Como supervisor, quiero asignar o reasignar una solicitud a un técnico de mi área y ajustar su nivel de prioridad, para asegurar que cada requerimiento tenga un responsable adecuado según su urgencia. | RF-10, RF-11, RF-15 | Alta | 5\. Vista de gestión |
+| HU-09 | EP-03 | Como técnico, quiero consultar la bandeja de solicitudes que me han sido asignadas ordenadas por prioridad y fecha, para atender primero los casos más urgentes. | RF-12 | Alta | 2\. Listado / 5\. Vista de gestión |
+| HU-10 | EP-03 | Como técnico, quiero cambiar el estado de una solicitud asignada a *En proceso* cuando inicio la labor y a *Resuelto* al culminarla, para reflejar el avance real del servicio. | RF-13, RF-15 | Alta | 5\. Vista de gestión |
+| HU-11 | EP-03 | Como supervisor, quiero cambiar a *Cerrado* una solicitud resuelta tras verificar su conformidad, o a *Rechazado* registrando el motivo correspondiente, para concluir formalmente el ciclo de vida de la solicitud. | RF-14, RF-15 | Alta | 5\. Vista de gestión |
+| HU-12 | EP-04 | Como supervisor o administrador, quiero visualizar un dashboard con los 9 indicadores clave de atención (registradas, pendientes, atendidas, por categoría, por prioridad, por responsable, tiempo promedio, porcentaje de resueltas y vencidas), para evaluar el desempeño del servicio y tomar decisiones. | RF-16 | Alta | — (Fase II) |
+| HU-13 | EP-04 | Como supervisor o administrador, quiero filtrar los indicadores del dashboard por rango de fechas y por área responsable, para analizar el rendimiento en periodos o sectores específicos. | RF-17 | Media | — (Fase II) |
+| HU-14 | EP-04 | Como supervisor o administrador, quiero exportar reportes de las solicitudes e indicadores de atención, para compartir la información en reuniones de gestión o respaldos externos. | RF-23 | Baja | — (Fase II) |
+| HU-15 | EP-05 | Como administrador, quiero crear, consultar, editar y desactivar usuarios asignándoles un rol y un área responsable, para controlar quiénes acceden y operan en el sistema. | RF-18 | Alta | 12\. Usuarios |
+| HU-16 | EP-05 | Como administrador, quiero gestionar el catálogo de categorías y áreas responsables asociando cada categoría a un área, para que las solicitudes nuevas se deriven automáticamente al área correcta. | RF-19 | Alta | 13\. Catálogos |
+| HU-17 | EP-05 | Como administrador, quiero gestionar el catálogo de prioridades y personalizar los nombres visibles de los estados, para adaptar la terminología del sistema a la normativa universitaria sin alterar el código. | RF-20 | Media | 13\. Catálogos |
+| HU-18 | EP-06 | Como administrador, quiero definir tiempos máximos de atención (SLA) por prioridad o categoría para que el sistema identifique solicitudes próximas a vencer o vencidas, para prevenir retrasos en el servicio. | RF-21 | Media | 14\. Políticas SLA |
+| HU-19 | EP-06 | Como supervisor, quiero consultar el registro de auditoría de cada cambio efectuado sobre una solicitud (campo modificado, valor anterior, valor nuevo, autor y fecha), para auditar cualquier modificación. | RF-22 | Media | 5\. Detalle y seguimiento |
+| HU-20 | EP-06 | Como estudiante o docente, quiero responder una breve encuesta de satisfacción cuando mi solicitud pase al estado *Cerrado*, para calificar la atención recibida. | RF-24 | Baja | 5\. Detalle y seguimiento |
+| HU-21 | EP-07 | Como usuario autenticado, quiero consultar los espacios reservables y su disponibilidad por fecha y hora, para elegir un ambiente libre antes de solicitar la reserva. | RF-25 | Alta | 9\. Reservar ambiente |
+| HU-22 | EP-07 | Como usuario autenticado, quiero registrar una reserva indicando espacio, fecha, hora de inicio, hora de fin y motivo, para solicitar el uso de un ambiente universitario en una franja determinada. | RF-26, RF-27 | Alta | 9\. Reservar ambiente |
+| HU-23 | EP-07 | Como supervisor del área del espacio o administrador, quiero aprobar o rechazar las reservas pendientes, para controlar el uso de los ambientes y dejar registro de la decisión. | RF-28 | Alta | 11\. Aprobación de reservas |
+| HU-24 | EP-07 | Como usuario autenticado, quiero consultar y cancelar mis reservas, para hacer seguimiento de mis solicitudes y liberar un ambiente cuando ya no lo necesite. | RF-29 | Alta | 10\. Mis reservas |
+| HU-25 | EP-07 | Como administrador, quiero gestionar los espacios, sus horarios de atención y la política de reservas, para mantener actualizada la oferta de ambientes y las reglas de uso. | RF-30 | Media | 15\. Espacios y horarios |
+| HU-26 | EP-02 | Como solicitante, quiero adjuntar fotos o documentos como evidencia a mi solicitud, para que el área responsable entienda mejor el problema y pueda atenderlo. | RF-31 | Media | 3\. Registro / 5\. Detalle |
+| HU-27 | EP-01 | Como estudiante sin cuenta, quiero registrarme con mi correo institucional, para solicitar acceso a la plataforma sin depender de que el administrador me cree la cuenta. | RF-32 | Media | — (Fase II–III) |
+| HU-28 | EP-05 | Como administrador, quiero revisar las cuentas creadas por auto-registro y aprobarlas o rechazarlas, para que solo accedan al sistema estudiantes legítimos. | RF-33 | Media | 12\. Usuarios (cuentas pendientes) |
+| HU-29 | EP-05 | Como administrador, quiero restablecer la contraseña de un usuario que la olvidó, para que pueda volver a ingresar sin que el sistema dependa del envío de correos. | RF-34 | Media | 12\. Usuarios |
+
+## 10\. División de historias en tareas
+
+| Historia | ID Tarea | Descripción de la tarea | Tipo / Enfoque |
+| ----- | ----- | ----- | ----- |
+| HU-01 Iniciar y cerrar sesión | TA-01.1 | Diseñar el wireframe y mockup de la pantalla de inicio de sesión en el prototipo `fase-1/`, con diseño responsive. | UI/UX (Fase I) |
+|  | TA-01.2 | Maquetar el formulario de ingreso con campos de correo y contraseña e implementar validación de formato y campos vacíos en JavaScript. | Prototipo JS (Fase I) |
+|  | TA-01.3 | Implementar el servicio de autenticación en el backend (Spring Boot) con validación de credenciales y hash de contraseña (RNF-05). | Backend (Fase II) |
+|  | TA-01.4 | Gestionar la sesión activa o token JWT en el cliente y habilitar la acción de cierre de sesión. | Full-stack (Fase II) |
+| HU-02 Acceso según rol | TA-02.1 | Definir la estructura del menú de navegación y vistas permitidas según los 5 roles (Estudiante, Docente, Técnico, Supervisor y Administrador). | UI/UX (Fase I) |
+|  | TA-02.2 | Simular el cambio o vista por rol en el prototipo para demostrar las vistas de solicitante y de responsable. | Prototipo JS (Fase I) |
+|  | TA-02.3 | Implementar el control de autorización por rol en los endpoints de la API REST y el renderizado condicional en React (RNF-06). | Full-stack (Fase II) |
+| HU-03 Registrar solicitud | TA-03.1 | Diseñar el wireframe y mockup del formulario de registro de solicitud en el prototipo `fase-1/`, asegurando un flujo de máximo 3 pasos (RNF-02). | UI/UX (Fase I) |
+|  | TA-03.2 | Construir el formulario HTML/CSS con selector de categoría, campo de ubicación y área de texto para descripción. | Prototipo JS (Fase I) |
+|  | TA-03.3 | Programar en JavaScript la validación de campos obligatorios, mostrando mensajes de error junto a cada campo incompleto (RNF-03, RNF-07). | Prototipo JS (Fase I) |
+|  | TA-03.4 | Implementar la lógica de autogeneración de código único, fecha actual, estado inicial *Nuevo* y prioridad por defecto según la categoría (S-03). | Prototipo / Backend |
+| HU-04 Listado de mis solicitudes | TA-04.1 | Diseñar el wireframe y mockup del listado de solicitudes en el prototipo `fase-1/`, incluyendo el diseño de estado vacío (RNF-03). | UI/UX (Fase I) |
+|  | TA-04.2 | Renderizar dinámicamente en el DOM la tabla o tarjetas de solicitudes con código, categoría, estado, prioridad y fecha a partir de datos simulados. | Prototipo JS (Fase I) |
+|  | TA-04.3 | Implementar la paginación del listado y la consulta filtrada por solicitante autenticado mediante la API REST (RNF-10). | Full-stack (Fase II) |
+| HU-05 Detalle e historial | TA-05.1 | Diseñar el wireframe y mockup de la vista de detalle y seguimiento en el prototipo `fase-1/`, con línea de tiempo de estados. | UI/UX (Fase I) |
+|  | TA-05.2 | Mostrar en el DOM los datos completos de la solicitud seleccionada, el técnico responsable actual y la secuencia cronológica de estados. | Prototipo JS (Fase I) |
+|  | TA-05.3 | Crear el endpoint `GET /api/v1/requests/{id}` que retorne el detalle y el historial de transiciones desde MySQL. | Backend (Fase II) |
+| HU-06 Añadir comentarios | TA-06.1 | Integrar la sección de comentarios y el formulario de nuevo comentario dentro de la vista de detalle de la solicitud. | UI/UX (Fase I) |
+|  | TA-06.2 | Validar en JavaScript que el comentario no esté vacío e insertarlo dinámicamente en la lista con autor y fecha actual. | Prototipo JS (Fase I) |
+|  | TA-06.3 | Implementar la persistencia de comentarios asociados a la solicitud en base de datos. | Full-stack (Fase II) |
+| HU-07 Filtrar solicitudes del área | TA-07.1 | Diseñar los controles de filtrado por estado, categoría y prioridad en la vista de gestión del supervisor en el prototipo `fase-1/`. | UI/UX (Fase I) |
+|  | TA-07.2 | Implementar eventos en JavaScript para filtrar en tiempo real las solicitudes mostradas en el DOM según los criterios seleccionados. | Prototipo JS (Fase I) |
+|  | TA-07.3 | Implementar la consulta filtrada por área del supervisor (S-02, S-03) en el backend. | Backend (Fase II) |
+| HU-08 Asignar técnico y prioridad | TA-08.1 | Diseñar en la vista de gestión para el responsable los selectores de técnico del área y de ajuste de prioridad. | UI/UX (Fase I) |
+|  | TA-08.2 | Implementar la actualización de responsable y prioridad en el prototipo, cambiando automáticamente el estado de *Nuevo* a *Asignado*. | Prototipo JS (Fase I) |
+|  | TA-08.3 | Desarrollar el servicio backend que valide que el técnico pertenezca al área y registre el cambio en el historial. | Backend (Fase II) |
+| HU-09 Bandeja del técnico | TA-09.1 | Configurar la vista de listado/gestión del técnico para mostrar únicamente las solicitudes asignadas a su usuario. | UI/UX / Prototipo |
+|  | TA-09.2 | Implementar el ordenamiento de solicitudes por nivel de prioridad (de mayor a menor urgencia) y fecha de registro. | Prototipo / Backend |
+| HU-10 Cambiar a En proceso y Resuelto | TA-10.1 | Diseñar los controles de acción del técnico para avanzar el estado de la solicitud (*En proceso* / *Resuelto*). | UI/UX (Fase I) |
+|  | TA-10.2 | Validar en cliente y servidor que solo se permitan transiciones válidas (*Asignado* → *En proceso* → *Resuelto*) y actualizar el historial. | Prototipo / Backend |
+| HU-11 Cerrar o rechazar solicitud | TA-11.1 | Diseñar los controles del supervisor para confirmar el cierre (*Cerrado*) o rechazar la solicitud (*Rechazado*) exigiendo un campo de motivo. | UI/UX (Fase I) |
+|  | TA-11.2 | Implementar la validación que impida rechazar una solicitud sin motivo y que bloquee modificaciones posteriores al cierre o rechazo. | Prototipo / Backend |
+| HU-12 Dashboard de indicadores | TA-12.1 | Diseñar la distribución visual de tarjetas y gráficos para los 9 indicadores acordados (Anexo A.4). | UI/UX (Fase II) |
+|  | TA-12.2 | Implementar las consultas agregadas en el backend (conteos por estado, categoría, prioridad, responsable y tiempos de atención). | Backend (Fase II) |
+| HU-13 Filtrar indicadores | TA-13.1 | Diseñar los filtros de rango de fechas y área responsable en el dashboard. | UI/UX (Fase II) |
+|  | TA-13.2 | Implementar las consultas agregadas filtradas y su reflejo en React. | Full-stack (Fase II) |
+| HU-14 Exportar reportes | TA-14.1 | Diseñar la acción de exportación y el formato CSV de solicitudes e indicadores. | UI/UX (Fase II) |
+|  | TA-14.2 | Implementar la generación y descarga del CSV con BOM UTF-8. | Backend / Frontend (Fase II) |
+| HU-15 y HU-16 Administración de usuarios y catálogos | TA-15.1 | Diseñar las vistas de mantenimiento (CRUD) para usuarios, categorías y áreas responsables. | UI/UX (Fase II) |
+|  | TA-15.2 | Implementar los endpoints REST y formularios React para crear, editar y desactivar usuarios y asociar categorías a áreas. | Full-stack (Fase II–III) |
+| HU-17 Prioridades y estados | TA-17.1 | Diseñar las pestañas de prioridades y estados dentro de Catálogos. | UI/UX (Fase II) |
+|  | TA-17.2 | Implementar los endpoints y formularios para prioridades y nombres visibles de estados. | Full-stack (Fase II) |
+| HU-18 SLA y vencimientos | TA-18.1 | Diseñar la pantalla de políticas SLA, precedencia y estados de vencimiento. | UI/UX (Fase II) |
+|  | TA-18.2 | Implementar el CRUD de políticas SLA y el cálculo de solicitudes vencidas o por vencer. | Backend (Fase II) |
+| HU-19 Auditoría | TA-19.1 | Diseñar la vista de auditoría dentro del detalle de la solicitud. | UI/UX (Fase II) |
+|  | TA-19.2 | Implementar el registro y la consulta de eventos de auditoría por solicitud. | Backend (Fase II) |
+| HU-20 Encuesta de satisfacción | TA-20.1 | Diseñar la encuesta de satisfacción para solicitudes cerradas. | UI/UX (Fase II) |
+|  | TA-20.2 | Implementar el endpoint y la regla de una respuesta por solicitud. | Backend (Fase II) |
+| HU-21 Consultar espacios y disponibilidad | TA-21.1 | Diseñar el catálogo de espacios, filtros y vista de disponibilidad. | UI/UX (Fase II) |
+|  | TA-21.2 | Implementar los endpoints de espacios y disponibilidad por fecha. | Backend (Fase II) |
+| HU-22 Registrar reserva | TA-22.1 | Diseñar el formulario de reserva y la confirmación de registro. | UI/UX (Fase II) |
+|  | TA-22.2 | Implementar el alta de reserva, el código RES y la validación de solapamientos. | Backend (Fase II) |
+| HU-23 Aprobar o rechazar reservas | TA-23.1 | Diseñar la bandeja de aprobación y el rechazo con motivo obligatorio. | UI/UX (Fase II) |
+|  | TA-23.2 | Implementar aprobar o rechazar con alcance por área y revalidación de solapamientos. | Backend (Fase II) |
+| HU-24 Consultar y cancelar mis reservas | TA-24.1 | Diseñar la vista «Mis reservas» y la confirmación de cancelación. | UI/UX (Fase II) |
+|  | TA-24.2 | Implementar el listado y la cancelación de reservas propias antes del inicio. | Backend (Fase II) |
+| HU-25 Administrar espacios y horarios | TA-25.1 | Diseñar la administración de espacios, horarios semanales y política de reservas. | UI/UX (Fase II) |
+|  | TA-25.2 | Implementar el CRUD de espacios, horarios y política con baja lógica. | Backend (Fase II) |
+| HU-26 Adjuntar evidencias | TA-26.1 | Diseñar la sección de evidencias en el registro y en el detalle. | UI/UX (Fase II) |
+|  | TA-26.2 | Implementar la carga, descarga autorizada y eliminación de evidencias. | Full-stack (Fase II–III) |
+|  | TA-26.3 | Configurar el almacenamiento local y la alternativa Supabase con límites de tipo y tamaño. | Backend / Infra (Fase III) |
+| HU-27 Registrarse en el sistema | TA-27.1 | Diseñar la pantalla de registro y el mensaje de cuenta pendiente. | UI/UX (Fase II) |
+|  | TA-27.2 | Implementar el auto-registro con dominio institucional y estado pendiente. | Backend (Fase II) |
+|  | TA-27.3 | Probar el flujo de aprobación, rechazo e intento de escalada de rol. | Full-stack (Fase III) |
+| HU-28 Aprobar o rechazar cuentas | TA-28.1 | Diseñar la bandeja de cuentas pendientes de aprobación. | UI/UX (Fase II) |
+|  | TA-28.2 | Implementar aprobar o rechazar con motivo y registro de auditoría. | Backend (Fase II) |
+| HU-29 Restablecer contraseña | TA-29.1 | Diseñar el restablecimiento y el cambio obligatorio en el primer ingreso. | UI/UX (Fase II) |
+|  | TA-29.2 | Implementar la contraseña temporal y la revocación de sesiones activas. | Backend (Fase II) |
+
+## 11\. Criterios de aceptación y escenarios BDD
+
+A continuación se especifican los criterios de aceptación verificables y los escenarios BDD (Behavior-Driven Development) con la estructura Dado / Cuando / Entonces para las 29 historias del sistema, incluyendo tanto los flujos correctos como las validaciones de datos incompletos y reglas de negocio. Las HU-21 a HU-29 corresponden a las extensiones de reservas, evidencias, auto-registro, aprobación de cuentas y restablecimiento de contraseña.
+
+### HU-01: Iniciar y cerrar sesión (RF-01, RNF-03, RNF-06)
+
+Criterios de aceptación:
+
+1. El formulario de inicio de sesión solicita obligatoriamente el correo electrónico y la contraseña.  
+2. Si las credenciales son válidas y el usuario está activo, el sistema inicia la sesión y redirige a la vista principal correspondiente a su rol.  
+3. Si algún campo está vacío o las credenciales son incorrectas, el sistema impide el acceso y muestra un mensaje claro sin exponer detalles técnicos.  
+4. Al cerrar sesión, el sistema invalida la sesión activa y redirige a la pantalla de inicio de sesión.
+
+Escenarios BDD:
+
+* Escenario 1.1 – Inicio de sesión exitoso (Flujo correcto)  
+  * Dado que el usuario se encuentra en la pantalla de inicio de sesión y posee una cuenta activa  
+  * Cuando ingresa su correo institucional y su contraseña válidos y presiona el botón «Iniciar sesión»  
+  * Entonces el sistema autentica al usuario  
+  * Y lo redirige a la pantalla principal correspondiente a su rol.  
+* Escenario 1.2 – Intento de inicio de sesión con campos vacíos (Validación de datos incompletos)  
+  * Dado que el usuario se encuentra en la pantalla de inicio de sesión  
+  * Cuando intenta enviar el formulario omitiendo el correo electrónico o la contraseña  
+  * Entonces el sistema no envía la petición de autenticación  
+  * Y muestra un mensaje de validación junto al campo faltante indicando que es obligatorio.  
+* Escenario 1.3 – Credenciales inválidas  
+  * Dado que el usuario se encuentra en la pantalla de inicio de sesión  
+  * Cuando ingresa un correo o una contraseña que no coinciden con un usuario activo  
+  * Entonces el sistema rechaza el acceso  
+  * Y muestra el mensaje «Correo o contraseña incorrectos».
+
+### HU-02: Acceso diferenciado según rol (RF-02, RNF-06)
+
+Criterios de aceptación:
+
+1. El menú de navegación muestra únicamente los módulos autorizados para el rol del usuario autenticado (Estudiante, Técnico, Supervisor o Administrador).  
+2. Un usuario con rol Estudiante no puede visualizar ni ejecutar acciones de asignación de responsables, cambio de prioridad ni administración de catálogos.
+
+Escenarios BDD:
+
+* Escenario 2.1 – Visualización de opciones según rol (Flujo correcto)  
+  * Dado que un usuario ha iniciado sesión con el rol «Estudiante»  
+  * Cuando el sistema carga la interfaz principal  
+  * Entonces el usuario visualiza las opciones para «Registrar solicitud» y «Mis solicitudes»  
+  * Y no visualiza las opciones de «Gestión de área», «Dashboard» ni «Administración».  
+* Escenario 2.2 – Intento de acceso no autorizado a vista de otro rol  
+  * Dado que un usuario autenticado con el rol «Estudiante» tiene una sesión activa  
+  * Cuando intenta acceder directamente a una ruta o acción exclusiva del rol «Supervisor» o «Administrador»  
+  * Entonces el sistema bloquea la operación  
+  * Y muestra un mensaje de acceso restringido o redirige a su vista permitida.
+
+### HU-03: Registrar solicitud de servicio (RF-03, RF-04, RF-05, RNF-02, RNF-03)
+
+Criterios de aceptación:
+
+1. El formulario exige completar tres datos obligatorios: categoría, ubicación y descripción del problema o requerimiento.  
+2. El registro se completa en un máximo de 3 pasos desde el inicio de sesión.  
+3. Al registrar la solicitud, el sistema asigna automáticamente un código único, la fecha y hora de registro, los datos del solicitante, la prioridad inicial por defecto según la categoría (S-04) y el estado inicial Nuevo.  
+4. Si se omite cualquiera de los campos obligatorios, el sistema impide el registro y resalta los campos pendientes con mensajes de validación claros.
+
+Escenarios BDD:
+
+* Escenario 3.1 – Registro correcto de una solicitud (Flujo correcto)  
+  * Dado que el estudiante está autenticado y se encuentra en el formulario de registro de solicitud  
+  * Cuando selecciona una categoría válida (por ejemplo, «Soporte informático»), ingresa la ubicación («Laboratorio 204 \- Pabellón nuevo») y redacta la descripción del problema, y presiona «Registrar solicitud»  
+  * Entonces el sistema guarda la solicitud  
+  * Y genera automáticamente un código único de seguimiento y la fecha de registro  
+  * Y asigna la prioridad inicial asociada a la categoría y el estado «Nuevo»  
+  * Y muestra un mensaje de confirmación con el código generado.  
+* Escenario 3.2 – Registro con datos obligatorios incompletos (Validación de formulario)  
+  * Dado que el estudiante se encuentra en el formulario de registro de solicitud  
+  * Cuando intenta enviar el formulario dejando vacía la categoría, la ubicación o la descripción  
+  * Entonces el sistema no registra la solicitud  
+  * Y muestra un mensaje de validación junto a cada campo omitido indicando la información requerida.
+
+### HU-04: Consultar listado de mis solicitudes (RF-06, RNF-03, RNF-10)
+
+Criterios de aceptación:
+
+1. El listado muestra únicamente las solicitudes creadas por el estudiante autenticado.  
+2. Por cada solicitud se visualiza: código, categoría, estado actual, prioridad y fecha de registro.  
+3. Si el estudiante aún no ha registrado ninguna solicitud, se muestra un mensaje de estado vacío con un acceso directo para crear su primera solicitud.
+
+Escenarios BDD:
+
+* Escenario 4.1 – Consulta del listado con solicitudes existentes (Flujo correcto)  
+  * Dado que el estudiante está autenticado y tiene solicitudes previamente registradas  
+  * Cuando accede a la sección «Mis solicitudes»  
+  * Entonces el sistema muestra el listado de sus solicitudes incluyendo código, categoría, estado, prioridad y fecha  
+  * Y permite seleccionar cualquiera de ellas para ver su detalle.  
+* Escenario 4.2 – Consulta del listado sin solicitudes registradas (Estado vacío)  
+  * Dado que el estudiante está autenticado y no ha registrado ninguna solicitud anteriormente  
+  * Cuando accede a la sección «Mis solicitudes»  
+  * Entonces el sistema muestra un estado vacío indicando «Aún no tienes solicitudes registradas»  
+  * Y presenta un botón visible para «Registrar nueva solicitud».
+
+### HU-05 y HU-06: Consultar detalle, historial y añadir comentarios (RF-07, RF-08)
+
+Criterios de aceptación:
+
+1. La vista de detalle muestra todos los datos de la solicitud (código, solicitante, categoría, área, ubicación, descripción, prioridad, fecha, responsable asignado y estado actual).  
+2. Se muestra el historial cronológico de los estados por los que ha pasado la solicitud.  
+3. El estudiante, el técnico asignado y el supervisor del área pueden añadir comentarios de seguimiento, registrándose automáticamente el autor y la fecha.  
+4. No se permite publicar un comentario en blanco.
+
+Escenarios BDD:
+
+* Escenario 5.1 – Visualización del detalle e historial de estados (Flujo correcto)  
+  * Dado que un usuario autorizado selecciona una solicitud desde el listado  
+  * Cuando se abre la pantalla de «Detalle y seguimiento de solicitud»  
+  * Entonces el sistema muestra la información completa de la solicitud, el técnico responsable (o «Sin asignar» si está en estado «Nuevo»)  
+  * Y despliega la línea de tiempo con el historial de estados y los comentarios registrados.  
+* Escenario 6.1 – Registro exitoso de un comentario (Flujo correcto)  
+  * Dado que el usuario autorizado se encuentra en el detalle de una solicitud activa  
+  * Cuando escribe un texto en el campo de nuevo comentario y presiona «Publicar comentario»  
+  * Entonces el sistema añade el comentario a la lista de seguimiento  
+  * Y muestra el nombre del autor, su rol y la fecha y hora del registro.  
+* Escenario 6.2 – Intento de publicar un comentario vacío (Validación)  
+  * Dado que el usuario se encuentra en el detalle de una solicitud  
+  * Cuando presiona «Publicar comentario» dejando el campo de texto vacío o solo con espacios en blanco  
+  * Entonces el sistema no registra el comentario  
+  * Y muestra un mensaje de validación indicando que debe escribir un contenido antes de enviar.
+
+### HU-07 y HU-08: Filtrar solicitudes, asignar responsable y ajustar prioridad (RF-09, RF-10, RF-11, RF-15)
+
+Criterios de aceptación:
+
+1. El supervisor visualiza únicamente las solicitudes cuya categoría pertenece a su área responsable (S-02, S-03) y puede filtrarlas por estado, categoría y prioridad.  
+2. Al asignar un técnico del área a una solicitud en estado Nuevo, el estado cambia automáticamente a Asignado.  
+3. El supervisor puede reasignar la solicitud a otro técnico de su área o modificar su nivel de prioridad en cualquier momento mientras la solicitud no esté Cerrado ni Rechazado.
+
+Escenarios BDD:
+
+* Escenario 7.1 – Filtrado de solicitudes del área (Flujo correcto)  
+  * Dado que el supervisor está autenticado en la vista de gestión de su área  
+  * Cuando selecciona el filtro de estado «Nuevo» y la prioridad «Alta»  
+  * Entonces el sistema actualiza el listado mostrando únicamente las solicitudes de su área que cumplen ambos criterios.  
+* Escenario 8.1 – Asignación de técnico responsable y ajuste de prioridad (Flujo correcto)  
+  * Dado que el supervisor visualiza una solicitud en estado «Nuevo» dentro de la vista de gestión  
+  * Cuando selecciona a un técnico perteneciente a su área, ajusta la prioridad a «Alta» y guarda los cambios  
+  * Entonces el sistema registra al técnico como responsable de la solicitud y actualiza la prioridad  
+  * Y cambia automáticamente el estado de la solicitud a «Asignado»  
+  * Y añade el cambio al historial de estados.  
+* Escenario 8.2 – Intento de asignar sin seleccionar un técnico (Validación)  
+  * Dado que el supervisor se encuentra en la vista de gestión de una solicitud en estado «Nuevo»  
+  * Cuando presiona la acción «Asignar responsable» sin haber elegido un técnico del selector  
+  * Entonces el sistema muestra un mensaje de validación solicitando seleccionar un técnico válido  
+  * Y mantiene la solicitud en estado «Nuevo».
+
+### HU-09 y HU-10: Consultar asignaciones y actualizar estado por el técnico (RF-12, RF-13, RF-15)
+
+Criterios de aceptación:
+
+1. El técnico visualiza la lista de solicitudes que le han sido asignadas, ordenadas por prioridad y fecha de registro.  
+2. El técnico solo puede cambiar el estado de una solicitud en estado Asignado a En proceso, y de En proceso a Resuelto.  
+3. El sistema bloquea cualquier transición de estado que no respete el flujo del ciclo de vida o que corresponda exclusivamente al supervisor (como Cerrado o Rechazado).
+
+Escenarios BDD:
+
+* Escenario 10.1 – Cambio de estado de Asignado a En proceso y Resuelto (Flujo correcto)  
+  * Dado que el técnico está autenticado y accede a una solicitud asignada a su nombre con estado «Asignado»  
+  * Cuando inicia el trabajo y actualiza el estado a «En proceso», y posteriormente al culminar la labor lo actualiza a «Resuelto»  
+  * Entonces el sistema guarda cada transición de estado con su fecha y autor en el historial  
+  * Y muestra la solicitud con el estado actual «Resuelto» lista para la revisión del supervisor.  
+* Escenario 10.2 – Intento de transición de estado no permitida (Regla de negocio RF-15)  
+  * Dado que el técnico visualiza una solicitud en estado «Asignado»  
+  * Cuando intenta cambiar el estado directamente a «Cerrado» o «Resuelto» sin haber pasado por «En proceso»  
+  * Entonces el sistema impide la operación  
+  * Y muestra únicamente las transiciones permitidas según el estado actual y su rol.
+
+### HU-11: Cerrar solicitud resuelta o rechazar solicitud con motivo (RF-14, RF-15)
+
+Criterios de aceptación:
+
+1. El supervisor puede cambiar una solicitud en estado Resuelto al estado final Cerrado.  
+2. El supervisor puede cambiar una solicitud al estado Rechazado únicamente si ingresa el motivo del rechazo.  
+3. Una vez en estado Cerrado o Rechazado, la solicitud no admite nuevos cambios de estado ni reasignaciones.
+
+Escenarios BDD:
+
+* Escenario 11.1 – Cierre de una solicitud resuelta (Flujo correcto)  
+  * Dado que el supervisor revisa una solicitud de su área que se encuentra en estado «Resuelto»  
+  * Cuando selecciona la acción «Cerrar solicitud» y confirma la operación  
+  * Entonces el sistema actualiza el estado de la solicitud a «Cerrado»  
+  * Y registra el cierre en el historial de estados bloqueando futuras ediciones.  
+* Escenario 11.2 – Rechazo de una solicitud indicando el motivo (Flujo correcto)  
+  * Dado que el supervisor evalúa una solicitud improcedente o duplicada en su área  
+  * Cuando selecciona la acción «Rechazar solicitud», escribe el motivo del rechazo y confirma  
+  * Entonces el sistema actualiza el estado a «Rechazado»  
+  * Y registra el motivo como parte del historial y detalle visible para el solicitante.  
+* Escenario 11.3 – Intento de rechazar una solicitud sin indicar motivo (Validación)  
+  * Dado que el supervisor selecciona la opción «Rechazar solicitud»  
+  * Cuando intenta confirmar el rechazo dejando el campo de motivo vacío  
+  * Entonces el sistema impide el cambio de estado  
+  * Y muestra un mensaje de validación indicando que el motivo de rechazo es obligatorio.
+
+### HU-12: Visualizar dashboard de indicadores de atención (RF-16)
+
+Criterios de aceptación:
+
+1. El dashboard es accesible únicamente para los roles Supervisor y Administrador.  
+2. Muestra los 9 indicadores acordados: solicitudes registradas, pendientes, atendidas, por categoría, por prioridad, por responsable, tiempo promedio de atención, porcentaje de solicitudes resueltas y solicitudes vencidas (mostrando este último como «No disponible» hasta implementar el módulo de SLA en RF-21).
+
+Escenarios BDD:
+
+* Escenario 12.1 – Consulta del dashboard de indicadores (Flujo correcto)  
+  * Dado que un supervisor o administrador ha iniciado sesión en el sistema  
+  * Cuando accede a la sección «Dashboard»  
+  * Entonces el sistema calcula y muestra los indicadores de solicitudes registradas, pendientes, atendidas, porcentaje de resueltas, tiempo promedio y sus distribuciones por categoría, prioridad y responsable.
+
+### HU-13: Filtrar indicadores del dashboard (RF-17)
+
+Criterios de aceptación:
+
+1. El dashboard permite filtrar por rango de fechas y por área responsable.  
+2. El supervisor solo puede consultar el área a la que pertenece; el administrador puede consultar cualquier área o todas.  
+3. Los filtros actualizan los indicadores y las distribuciones sin recargar la página.  
+4. Un rango inválido (fecha inicial posterior a la final) muestra un mensaje de validación y no ejecuta la consulta.
+
+Escenarios BDD:
+
+* Escenario 13.1 – Filtrado por fecha y área (Flujo correcto)  
+  * Dado que un supervisor ha iniciado sesión y accede al dashboard  
+  * Cuando selecciona el rango «01/11/2026 – 15/11/2026» y su área  
+  * Entonces el sistema actualiza los indicadores con las solicitudes de ese periodo y área  
+  * Y mantiene el resto de la pantalla visible.  
+* Escenario 13.2 – Rango de fechas inválido (Validación)  
+  * Dado que el supervisor está en el dashboard  
+  * Cuando ingresa una fecha inicial posterior a la fecha final  
+  * Entonces el sistema muestra un mensaje de validación  
+  * Y no ejecuta la consulta.
+
+### HU-14: Exportar reportes de solicitudes e indicadores (RF-23)
+
+Criterios de aceptación:
+
+1. La exportación está disponible para Supervisor y Administrador.  
+2. El archivo CSV incluye las solicitudes y los indicadores del filtro vigente.  
+3. El archivo se descarga con codificación UTF-8 y BOM para conservar los acentos en Excel.  
+4. Si no hay datos, se descarga un CSV con cabeceras y sin filas.
+
+Escenarios BDD:
+
+* Escenario 14.1 – Exportación de indicadores (Flujo correcto)  
+  * Dado que el supervisor está en el dashboard con un filtro aplicado  
+  * Cuando presiona «Exportar CSV»  
+  * Entonces el navegador descarga un archivo `solicitudes.csv`  
+  * Y el archivo contiene las filas del periodo y área seleccionados.
+
+### HU-15 y HU-16: Administración de usuarios, categorías y áreas (RF-18, RF-19)
+
+Criterios de aceptación:
+
+1. El administrador puede registrar nuevos usuarios indicando nombre, correo, contraseña inicial, rol y área (cuando el rol sea Técnico o Supervisor), así como editarlos o desactivarlos.  
+2. El administrador puede crear y editar categorías de solicitud asociando obligatoriamente cada categoría a un área responsable.
+
+Escenarios BDD:
+
+* Escenario 15.1 – Creación de un usuario técnico asignado a un área (Flujo correcto)  
+  * Dado que el administrador se encuentra en el módulo de «Administración de usuarios»  
+  * Cuando completa el formulario con nombre, correo institucional válido, contraseña, selecciona el rol «Técnico» y el área «Soporte informático», y guarda el registro  
+  * Entonces el sistema crea el usuario en estado activo  
+  * Y el técnico queda habilitado para recibir asignaciones de solicitudes de dicha área.  
+* Escenario 16.1 – Intento de crear una categoría sin área responsable asociada (Validación)  
+  * Dado que el administrador se encuentra en la gestión de categorías  
+  * Cuando ingresa el nombre de una nueva categoría pero omite seleccionar el área responsable asociada  
+  * Entonces el sistema no guarda la categoría  
+  * Y muestra un mensaje de validación indicando que toda categoría debe estar vinculada a un área responsable.
+
+### HU-17: Administrar prioridades y nombres de estados (RF-20)
+
+Criterios de aceptación:
+
+1. El administrador puede crear, editar y desactivar prioridades con código, nombre, nivel y color.  
+2. El administrador puede cambiar el nombre visible de los estados sin alterar el código interno.  
+3. Los códigos de prioridad y estado son estables; no se editan una vez creados.  
+4. Una prioridad o estado con dependencias activas no se elimina; se desactiva con control de integridad.
+
+Escenarios BDD:
+
+* Escenario 17.1 – Renombrar un estado (Flujo correcto)  
+  * Dado que el administrador está en el catálogo de estados  
+  * Cuando cambia el nombre visible de «Nuevo» a «Registrada» y guarda  
+  * Entonces el nuevo nombre se muestra en las solicitudes y en el historial  
+  * Y el código interno del estado se conserva.  
+* Escenario 17.2 – Intento de editar un código estable (Validación)  
+  * Dado que el administrador edita una prioridad existente  
+  * Cuando intenta cambiar su código  
+  * Entonces el sistema no guarda el cambio  
+  * Y muestra un mensaje indicando que el código es estable.
+
+### HU-18: Definir SLA y controlar vencimientos (RF-21)
+
+Criterios de aceptación:
+
+1. El administrador puede definir horas objetivo y horas de aviso por prioridad o categoría.  
+2. El sistema aplica la política vigente al registrar la solicitud y conserva el plazo asignado aunque la política cambie después.  
+3. El dashboard marca solicitudes vencidas y próximas a vencer.  
+4. No se permiten políticas superpuestas para la misma prioridad o categoría en el mismo periodo.
+
+Escenarios BDD:
+
+* Escenario 18.1 – Creación de una política SLA (Flujo correcto)  
+  * Dado que el administrador está en «Políticas SLA»  
+  * Cuando define 24 horas objetivo y 4 horas de aviso para la prioridad «Alta» y guarda  
+  * Entonces la política queda vigente para las nuevas solicitudes de esa prioridad.  
+* Escenario 18.2 – Política superpuesta (Validación)  
+  * Dado que ya existe una política vigente para la prioridad «Alta»  
+  * Cuando el administrador intenta crear otra política para la misma prioridad y periodo  
+  * Entonces el sistema muestra un conflicto  
+  * Y no guarda la nueva política.
+
+### HU-19: Consultar auditoría de cambios (RF-22)
+
+Criterios de aceptación:
+
+1. El supervisor puede consultar los eventos de auditoría de las solicitudes de su área.  
+2. Cada evento muestra acción, campo modificado, valor anterior, valor nuevo, actor y fecha.  
+3. Los usuarios sin permiso no pueden acceder a la auditoría de una solicitud.  
+4. La auditoría no guarda tokens, contraseñas ni datos sensibles.
+
+Escenarios BDD:
+
+* Escenario 19.1 – Consulta de auditoría (Flujo correcto)  
+  * Dado que el supervisor del área abre el detalle de una solicitud  
+  * Cuando accede a la sección «Auditoría»  
+  * Entonces ve los cambios registrados con actor, campo, valor anterior, valor nuevo y fecha.  
+* Escenario 19.2 – Acceso sin permiso (Seguridad)  
+  * Dado que un estudiante abre una solicitud propia  
+  * Cuando intenta acceder a la auditoría  
+  * Entonces el sistema niega la operación.
+
+### HU-20: Responder encuesta de satisfacción (RF-24)
+
+Criterios de aceptación:
+
+1. Solo el solicitante propietario puede responder la encuesta.  
+2. La encuesta está disponible únicamente cuando la solicitud está en estado `CERRADO`.  
+3. Solo se permite una respuesta por solicitud.  
+4. La respuesta registra la calificación y, opcionalmente, un comentario.
+
+Escenarios BDD:
+
+* Escenario 20.1 – Registro de la encuesta (Flujo correcto)  
+  * Dado que el solicitante tiene una solicitud en estado `CERRADO`  
+  * Cuando califica la atención con 5 y envía la encuesta  
+  * Entonces el sistema guarda la respuesta  
+  * Y oculta el formulario al recargar el detalle.  
+* Escenario 20.2 – Intento de responder dos veces (Validación)  
+  * Dado que el solicitante ya respondió la encuesta de su solicitud  
+  * Cuando intenta enviar una segunda respuesta  
+  * Entonces el sistema responde con un conflicto  
+  * Y no guarda la nueva respuesta.
+
+### HU-21: Consultar espacios y disponibilidad (RF-25)
+
+Criterios de aceptación:
+
+1. El sistema muestra los espacios activos con nombre, tipo, pabellón, capacidad y horario del día consultado.  
+2. El usuario puede filtrar por tipo de espacio, pabellón, capacidad mínima y fecha.  
+3. Al seleccionar un espacio y una fecha, se muestran las franjas libres y ocupadas; solo cuentan como ocupadas las reservas `PENDIENTE` o `CONFIRMADA`.  
+4. Si no hay espacios o disponibilidad, se muestra un estado vacío con la opción de limpiar filtros.
+
+Escenarios BDD:
+
+* Escenario 21.1 – Consulta de disponibilidad con franjas libres (Flujo correcto)  
+  * Dado que el usuario está autenticado y se encuentra en la pantalla de reserva de ambientes  
+  * Cuando selecciona el espacio «Laboratorio 204» y la fecha «2026-11-10»  
+  * Entonces el sistema muestra el horario de atención de ese día  
+  * Y marca como ocupadas únicamente las franjas con reservas `PENDIENTE` o `CONFIRMADA`  
+  * Y muestra el resto como disponibles.  
+* Escenario 21.2 – Día sin franjas libres (Estado vacío)  
+  * Dado que el usuario consulta un espacio cuya fecha tiene todas sus franjas ocupadas  
+  * Cuando el sistema carga la disponibilidad  
+  * Entonces no permite seleccionar ninguna franja  
+  * Y muestra el mensaje «No hay disponibilidad para la fecha seleccionada».
+
+### HU-22: Registrar reserva (RF-26, RF-27)
+
+Criterios de aceptación:
+
+1. El formulario exige espacio, fecha, hora de inicio, hora de fin y motivo.  
+2. El sistema valida fecha, duración, horario, solapamiento, capacidad y límite de reservas por usuario y día.  
+3. Al guardar, genera un código único `RES-AAAA-NNNNNN`, asigna el estado `PENDIENTE` y registra el historial inicial.  
+4. Si hay conflicto o una validación falla, no guarda la reserva y explica el motivo.
+
+Escenarios BDD:
+
+* Escenario 22.1 – Registro correcto de una reserva (Flujo correcto)  
+  * Dado que el usuario está autenticado y consultó la disponibilidad de un espacio  
+  * Cuando selecciona una fecha futura, la franja de 10:00 a 12:00, escribe el motivo e indica asistentes dentro de la capacidad  
+  * Entonces el sistema guarda la reserva en estado `PENDIENTE`  
+  * Y genera un código con el formato `RES-AAAA-NNNNNN`  
+  * Y muestra el mensaje «Reserva registrada, pendiente de aprobación».  
+* Escenario 22.2 – Solapamiento con una reserva existente (Validación)  
+  * Dado que existe una reserva confirmada para el mismo espacio y fecha de 10:00 a 12:00  
+  * Cuando el usuario intenta reservar de 11:00 a 13:00  
+  * Entonces el sistema no guarda la reserva  
+  * Y muestra un mensaje indicando que la franja ya está ocupada.
+
+### HU-23: Aprobar o rechazar reservas (RF-28)
+
+Criterios de aceptación:
+
+1. El supervisor ve las reservas pendientes de los espacios de su área; el administrador ve todas.  
+2. Al aprobar, la reserva pasa a `CONFIRMADA` y se registran aprobador y fecha.  
+3. Al rechazar se exige motivo; la reserva pasa a `RECHAZADA` y el motivo queda visible.  
+4. Un aprobador no puede aprobar su propia reserva.  
+5. Al aprobar se revalida el solapamiento; si hay conflicto, no se aprueba.
+
+Escenarios BDD:
+
+* Escenario 23.1 – Aprobación de una reserva pendiente (Flujo correcto)  
+  * Dado que el supervisor del área del espacio accede a la bandeja de reservas pendientes  
+  * Cuando selecciona una reserva y presiona «Aprobar»  
+  * Entonces la reserva cambia a `CONFIRMADA`  
+  * Y se registra el aprobador y la fecha de aprobación.  
+* Escenario 23.2 – Rechazo sin motivo (Validación)  
+  * Dado que el supervisor revisa una reserva pendiente  
+  * Cuando presiona «Rechazar» sin ingresar el motivo  
+  * Entonces el sistema no cambia el estado  
+  * Y muestra un mensaje indicando que el motivo es obligatorio.
+
+### HU-24: Consultar y cancelar mis reservas (RF-29)
+
+Criterios de aceptación:
+
+1. El sistema lista las reservas propias con código, espacio, fecha, horario y estado.  
+2. El listado permite filtrar por estado y rango de fechas, y se presenta paginado.  
+3. El detalle muestra el historial y, si aplica, el motivo de rechazo.  
+4. El usuario puede cancelar una reserva solo si está `PENDIENTE` o `CONFIRMADA` y antes del inicio.  
+5. Un usuario no puede ver ni cancelar reservas de otro usuario.
+
+Escenarios BDD:
+
+* Escenario 24.1 – Cancelación de una reserva confirmada futura (Flujo correcto)  
+  * Dado que el usuario tiene una reserva `CONFIRMADA` cuya fecha y hora de inicio aún no llegan  
+  * Cuando presiona «Cancelar reserva» y confirma  
+  * Entonces la reserva cambia a `CANCELADA`  
+  * Y se registra el usuario y la fecha de cancelación  
+  * Y la franja vuelve a estar disponible.  
+* Escenario 24.2 – Intento de cancelar una reserva ya iniciada (Validación)  
+  * Dado que el usuario tiene una reserva confirmada cuya hora de inicio ya pasó  
+  * Cuando intenta cancelarla  
+  * Entonces el sistema bloquea la operación  
+  * Y muestra un mensaje indicando que solo se puede cancelar antes del inicio.
+
+### HU-25: Administrar espacios, horarios y política (RF-30)
+
+Criterios de aceptación:
+
+1. El administrador puede crear, editar y desactivar espacios con código único, nombre, tipo, área, pabellón, piso y capacidad mayor que cero.  
+2. Puede definir el horario semanal sin solapamientos para el mismo día.  
+3. Puede configurar la política vigente: duración mínima y máxima, anticipación y límite de reservas activas por día.  
+4. Desactivar un espacio impide nuevas reservas, pero conserva las existentes y su historial.
+
+Escenarios BDD:
+
+* Escenario 25.1 – Creación de un espacio sin capacidad (Validación)  
+  * Dado que el administrador está en el formulario de alta de espacios  
+  * Cuando completa los datos pero deja la capacidad vacía o en cero  
+  * Entonces el sistema no guarda el espacio  
+  * Y muestra un mensaje indicando que la capacidad debe ser mayor que cero.  
+* Escenario 25.2 – Desactivación de un espacio con reservas futuras (Flujo correcto)  
+  * Dado que un espacio tiene reservas futuras confirmadas  
+  * Cuando el administrador lo desactiva  
+  * Entonces el espacio deja de aparecer para nuevas reservas  
+  * Y las reservas existentes se conservan con su historial.
+
+### HU-26: Adjuntar evidencias a una solicitud (RF-31)
+
+Criterios de aceptación:
+
+1. El solicitante puede adjuntar evidencias al registrar la solicitud y desde el detalle mientras no esté `CERRADO` o `RECHAZADO`; el técnico y el supervisor del área también pueden hacerlo.  
+2. Solo se aceptan JPG, PNG o PDF de hasta 5 MB y un máximo de 5 evidencias activas por solicitud, validadas por contenido.  
+3. Las evidencias se muestran con nombre, tamaño, autor y fecha; solo las ve quien puede ver la solicitud.  
+4. El autor puede eliminarlas mientras la solicitud esté abierta; la eliminación queda auditada.
+
+Escenarios BDD:
+
+* Escenario 26.1 – Adjuntar una foto al registrar la solicitud (Flujo correcto)  
+  * Dado que el estudiante está completando el formulario de registro  
+  * Cuando adjunta una foto JPG de 2 MB y presiona «Registrar solicitud»  
+  * Entonces el sistema registra la solicitud con la evidencia asociada  
+  * Y la evidencia aparece en el detalle con nombre, tamaño, autor y fecha.  
+* Escenario 26.2 – Archivo con formato no permitido (Validación)  
+  * Dado que el estudiante está en el detalle de su solicitud en estado `Nuevo`  
+  * Cuando intenta adjuntar un archivo `.exe`  
+  * Entonces el sistema no guarda el archivo  
+  * Y muestra un mensaje indicando que solo se aceptan JPG, PNG o PDF.
+
+### HU-27: Registrarse en el sistema (RF-32)
+
+Criterios de aceptación:
+
+1. El formulario exige nombre completo, correo institucional, contraseña y confirmación.  
+2. Solo se aceptan correos `@unmsm.edu.pe`; los repetidos no revelan a quién pertenecen.  
+3. La cuenta se crea con rol Estudiante, sin área y en estado pendiente de aprobación.  
+4. El usuario no puede elegir otro rol; las cuentas de docente solo las crea el administrador.  
+5. Mientras la cuenta esté pendiente o rechazada, no se permite iniciar sesión.
+
+Escenarios BDD:
+
+* Escenario 27.1 – Registro correcto (Flujo correcto)  
+  * Dado que el visitante está en la pantalla «Crear cuenta»  
+  * Cuando ingresa su nombre, un correo institucional válido, una contraseña que cumple la política y su confirmación  
+  * Entonces el sistema crea la cuenta con rol Estudiante en estado pendiente  
+  * Y muestra el mensaje «Registro enviado. Podrás ingresar cuando un administrador apruebe tu cuenta».  
+* Escenario 27.2 – Correo fuera del dominio institucional (Validación)  
+  * Dado que el visitante está en la pantalla «Crear cuenta»  
+  * Cuando ingresa un correo `@gmail.com`  
+  * Entonces el sistema no crea la cuenta  
+  * Y indica que se debe usar el correo institucional `@unmsm.edu.pe`.
+
+### HU-28: Aprobar o rechazar cuentas (RF-33)
+
+Criterios de aceptación:
+
+1. El administrador ve una bandeja de cuentas pendientes con nombre, correo y fecha, ordenada de la más antigua a la más reciente.  
+2. Al aprobar, la cuenta pasa a activa con rol Estudiante y puede iniciar sesión.  
+3. Al rechazar, el motivo es obligatorio; la cuenta pasa a rechazada y no puede iniciar sesión.  
+4. Se registra quién aprobó o rechazó, cuándo y el motivo, también en auditoría.  
+5. Solo el administrador puede ver la bandeja y decidir.
+
+Escenarios BDD:
+
+* Escenario 28.1 – Aprobar una cuenta pendiente (Flujo correcto)  
+  * Dado que existe una cuenta pendiente registrada por un estudiante  
+  * Cuando el administrador la aprueba desde la bandeja  
+  * Entonces la cuenta pasa a activa  
+  * Y el estudiante puede iniciar sesión con el correo y la contraseña que registró.  
+* Escenario 28.2 – Rechazar una cuenta sin motivo (Validación)  
+  * Dado que existe una cuenta pendiente  
+  * Cuando el administrador intenta rechazarla sin escribir el motivo  
+  * Entonces el sistema no rechaza la cuenta  
+  * Y indica que el motivo es obligatorio.
+
+### HU-29: Restablecer contraseña (RF-34)
+
+Criterios de aceptación:
+
+1. El administrador puede restablecer la contraseña de cualquier usuario activo desde «Administración de usuarios».  
+2. El sistema genera una contraseña temporal aleatoria, la muestra una sola vez y guarda solo su hash.  
+3. Al restablecer, revoca todas las sesiones activas y obliga a cambiar la contraseña en el próximo ingreso.  
+4. El restablecimiento queda auditado con el administrador y la fecha, sin guardar la contraseña temporal.  
+5. Cualquier usuario autenticado puede cambiar su propia contraseña desde su perfil.
+
+Escenarios BDD:
+
+* Escenario 29.1 – Restablecer la contraseña (Flujo correcto)  
+  * Dado que un estudiante activo olvidó su contraseña y lo informó a soporte  
+  * Cuando el administrador elige «Restablecer contraseña» y confirma  
+  * Entonces el sistema muestra una contraseña temporal una sola vez  
+  * Y revoca las sesiones activas del estudiante  
+  * Y le exige cambiar la contraseña en su próximo ingreso.  
+* Escenario 29.2 – Primer ingreso con contraseña temporal (Flujo correcto)  
+  * Dado que el administrador restableció la contraseña del estudiante  
+  * Cuando el estudiante inicia sesión con la contraseña temporal  
+  * Entonces el sistema lo lleva a la pantalla de cambio obligatorio  
+  * Y no le permite usar otras opciones hasta cambiarla.
+
+## 12\. Arquitectura preliminar
+
+Gestal se plantea en tres etapas. En la Fase I, la interfaz se materializa en HTML, CSS y JavaScript y trabaja con datos simulados en el navegador, sin servidor ni base de datos; la muestra se conserva en `frontend-uni/docs/fase-1/`. A partir de la Fase II entra la arquitectura full-stack: un cliente en React 19 + Vite que se comunica por HTTP con una API REST en Spring Boot 4.1.2, organizada por capas (controladores y DTO, servicios con las reglas de negocio y acceso a datos), y esta última persiste la información en MySQL 8.4. En la Fase III se incorporan Docker, GitHub Actions, Vercel, Render y Railway, con entornos de staging y producción separados.
+
+Responsabilidad de cada componente:
+
+• Cliente (React): presenta las pantallas, valida las entradas y consume la API; no accede directamente a los datos.
+
+• API REST (Spring Boot): expone los recursos, aplica autenticación y autorización por rol, y controla las transiciones del ciclo de vida.
+
+• Capa de datos (`JdbcClient` + SQL explícito – MySQL): almacena usuarios, categorías, solicitudes, reservas y evidencias con sus relaciones; el esquema se versiona con Flyway y no se usa Hibernate.
+
+• Infraestructura (Docker, GitHub Actions, Vercel, Render, Railway): ejecuta el entorno local, automatiza pruebas y despliegues, y separa staging de producción.
+
+Decisiones adoptadas en la versión funcional: autenticación con JWT de 15 minutos y refresh token en cookie `HttpOnly`; códigos `SOL-AAAA-NNNNNN` para solicitudes y `RES-AAAA-NNNNNN` para reservas; persistencia en MySQL con Flyway; tres repositorios (`frontend-uni`, `backend-uni` e `infra-uni`); y despliegue en staging y producción con Release Candidate `v1.0.0-rc.2`.
+
+Las decisiones de arquitectura se registran como **ADR** (*Architecture Decision Records*): ADR-0001 incorpora la reserva de ambientes, ADR-0002 define la autenticación y sesión, ADR-0003 la observabilidad y retención, ADR-0004 el despliegue y la persistencia, y ADR-0005 el CI/CD y las puertas de calidad. Las decisiones ya implementadas se reflejan en este informe; no se listan como pendientes.
+
+**Métodos HTTP y almacenamiento en el cliente.** La API usa `GET`, `POST`, `PATCH` y `DELETE`. `PATCH` se emplea para actualizaciones parciales (prioridad, estado y catálogos) y `DELETE` para evidencias; no se usa `PUT` porque no hay reemplazo completo de recursos. El JWT se mantiene en memoria y el refresh token en una cookie `HttpOnly`; `sessionStorage` solo se usa en la API simulada y no se guardan credenciales en `localStorage`. Esta decisión cumple el contenido de la Fase II y evita exposiciones innecesarias.
+
+## 13\. Wireframes y mockups
+
+El diseño está en un prototipo de Figma que cubre los cinco roles (estudiante, docente, técnico, supervisor y administrador) en versión escritorio y móvil 360\. El prototipo completo incluye **16 pantallas** (P01 a P16, además de las variantes P00 de inicio por rol) y **34 capturas** de referencia. Las pantallas principales son: inicio de sesión, inicio por rol, listado de solicitudes, formulario de registro, detalle y seguimiento, bandeja del técnico, gestión de área, dashboard, reservas, aprobación de reservas, usuarios, catálogos, políticas SLA, espacios y perfil.
+
+Enlace del prototipo: [Gestal – GESTAL-V2 en Figma](https://www.figma.com/design/9qJJaiyMwZ1ZON36LkmbyR/GESTAL-V2?node-id=0-1).
+
+La muestra de desarrollo de Fase I en HTML, CSS y JavaScript está en [`frontend-uni/docs/fase-1/`](https://github.com/taller-web-sigesu/frontend-uni/tree/main/docs/fase-1); se abre con un servidor local y permite recorrer login, listado, registro, detalle y gestión con datos simulados.
+
+Criterios de usabilidad aplicados: navegación consistente (barra superior y lateral), mensajes de validación junto a cada campo, y estados de vacío, carga, error y éxito definidos por pantalla. El diseño es responsive (escritorio y 360 px).
+
+Capturas de las pantallas principales (versión escritorio):
+
+**Inicio de Sesión**
+
+**![][image1]**
+
+**Listado de Solicitudes**
+
+**![][image2]**
+
+     
+
+
+       **Formulario de registro de solicitud**
+
+**![][image3]**
+
+**Detalle y seguimiento de una solicitud**
+
+**![][image4]**
+
+**Vista de gestión para el responsable**
+
+**(Supervisor)**
+
+**![][image5]**
+
+**(Técnico)**
+
+**![][image6]**
+
+**MOCKUPS:**
+
+**Inicio de Sesión**
+
+**![][image7]**
+
+**Listado de Solicitudes**
+
+**![][image8]**
+
+**Formulario de registro de Solicitudes**
+
+**![][image9]**
+
+**Detalle y seguimiento de una solicitud**
+
+**![][image10]**
+
+**Vista de gestión para el responsable**
+
+**(Supervisor)**
+
+**![][image11]**
+
+**(Técnico)**
+
+*![][image12]*
+
+## 14\. Descripción o enlace al prototipo
+
+Prototipo navegable en Figma del equipo: [Gestal – GESTAL-V2](https://www.figma.com/design/9qJJaiyMwZ1ZON36LkmbyR/GESTAL-V2?node-id=0-1). Recorridos de demostración por rol: iniciar sesión, registrar una solicitud, consultar el listado, ver el detalle y el seguimiento, gestionar el estado y reservar ambientes.
+
+La muestra de Fase I en HTML/CSS/JS está en [`frontend-uni/docs/fase-1/`](https://github.com/taller-web-sigesu/frontend-uni/tree/main/docs/fase-1), con instrucciones en el `README.md` de esa carpeta.
+
+## 15\. Evidencia por fase: prototipo (Fase I), versión funcional (Fase II), Release Candidate (Fase III) y versión final (Fase IV)
+
+### 15.1 Evidencia del primer desarrollo (Fase I)
+
+La muestra de Fase I usa HTML, CSS y JavaScript sin frameworks. Carga datos simulados con `fetch` desde `data.json`, simula la sesión con `sessionStorage` y cubre login, listado con indicadores y filtros, registro, detalle y gestión. Está en [`frontend-uni/docs/fase-1/`](https://github.com/taller-web-sigesu/frontend-uni/tree/main/docs/fase-1).
+
+<figure><img src="assets/informe/fase1-login.png" alt="Login del prototipo de Fase I"><figcaption>Figura 15.1. Inicio de sesión del prototipo de Fase I.</figcaption></figure>
+
+<figure><img src="assets/informe/fase1-listado.png" alt="Listado del prototipo de Fase I"><figcaption>Figura 15.2. Listado de solicitudes con indicadores y filtros (Fase I).</figcaption></figure>
+
+### 15.2 Primera versión funcional end-to-end (Fase II)
+
+El equipo completó la primera versión funcional con datos reales:
+
+• **Backend (`backend-uni`, rama `main`)**: API REST en Spring Boot 4.1.2 con arquitectura por capas, autenticación JWT y refresh token, control por rol, persistencia en MySQL 8.4 con `JdbcClient` y Flyway, y CRUD de solicitudes con las transiciones del ciclo de vida. Cubre HU-01 a HU-29.
+
+• **Frontend (`frontend-uni`, rama `main`)**: aplicación React 19 + Vite con las pantallas de inicio de sesión, inicio por rol, listado, registro, detalle, bandeja del técnico, gestión de área, dashboard, reservas y administración, conectada a la API real mediante `fetch`, con manejo de estados de carga, vacío y error, y protección de rutas por rol.
+
+Flujo verificado de extremo a extremo: inicio de sesión, registro de solicitud, guardado en MySQL, consulta según el rol, asignación de responsable, ajuste de prioridad, inicio de atención, resolución y cierre; además, se verificaron las transiciones inválidas y el acceso a recursos ajenos (respuesta 404 fuera de alcance y 403 cuando falta permiso). HU-07 y HU-08 leen el catálogo de prioridades activas desde `GET /api/v1/admin/catalogs/priorities` (solo lectura para los roles autenticados) y lo usan en el filtro y en la asignación. La evidencia incluye E2E con Playwright (52 en verde y 2 omitidas en el build simulado; 24 de 24 en la pasada real previa y 2 de 2 en la verificación real de HU-16/HU-19 contra staging y el Compose local), 284 pruebas unitarias de frontend (las suites de las áreas modificadas pasan en local; CI usa Node 22), 13 unitarias y 80 de integración de backend (el nuevo caso de prioridades se ejecuta con `mvn -B verify` y Docker/Java 21), la colección Postman, la matriz HU → prueba y el registro de QA. La estrategia y el prompt de pruebas se documentan en [`PROMPT-PRUEBAS.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/testing/PROMPT-PRUEBAS.md).
+
+### 15.3 Fase III — APIs, nube, DevOps y seguridad
+
+El equipo cerró la Fase III con el Release Candidate `v1.0.0-rc.2` publicado en los tres repositorios y dos despliegues separados:
+
+| Entorno | Frontend | Backend | Base de datos |
+| --- | --- | --- | --- |
+| Staging | https://frontend-uni-tdk7.vercel.app | https://uniservice-backend-staging.onrender.com | MySQL en Railway |
+| Producción | https://frontend-uni-wx9m.vercel.app | https://uniservice-backend-prod.onrender.com | MySQL en Railway (instancia distinta) |
+
+Se implementaron Docker para desarrollo y para el backend de producción, CI/CD con GitHub Actions, OpenAPI/Swagger, RBAC, validación de entradas, gestión de secretos por entorno, CodeQL, pruebas de integración con Testcontainers, smoke de staging y despliegue de producción con aprobación y smoke automático. El detalle completo está en `infra-uni/docs/fase-3/INFORME-FASE-III.md`.
+
+### 15.4 Fase IV: verificación, operación y cierre
+
+La Fase IV, última del curso, convierte el Release Candidate en la versión final `v1.0.0`. Se trabajó en dos bloques: el bloque 1, hasta el 23/11/2026, cubrió el backend, la observabilidad, la seguridad, la UI/UX y los documentos base. El bloque 2, hasta el 30/11/2026, cubre las pruebas de aceptación y de usuario, la verificación y la aprobación final.
+
+| Frente | Resultado | Evidencia |
+| :---- | :---- | :---- |
+| Decisiones de alcance | Cuatro decisiones cerradas (sección 18.1). | [infra-uni#25](https://github.com/taller-web-sigesu/infra-uni/pull/25), `DECISIONES-FASE-IV.md` |
+| Sesión única por cuenta | Implementada y probada, incluida la concurrencia. | [backend-uni#16](https://github.com/taller-web-sigesu/backend-uni/pull/16) |
+| Datos de demostración | Laboratorio 10, Cancha deportiva y cuentas de Servicios Generales en `db/demo/V1001`. | [backend-uni#17](https://github.com/taller-web-sigesu/backend-uni/pull/17) |
+| Observabilidad | Métricas, trazas, logs correlacionados, dashboard, seis alertas y runbook. | [backend-uni#18](https://github.com/taller-web-sigesu/backend-uni/pull/18), `docs/fase-4/observabilidad-p2.md` |
+| Seguridad | Matriz de autorización, regresiones nuevas, ZAP pasivo y Gitleaks. | `docs/fase-4/INFORME-SEGURIDAD-P2.md`, `MATRIZ-AUTORIZACION-P2.md` |
+| Rendimiento | Carga, estrés y smoke con k6. | [infra-uni#26](https://github.com/taller-web-sigesu/infra-uni/pull/26), `docs/fase-4/performance-p2.md` |
+| UI/UX | Diez mejoras acordadas y revisión de pantallas adicionales. | `ANEXO-MEJORAS-UI-UX.pdf` |
+| Pruebas de aceptación y usuario | UAT, usabilidad, accesibilidad y cross-browser. | `INFORME-DE-PRUEBAS.pdf` |
+| Documentación | 13 PDF en el Drive, en ocho carpetas. | Drive `release final/` |
+
+## 16\. Uso responsable de IA
+
+El curso exige mantener un **registro de uso de IA** por cada utilización significativa. El equipo lo mantiene en `infra-uni/docs/ai/AI_USAGE_LOG.md` y el proceso de revisión en `infra-uni/docs/fase-3/PRUEBAS-IA.md`. La IA se usó como apoyo para redactar documentación, generar esbozos de pruebas y configurar el despliegue; todo resultado fue revisado por el equipo y validado con pruebas ejecutadas.
+
+| Fecha | Fase | Repo | Herramienta | Prompt | Resultado | ¿Se usó? | Validación | Modificaciones | Responsable |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 2026-11-11 | Auditoría 01 | infra-uni | Claude Code | Revisar y corregir la guía de ejecución con IA | Guía de auditoría y registro | Sí | Revisión manual de rutas y enlaces | Ubicación, ramas y prompts | Equipo |
+| 2026-11-11 | Decisiones 01 | infra-uni | Claude Code | Registrar decisiones de evidencias, auto-registro y recuperación | Decisiones, HU-26 a HU-29 y RF-31 a RF-34 | Sí | Revisión manual de enlaces y DDL | Ajustes de alcance por rol | Equipo |
+| 2026-11-12 | Decisiones 02 | 3 repos | Claude Code | Agregar el rol Docente con permisos de estudiante | Decisiones, HU, RF, DDL y planes | Sí | Revisión manual de enlaces y JSON | Sincronización de alcance | Equipo |
+| 2026-11-14 | Calidad y despliegue | frontend-uni | OpenCode | Generar y revisar pruebas de historial, encuesta y cierre de sesión | Pruebas de historial, encuesta y acciones | Sí | Vitest y E2E; revisión de aserciones | Ajustes de aserciones y animación | Equipo |
+| 2026-11-14 | Despliegue staging/producción | 3 repos | OpenCode | Configurar Vercel, Render, Railway, proxy `/api` y smoke | Staging y producción desplegados | Sí | Health, login, refresh, creación de solicitud y cabeceras | Ajustes de branch, CORS y fallback SPA | Equipo |
+| 2026-11-16 | Informe final | infra-uni | OpenCode | Actualizar el informe con el estado real de los repositorios | Este informe | Sí | Contraste con código, docs y workflows | Correcciones de alcance, arquitectura y evidencias | Equipo |
+| 2026-11-22 | Fase IV, documentación final | infra-uni | Claude Code | Redactar los documentos finales (versión, release notes, informe I–IV, manuales, guía y presentación) a partir de los repositorios | Fuentes de los 7 PDF de P4 y capturas del manual | Sí | Contraste con código, OpenAPI, workflows, informes de Fase IV y capturas tomadas del sistema en local | Ajustes de etiquetas de UI, recursos API y disparadores de CI | Equipo |
+
+## 17\. Cumplimiento de la rúbrica de Fase III (histórico del RC.2)
+
+### 17.1 Cloud + CI/CD
+
+| Punto de la rúbrica | Estado | Evidencia |
+| --- | --- | --- |
+| Selección de plataforma cloud | ✅ | ADR-0004: Vercel (frontend), Render (backend) y Railway (MySQL). |
+| Docker | ✅ | `backend-uni/Dockerfile` de producción, `Dockerfile.dev` de frontend/backend y `infra-uni/compose.yaml`. |
+| Ambientes de desarrollo/prueba/producción | ✅ | Local, CI, staging y producción, con bases MySQL separadas. |
+| Git | ✅ | Tres repositorios con historial, PRs y ramas protegidas. |
+| Ramas | ✅ | `main` para staging, `production` para producción y ramas `feature/`, `fix/` y `docs/`. |
+| Integración continua | ✅ | `backend-ci`, `frontend ci` e `infra-ci` en verde sobre `main`. |
+| Despliegue | ✅ | Staging y producción con URLs públicas; producción actualizada al `main` del RC.2. |
+| Pipeline CI/CD | ✅ | `deploy-production` con aprobación, Deploy Hook, health y smoke; `staging-smoke` manual/programado. |
+
+**Evidencia del cierre:** deploy de producción [run 43963809965](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43963809965), CI de producción del frontend [run 43963845675](https://github.com/taller-web-sigesu/frontend-uni/actions/runs/43963845675), smoke de staging [run 43970286002](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43970286002), redeploy manual de staging a `b00e92b` y E2E reales de HU-16/HU-19 **2 de 2** contra staging.
+
+### 17.2 API REST
+
+| Punto de la rúbrica | Estado | Evidencia |
+| --- | --- | --- |
+| Diseño de recursos | ✅ | Solicitudes, reservas, usuarios, catálogos, SLA, auditoría, dashboard y adjuntos. |
+| Rutas | ✅ | Prefijo versionado `/api/v1` y recursos anidados. |
+| Parámetros | ✅ | Filtros, paginación, fechas, estado, categoría, prioridad y búsqueda. |
+| Códigos HTTP | ✅ | `200`, `201`, `204`, `400`, `401`, `403`, `404`, `409`, `429` y `500`; errores `application/problem+json`. |
+| Documentación | ✅ | `docs/api/openapi.yaml`, Swagger UI y `/v3/api-docs`. |
+| Pruebas de API | ✅ | Contrato OpenAPI, integración con Testcontainers y smoke real de staging. |
+| GraphQL/gRPC/webhooks | ✅ | Panorama y decisión de no implementarlos en `API-PANORAMA.md`. |
+| API Gateway | ✅ | Análisis y decisión de no usar gateway propio en `API-PANORAMA.md`. |
+
+### 17.3 Seguridad
+
+| Punto de la rúbrica | Estado | Evidencia |
+| --- | --- | --- |
+| Autenticación | ✅ | Login, logout, refresh rotativo y bloqueo por intentos. |
+| Autorización | ✅ | RBAC y alcance por recurso; 404 fuera de alcance y 403 sin permiso. |
+| Roles | ✅ | Estudiante, docente, técnico, supervisor y administrador. |
+| JWT o sesión | ✅ | JWT de 15 minutos y refresh opaco en cookie `HttpOnly`. |
+| Validación de entradas | ✅ | Bean Validation, validación de archivos por contenido y manejo global de errores. |
+| Protección de secretos | ✅ | Variables de entorno, GitHub Secrets y secretos de Render/Railway. |
+| Variables de entorno | ✅ | Configuración separada por entorno. |
+| Prevención de hardcode | ✅ | Sin credenciales reales en el repositorio; datos demo aislados en `db/demo`. |
+| Principios OWASP | ✅/🟡 | `OWASP-TOP-10.md` con controles y riesgos residuales. |
+
+**Decisiones de seguridad del RC.2:**
+
+| Tema | Decisión | Motivo |
+| --- | --- | --- |
+| CSP | Se acepta el riesgo para el RC. | Vercel ya envía HSTS, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` y `Permissions-Policy`; una CSP no probada podía romper la demo. Se implementa en Fase IV. |
+| Swagger/Actuator públicos | Swagger/OpenAPI se mantienen públicos para la demo; Actuator solo expone `health` sin detalles. | La rúbrica exige API documentada. Se restringirán por red/rol en Fase IV. |
+| Rotación de secretos | Se documenta como procedimiento de Fase IV. | Rotar durante el RC invalidaría sesiones y credenciales de la demo. |
+| Threat model formal | No se elabora para el RC. | El mapeo OWASP y las pruebas de autorización cubren los riesgos principales; se considera documentación de Fase IV. |
+| DAST / OWASP ZAP | Fase IV. | La Fase III cubre SAST (CodeQL), dependencias y pruebas de autorización. |
+
+### 17.4 Testing
+
+| Punto de la rúbrica | Estado | Evidencia |
+| --- | --- | --- |
+| Pruebas unitarias | ✅ | 284 de frontend y 13 de backend. |
+| Pruebas de integración | ✅ | 80 de backend con Testcontainers y MySQL. |
+| Automatización | ✅ | GitHub Actions, Playwright y smoke programado/manual. |
+| Criterios de aceptación | ✅ | `matriz-hu.md` con las 29 HU. |
+| Pruebas de API | ✅ | Contrato OpenAPI, integración y smoke real. |
+| Generación asistida por IA | ✅ | `PRUEBAS-IA.md` y registro de uso de IA. |
+| Revisión de pruebas generadas por IA | ✅ | Checklist y validación en `PRUEBAS-IA.md`. |
+
+**E2E del RC.2:** 52 en verde y 2 omitidas en el build simulado; 24 de 24 en la pasada real previa y **2 de 2** en la verificación real de HU-16/HU-19 contra staging y el Compose local.
+
+### 17.5 Demostración y producto
+
+| Punto de la rúbrica | Estado | Evidencia |
+| --- | --- | --- |
+| Aplicación desplegada | ✅ | Staging y producción; producción actualizada al RC.2. |
+| API documentada | ✅ | Swagger, OpenAPI y `/v3/api-docs`. |
+| CI/CD | ✅ | Workflows en verde y deploy de producción aprobado. |
+| Autenticación | ✅ | Verificada en staging, producción y Compose. |
+| Autorización | ✅ | Pruebas por rol y por recurso. |
+| Seguridad | ✅ | Auth, RBAC, validación, secretos, OWASP y cabeceras. |
+| Pruebas | ✅ | Unitarias, integración, E2E y smoke. |
+| Evidencias de automatización | ✅ | `EVIDENCIAS.md`, runs de GitHub Actions y reportes. |
+| Release Candidate | ✅ | `v1.0.0-rc.2` en los tres repositorios. |
+
+**Release Candidate:**
+- https://github.com/taller-web-sigesu/frontend-uni/releases/tag/v1.0.0-rc.2
+- https://github.com/taller-web-sigesu/backend-uni/releases/tag/v1.0.0-rc.2
+- https://github.com/taller-web-sigesu/infra-uni/releases/tag/v1.0.0-rc.2
+
+### 17.6 Lo deliberadamente no hecho
+
+El detalle está en [`DELIBERADAMENTE-NO-HECHO.md`](https://github.com/taller-web-sigesu/infra-uni/blob/main/docs/entregables/DELIBERADAMENTE-NO-HECHO.md). En resumen:
+
+- **Arquitectura/API:** GraphQL, gRPC, webhooks y API Gateway propio.
+- **Producto:** notificaciones, recuperación por correo, integraciones externas, reservas recurrentes, multi-rol y chatbot.
+- **Infraestructura:** Docker de producción del frontend (Vercel construye el frontend), observabilidad completa, DAST, k6, backups/restauración y rotación de secretos.
+- **Datos:** almacenamiento persistente de evidencias en Supabase; el RC usa almacenamiento local temporal.
+- **Documentación:** manuales de usuario/técnico e informe final de Fase IV.
+
+### 17.7 Limitaciones conocidas del RC.2
+
+1. **Evidencias:** staging y producción usan almacenamiento local temporal; Supabase queda para Fase IV.
+2. **Revisión independiente:** las PRs finales se integraron con bypass de administrador; queda como tarea de gobierno del equipo.
+3. **Registro de IA:** el informe contiene el resumen; el archivo histórico del repositorio conserva filas con “Responsable: Completar”.
+4. **E2E reales:** los escenarios nuevos de HU-16/HU-19 pasan contra staging y contra el Compose local; la regresión completa de 24 escenarios se conserva de la pasada real previa.
+
+## 18\. Fase IV: pruebas, seguridad, observabilidad y rendimiento
+
+### 18.1 Decisiones de alcance
+
+| Decisión | Resolución | Implementación |
+| :---- | :---- | :---- |
+| Solicitudes duplicadas | Se aceptan los reportes. El supervisor revisa los posibles duplicados y rechaza el duplicado con un motivo (HU-11). Se conservan el original y el historial. | Sin cambios de código. Prueba de integración del rechazo motivado. |
+| Sesión única | El último inicio de sesión válido reemplaza a los anteriores, con la cuenta bloqueada y la emisión en la misma transacción. | Código y migración `R__consolidar_sesiones_vigentes.sql`. |
+| Asignación por rol | El supervisor asigna dentro de su área. El administrador gestiona cuentas y catálogos. | Se mantiene la separación. Pruebas de denegación al administrador y al supervisor de otra área. |
+| Transferencia entre áreas | Excluida de `v1.0.0`. Se usa el rechazo motivado y el reingreso con la categoría correcta. | Registrada en `DELIBERADAMENTE-NO-HECHO.md`. |
+
+### 18.2 Arquitectura final
+
+La arquitectura de la sección 12 se mantiene: monolito modular Spring Boot, SPA React, MySQL con Flyway, tres repositorios y despliegue en Vercel, Render y Railway. La Fase IV agrega la capa de observabilidad:
+
+```text
+ Backend ──(Micrometer)──► /actuator/prometheus ◄── Prometheus ──► alertas (6 reglas)
+    │                                                   │
+    ├──(OpenTelemetry OTLP/HTTP)──► Tempo ◄─────────────┤
+    │                                                   ▼
+    └──(logs JSON: correlationId, traceId, spanId)    Grafana (dashboard gestal-backend)
+ Blackbox ──► /actuator/health      deploy_exporter ──► resultado de deploy-production.yml
+```
+
+### 18.3 Estrategia y resultados de pruebas
+
+| Tipo | Herramienta | Resultado de referencia |
+| :---- | :---- | :---- |
+| Unitarias backend | JUnit 5 + Mockito | 13, sin fallos. |
+| Integración backend | Spring Boot Test + Testcontainers (MySQL 8.4.13) | 94, sin fallos, errores ni omitidas, en el candidato con las regresiones de seguridad. |
+| Contrato API | `OpenApiContractIT` + Redocly | 64 operaciones verificadas. |
+| Unitarias frontend | Vitest + Testing Library | Suite en `src/**/*.test.*`, ejecutada en CI. |
+| E2E | Playwright | Sesión, solicitudes, reservas, administración y accesibilidad. |
+| Carga y estrés | k6 2.4.0 | Sección 18.6. |
+| Seguridad dinámica | OWASP ZAP 2.16.1 (pasivo) | Sección 18.4. |
+| Aceptación, usabilidad, accesibilidad y navegadores | UAT con usuarios, axe y Chromium, Firefox y WebKit | Consolidado en `INFORME-DE-PRUEBAS.pdf` (bloque 2). |
+
+Pruebas nuevas de la Fase IV: `AuthIT` (sesión única, revocación de JWT y refresh, concurrencia), `DemoDataIT` (cuentas y ambientes demo), `RequestLifecycleIT` (duplicados, asignación por área, rechazo y reingreso), `TelemetryIT` (permisos de Actuator) y regresiones de `AttachmentIT`, `SignedDownloadIT` y `OpenApiContractIT`.
+
+### 18.4 Seguridad
+
+**Controles implementados.** BCrypt, JWT de 15 minutos en memoria, refresh rotativo de 7 días en cookie `HttpOnly`, sesión única, RBAC con control por recurso (`404` fuera de alcance, `403` sin permiso), límites de intentos (`429`), validación de archivos por contenido, descarga firmada, secretos por entorno y Actuator protegido.
+
+**Matriz de autorización.** Cruza rol, método, ruta y recurso para las 64 operaciones, Swagger y Actuator, e indica qué prueba cubre cada fila (`MATRIZ-AUTORIZACION-P2.md`).
+
+**Hallazgos.**
+
+| ID | Severidad | Hallazgo | Estado |
+| :---- | :---- | :---- | :---- |
+| SEG-01 | Media | El frontend en Vercel no envía `Content-Security-Policy`. | Abierto. Riesgo aceptado para `v1.0.0`. |
+| SEG-02 | Informativa | `Access-Control-Allow-Origin: *` en recursos estáticos públicos, sin credenciales. | Clasificado. |
+| SEG-03 | Informativa | Gitleaks: clave ficticia en una prueba unitaria. | Falso positivo. |
+| SEG-04 | Baja | Contraseña generada en XML de `target/` (no versionados). | Revisar al publicar evidencias. |
+| SEG-05 / 06 | Pendiente | Confirmar el SHA desplegado en staging y el acceso a la observabilidad si se despliega allí. | Verificación del bloque 2. |
+| SEG-07 | Informativa | Cuentas demo con contraseña compartida en staging. | Deshabilitarlas tras la sustentación. |
+
+**Escaneo de secretos.** Gitleaks 8.28.0 sobre la historia y el árbol de `backend-uni` e `infra-uni`: una coincidencia en total, un falso positivo, y ninguna credencial real. El procedimiento de rotación está en el informe de seguridad.
+
+### 18.5 Observabilidad
+
+Verificada en local con Prometheus, Blackbox, Tempo y Grafana: tres targets UP, `probe_success=1` y log JSON y span de Tempo con el mismo `traceId` y `spanId`. Las seis alertas se dispararon y se recuperaron con fixtures de `promtool`.
+
+<figure><img src="assets/informe/grafana-dashboard.png" alt="Dashboard de Grafana"><figcaption>Figura 18.1. Dashboard de Grafana de la pila local.</figcaption></figure>
+
+| Alerta | Umbral |
+| :---- | :---- |
+| `GestalHealthUnavailable` | Sonda caída durante 1 min. |
+| `GestalHttp5xxHigh` | Más de 1 % de 5xx durante 5 min. |
+| `GestalHttpP95High` | p95 mayor de 2 s durante 5 min. |
+| `GestalPoolSaturated` | Hikari por encima del 80 % durante 5 min. |
+| `GestalDeploymentFailed` | Despliegue de producción fallido. |
+| `GestalLoginRejectionsHigh` | 20 o más rechazos de login en 5 min. |
+
+Retención configurada: 15 días de métricas y 7 de trazas, según ADR-0003. La retención de 30 días de logs y la pila en staging quedan pendientes de un proveedor.
+
+### 18.6 Rendimiento
+
+Mediciones del 21/11/2026 sobre Docker Compose local (MySQL limitado a 1 CPU y 1 GiB) con k6 2.4.0.
+
+| Escenario | Solicitudes | req/s | p50 ms | p95 ms | p99 ms | Errores |
+| :---- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Carga, línea base (RC.2) | 1479 | 9,45 | 8,27 | 18,71 | 25,75 | 0 % |
+| Carga, candidato Fase IV | 1480 | 9,43 | 10,59 | 21,89 | 35,40 | 0 % |
+| Estrés, línea base (10→40 req/s) | 4660 | 19,89 | 7,79 | 12,66 | 17,27 | 0 % |
+| Estrés, candidato (10→40 req/s) | 4659 | 19,89 | 8,55 | 15,49 | 20,24 | 0 % |
+| Smoke de staging | 6 | 0,75 | 225,13 | 553,21 | 575,20 | 0 % |
+
+El candidato sostuvo 40 lecturas por segundo durante 45 s sin errores. El pool Hikari no pasó de 1/10 conexiones y el heap de 80 MiB. La saturación queda fuera del intervalo ensayado. El aumento de p95 frente a la base (unos 6 a 10 ms) coincide con la instrumentación activa. Una sola corrida por revisión no permite atribuirlo a un cambio concreto.
+
+<figure><img src="assets/informe/stress-grafana.png" alt="Grafana durante el estrés"><figcaption>Figura 18.2. Grafana durante la prueba de estrés del candidato.</figcaption></figure>
+
+### 18.7 Interfaz de usuario
+
+Los diez cambios de UI/UX acordados son: cerrar sesión al pie del sidebar, breadcrumbs, botón de colapsar el sidebar, «UNMSM» como institución, nombre de la universidad en el sidebar, opción activa resaltada, inicio del administrador con indicadores, acciones de usuarios y catálogos, y ojo y código clicable en la aprobación de reservas. Su estado final, los hallazgos adicionales y los criterios de aceptación están en `ANEXO-MEJORAS-UI-UX.pdf`.
+
+### 18.8 Operación: despliegue, respaldos y rollback
+
+- Staging se despliega desde `main` y producción desde `production`, con aprobación y smoke (`deploy-production.yml`).
+- Respaldo diario de Railway con retención de 7 días. Se exige un respaldo reciente antes de promover a producción.
+- Rollback: deploy anterior en Render o Vercel. Las migraciones son *forward-only*.
+- Procedimientos completos en `MANUAL-TECNICO.pdf` y `PROMOCION-Y-ROLLBACK.md`.
+
+## 19\. Conclusiones y lecciones aprendidas
+
+### 19.1 Conclusiones
+
+1. **Objetivo cumplido.** Gestal centraliza el registro, la asignación, el seguimiento, la medición (SLA e indicadores) y la auditoría de las solicitudes de servicio, y suma la reserva de ambientes. Las 29 historias de usuario están implementadas y desplegadas en staging y producción.
+2. **Arquitectura adecuada.** El monolito modular, con tres repositorios y un contrato OpenAPI, fue suficiente para el alcance y la carga medida. Agregar microservicios, un gateway o mensajería habría complicado el sistema sin un beneficio demostrable.
+3. **Calidad verificable.** Cada cambio pasó por PR, revisión y CI con pruebas unitarias, de integración con MySQL real (Testcontainers), E2E, contrato, SAST y smoke. Cada afirmación de los informes se respalda con una ejecución enlazada.
+4. **Seguridad por capas.** La autorización se aplica en el servidor por rol y por recurso, y se verificó con regresiones y una matriz explícita. El riesgo pendiente más relevante (CSP) está identificado y aceptado.
+5. **Operable.** Métricas, trazas, logs correlacionados, alertas y runbook permiten detectar y diagnosticar incidentes. El despliegue a producción exige aprobación y comprueba la salud.
+
+### 19.2 Lecciones aprendidas
+
+- **Decidir por escrito antes de programar.** Las ADR y las decisiones de Fase IV evitaron discusiones repetidas y dejaron claro qué quedaba fuera del alcance.
+- **Probar contra la base real.** Testcontainers detectó problemas de concurrencia y de migraciones que los mocks no habrían mostrado, por ejemplo en la sesión única.
+- **Identificar la revisión desplegada.** Varias verificaciones de staging quedaron abiertas porque no se podía probar qué SHA servía el tráfico. Exponer la versión en `/status` o registrar el deploy lo resolvería.
+- **Sanitizar las evidencias.** Los resúmenes de k6 y los reportes de pruebas pueden filtrar tokens o contraseñas generadas. Revisarlos antes de publicar es parte del trabajo.
+- **Usar la IA como apoyo revisado.** La IA aceleró la documentación y las pruebas, pero cada resultado se contrastó con el código y con ejecuciones reales (sección 16).
+- **Respetar las ramas y las revisiones.** La regla de no confirmar en `main` y revisar cada PR redujo las regresiones al integrar el trabajo de cinco personas en tres repositorios.
+
+### 19.3 Trabajo futuro
+
+CSP en el frontend, almacenamiento persistente de evidencias en Supabase, observabilidad gestionada en staging con 30 días de logs, prueba periódica de restauración, notificaciones, recuperación de contraseña por correo, reservas recurrentes y transferencia formal de solicitudes entre áreas.
+
+## 20\. Limitaciones conocidas de `v1.0.0`
+
+1. **CSP** ausente en el frontend (SEG-01).
+2. **Evidencias** en almacenamiento temporal en Render.
+3. **Observabilidad en staging** pendiente de confirmar el SHA desplegado y el destino de las alertas.
+4. **Retención de logs** de 30 días sin proveedor.
+5. **Restauración de respaldos** pendiente de evidencia documentada.
+6. **Cuentas demo** con contraseña compartida en staging, a deshabilitar tras la sustentación.
+
+La lista completa de exclusiones está en `DELIBERADAMENTE-NO-HECHO.md`.
+
+## Anexo A — Acuerdos de arranque
+
+Acuerdos tomados en la reunión de arranque del equipo. Son la base para que P2 elabore el alcance y los requerimientos formales con identificadores y prioridades.
+
+### A.1 Identidad del proyecto
+
+* **Nombre del proyecto:** Gestal — Sistema de Gestión Integral de Servicios Universitarios.
+
+* **Producto desplegado:** UniService / Universidad Actúa.
+
+* **Enfoque principal:** gestión de solicitudes de servicios universitarios (mantenimiento, incidencias de infraestructura, soporte informático y solicitudes administrativas) y reserva de ambientes.
+
+### A.2 Alcance planificado priorizado
+
+La implementación se organizó por fases; el núcleo se construyó primero y los extras se incorporaron al cerrar la Fase III.
+
+| Prioridad | Funcionalidad | Fase | Estado |
+| :---- | :---- | :---- | :---- |
+| 1 (núcleo) | Autenticación y roles (5 roles) | II–III | Implementado |
+| 1 (núcleo) | Registro y ciclo de vida de solicitudes (estados, prioridad, categoría, responsable) | II | Implementado |
+| 1 (núcleo) | Gestión de solicitudes por parte de técnicos y supervisores | II | Implementado |
+| 1 (núcleo) | Dashboard con indicadores | II | Implementado |
+| 1 (núcleo) | Administración (usuarios, roles, categorías, prioridades, estados, áreas) | II–III | Implementado |
+| 2 (extra) | SLA y control de vencimientos | III | Implementado |
+| 2 (extra) | Auditoría de cambios (trazabilidad) | III | Implementado |
+| 2 (extra) | Reportes exportables | III | Implementado |
+| 2 (extra) | Encuestas de satisfacción | III | Implementado |
+| 2 (extra) | Evidencias adjuntas | III | Implementado |
+| 2 (extra) | Reserva de ambientes | III | Implementado |
+| 2 (extra) | Auto-registro, aprobación de cuentas y restablecimiento de contraseña | III | Implementado |
+
+### A.3 Exclusiones explícitas
+
+* **Notificaciones (in-app o correo):** no implementadas; quedan como evolución.
+
+* **Recuperación de contraseña por correo:** se cubre con el cambio de contraseña y el restablecimiento por el administrador.
+
+* **Integración con otros sistemas de la universidad:** fuera del alcance.
+
+* **Reservas recurrentes o periódicas:** la reserva simple está implementada.
+
+* **Varios roles por usuario:** cada cuenta tiene un rol principal.
+
+### A.4 Reglas de dominio acordadas
+
+* **Roles (5):** estudiante, docente, técnico, supervisor y administrador.
+
+* **Estados de una solicitud (6):** Nuevo, Asignado, En proceso, Resuelto, Cerrado, Rechazado.
+
+* **Indicadores del dashboard (9):** solicitudes registradas, pendientes, atendidas, por categoría, por prioridad, tiempo promedio de atención, porcentaje de solicitudes resueltas, solicitudes vencidas y solicitudes por responsable.
+
+### A.5 Pantallas del prototipo
+
+El prototipo completo tiene **16 pantallas** (P01 a P16) y variantes P00 de inicio por rol:
+
+1. Inicio de sesión.
+2. Inicio del estudiante / docente.
+3. Mis solicitudes.
+4. Registrar solicitud.
+5. Detalle y seguimiento.
+6. Bandeja del técnico.
+7. Gestión del área.
+8. Dashboard de indicadores.
+9. Reservar ambiente.
+10. Mis reservas.
+11. Aprobación de reservas.
+12. Administración de usuarios.
+13. Catálogos (áreas, categorías, prioridades y estados).
+14. Políticas SLA.
+15. Espacios, horarios y política de reservas.
+16. Perfil y contraseña.
+
+### A.6 Tecnologías
+
+* **Frontend:** HTML, CSS y JavaScript moderno en Fase I; React 19 + Vite en la construcción full-stack.
+
+* **Backend:** Spring Boot 4.1.2 con API REST, controladores, servicios, DTO, Bean Validation y arquitectura por capas.
+
+* **Base de datos:** MySQL 8.4 con migraciones Flyway y `JdbcClient` (SQL explícito).
+
+* **Autenticación:** JWT de acceso de 15 minutos y refresh token en cookie `HttpOnly`.
+
+* **Operación y calidad:** Docker, Git, GitHub Actions, CI/CD, pruebas automatizadas, prácticas OWASP, CodeQL y observabilidad.
+
+## Anexo B — Convenciones de trabajo (P1)
+
+### B.1 Repositorios
+
+* **Código:** tres repositorios en GitHub, separados por responsabilidad.
+
+  * Frontend: https\://github.com/taller-web-sigesu/frontend-uni
+
+  * Backend: https\://github.com/taller-web-sigesu/backend-uni
+
+  * Infraestructura y documentación: https\://github.com/taller-web-sigesu/infra-uni
+
+* **Documentación:** la documentación compartida (arquitectura, requisitos, historias de usuario, ADR, informes de Fase III y registro de IA) vive en `infra-uni/docs/`.
+
+### B.2 Ramas
+
+| Rama | Propósito |
+| :---- | :---- |
+| main | Versión estable y entorno de staging. |
+| production | Versión de producción; se promueve desde `main` con PR. |
+| feature/\* | Nuevas funcionalidades; se crean desde `main` y vuelven con PR. |
+| fix/\* | Correcciones; se crean desde `main` y vuelven con PR. |
+| docs/\* | Documentación; se crean desde `main` y vuelven con PR. |
+
+Nomenclatura:
+
+* feature/HU-08-prioridad-supervisor
+* fix/login-timeout
+* docs/informe-final
+
+### B.3 Commits y pull requests
+
+* Mensajes con estilo Conventional Commits en imperativo: feat:, fix:, docs:, chore:, test:, refactor:.
+
+  * Ejemplo: feat: registrar solicitud de mantenimiento.
+
+* Los PR se revisan al menos por otro integrante antes de integrar.
+
+* No se hace merge directo a `main`; el flujo es feature/\* → `main` → `production` para los despliegues de producción.
+
+### B.4 Archivos y carpetas
+
+* Carpetas en minúsculas y archivos web en kebab-case: registro-solicitud.html.
+
+* Backend con las convenciones de Java: clases en PascalCase, paquetes en minúsculas.
+
+* Cada repositorio mantiene su .gitignore según su tecnología (Java/Maven en backend, Node en frontend).
+
+[image1]: <data:image/png;base64,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>
+
+[image2]: <data:image/png;base64,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>
+
+[image3]: <data:image/png;base64,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>
+
+[image4]: <data:image/png;base64,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>
+
+[image5]: <data:image/png;base64,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>
+
+[image6]: <data:image/png;base64,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>
+
+[image7]: <data:image/png;base64,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>
+
+[image8]: <data:image/png;base64,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>
+
+[image9]: <data:image/png;base64,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>
+
+[image10]: <data:image/png;base64,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eseOvV+s/97GsA9v5+PgpXt4957ihXu/W7z6z98Lj9f/n8uKzf/w3XBfY1qmxx73su8t/VpQ93/5+DPFB7/9bblMvtUZe+A/fTnsP96n/OF/+/uglmkdL9M2Wldj2p+WSy1b+5+uK8/R/o9b/iGs6336fBAREbG5A43Dm+9YW457LI1DRaMfOw5jX/hZNw51P74lDudXxZhuD01FWBxy31+6slzPY7rd8crPy/Gdr/48xGEagPLEbw8X//C//5eeZXrs6IvjUOegxzs7+1f4fa9zfK+nWIz3nR4r3iciIiI2d97j0PFnHXzlbOKmF8OtwjGOQ0Wg1tX27/zq3eLxKPzu/Mf14TaOw/Q4eGnGkaW4SqNLcRevp1tFn5cr2hSHuq/Zu3hbjWvMAZou077SbTbf2z3Oj2+5p3i187N28ClC4/UUkLqNg9DngYiIiM2d9zhU2End39wJPo/vH++GXTyuj4q17s5du8Nj3Xo97yPeVuvH28Xr4KX7q02bw0e6uq/ocnh5TDrCyljTelPB5rGxrb8u1/c+PB4/1vGm7Sda5nEHqG81Hp+P9+MZxfg+IiIiNnfe4xARERERL1+JQ0REREQsJQ4RERERsZQ4RERERMRS4hARERERS4lDRERERCwlDhERERGxlDhERERExFLiEBERERFLBxKHf7Pq2z1jVWo9u3sP34eLiIiImNt5j8MfPPl08Tcrbw73FX1fWfbfij/5i78Kj+9es674wpf+7571fV/rvfLaG8Vvf3u4eOd//a+w7s233lVuo+W79+wul2l/6fERERERce7Oexx+6tOf68Tbr0Lk/eEf/3kY+x/P/0u4PdKJPsWibr2+49ABqW12794dttfjOAwVg9r/Fztjf3hFd9+IiIiIOH/Oexz+7dRHyn94xV+UcejQU9R996HHpn2E7DjUDKGiUfFXFYfaVrOGWsfLtG56fEREREScu/MehzN55Le/7RmLne33DuPls62LiIiIiM0dahwiIiIiYrslDhERERGxlDjErOr3RmX8e6QL8XdJ/bz+34ce61lWR/3urbbnL/QREXHQEodY6oCJbfpX4U3jbrHF4Vx/V1ZXALiU7VPT1x0REdESh1jqYNDlhhQjf/jHf9E31uK/Gq/aRzoutX58GaN4/dnisN/x5upM+5vrsrm6derST37c9Bizraug1F/6x2Pp6x6b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AuTh9MSHxd5fbi1OjB8qDm/vht/hTgBq5s4zh467x5d9PYSawlDLte6OF14Lj8UvHvlh8dNOzImqONTMocJP6584cLhY959vKMY6x1Zc6pg6Dx//R6tu7277R1/oLH8+LAOA4UMcYjaJQ4B8bPjr5Z0Y637k65B78M9vKOPwg044Os4Ub4o5RV0cgEIhp0D0euV48rHyuj+7Idx6/wpGBaH26+38sbK30awmAAwf4hCzSRwC5OPhThwqBoUC7fY/+NMwu/fzR54KYSgUfsIfKx/aPlqOGT12xMXLfvZPG8L+tEwzgtq/0L50X7/3+IOvfqPY8eJr4Zga8wykbr0+AAwf4hCzSRwCAAC0D+IQs0kcAgAAtA/iELNJHAIAALQP4hCzSRwCAAC0D+IQs0kcAgAAtA/iELM5smus/IcAAAAA7WDnnn0979mDljjE4NH33y//IQAAAEA7OHDocM979qAlDrFU/wC37dxbTEx+hIiIiBkdP3ik2H/gUM979TAkDhERERGxlDhERERExFLiEBERERFLiUNERERELCUOEREREbGUOERERETEUuIQEREREUuJQ0REREQsJQ4RERERsZQ4RERERMRS4hARERERS4lDRERERCwlDhERERGxlDhERERExNLKOPzkk08QERERcZHaE4cAAAAAAMQhAAAAAJQQhwAAAABQ8v8DDm18Eker+tsAAAAASUVORK5CYII=>
+
+[image11]: <data:image/png;base64,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>
+
+[image12]: <data:image/png;base64,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>

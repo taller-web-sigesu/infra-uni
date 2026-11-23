@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Presentación — Gestal v1.0.0</title>
+<style>
+  @page { size: 13.333in 7.5in; margin: 0; }
+  :root { --azul: #1d3f72; --amarillo: #f9c80e; --tinta: #1f2733; --gris: #5b6472; --suave: #f3f6fa; --borde: #d5dbe3; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; font-family: "Segoe UI", Calibri, Arial, sans-serif; color: var(--tinta); }
+  .slide { width: 13.333in; height: 7.5in; padding: 0.55in 0.75in 0.5in; position: relative; overflow: hidden; break-after: page; display: flex; flex-direction: column; }
+  .slide:last-child { break-after: auto; }
+  .slide::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 0.14in; background: var(--azul); }
+  .slide footer { position: absolute; left: 0.75in; right: 0.75in; bottom: 0.22in; display: flex; justify-content: space-between; font-size: 10pt; color: var(--gris); }
+  h1 { font-size: 34pt; color: var(--azul); margin: 0 0 0.15in; }
+  h2 { font-size: 26pt; color: var(--azul); margin: 0 0 0.25in; padding-bottom: 0.08in; border-bottom: 3px solid var(--amarillo); display: inline-block; }
+  h3 { font-size: 15pt; margin: 0 0 0.08in; color: var(--azul); }
+  p, li { font-size: 15pt; line-height: 1.38; }
+  ul { margin: 0; padding-left: 0.3in; }
+  li { margin-bottom: 0.07in; }
+  code { font-family: Consolas, monospace; font-size: 0.9em; background: var(--suave); padding: 0 4px; border-radius: 3px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0.45in; flex: 1; }
+  .cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.3in; }
+  .card { background: var(--suave); border: 1px solid var(--borde); border-radius: 10px; padding: 0.2in 0.25in; }
+  .card p, .card li { font-size: 13pt; }
+  .kpi { font-size: 30pt; font-weight: 700; color: var(--azul); line-height: 1; }
+  .kpi small { display: block; font-size: 11pt; font-weight: 400; color: var(--gris); margin-top: 6px; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5pt; }
+  th { background: var(--azul); color: #fff; text-align: left; padding: 6px 10px; }
+  td { border-bottom: 1px solid var(--borde); padding: 6px 10px; vertical-align: top; }
+  img { max-width: 100%; max-height: 100%; border: 1px solid var(--borde); border-radius: 8px; }
+  .shot { display: flex; align-items: center; justify-content: center; min-height: 0; }
+  .shot img { max-height: 4.9in; }
+  .portada { justify-content: center; background: linear-gradient(135deg, #fff 60%, #fdf3c4); }
+  .portada h1 { font-size: 46pt; }
+  .portada .sub { font-size: 20pt; color: var(--gris); margin: 0 0 0.35in; }
+  .portada .meta { font-size: 13pt; color: var(--gris); line-height: 1.5; }
+  .tag { display: inline-block; background: var(--amarillo); color: var(--tinta); font-weight: 700; border-radius: 6px; padding: 2px 10px; font-size: 13pt; }
+  .arq { font-family: Consolas, monospace; font-size: 12.5pt; background: var(--suave); border: 1px solid var(--borde); border-radius: 10px; padding: 0.2in 0.3in; white-space: pre; line-height: 1.35; }
+  .flow { display: flex; gap: 0.12in; align-items: center; flex-wrap: wrap; margin: 0.1in 0 0.25in; }
+  .flow span { background: var(--azul); color: #fff; border-radius: 6px; padding: 6px 12px; font-size: 13pt; }
+  .flow b { color: var(--gris); font-size: 16pt; }
+  .muted { color: var(--gris); }
+</style>
+</head>
+<body>
+
+<section class="slide portada">
+  <span class="tag">v1.0.0 · Release final</span>
+  <h1 style="margin-top:0.25in">Gestal / UniService</h1>
+  <p class="sub">Sistema Web para la Gestión Integral de Servicios Universitarios</p>
+  <p class="meta">Grupo 3 · Taller de construcción de software web · UNMSM, FISI, 2026-II<br>
+  Sebastian Andree Tejeda Alata (líder) · Marcos Luis Basualdo Ale · Bizarro Ortiz Luis Junior Alfredo ·
+  Gianpierre Rodrigo Dulanto Romero · Albert Marco Aurelio Huaman Ñahuinlla<br>
+  Profesor: Candela Arce, David Felix</p>
+</section>
+
+<section class="slide">
+  <h2>El problema</h2>
+  <div class="cols">
+    <div>
+      <ul>
+        <li>Las solicitudes de servicio llegan por correos, formatos sueltos y llamadas.</li>
+        <li>No hay un responsable visible ni un seguimiento por estados.</li>
+        <li>No se miden los plazos de atención ni se sabe quién cambió qué.</li>
+        <li>Las reservas de ambientes se gestionan aparte y se cruzan.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Objetivo</h3>
+      <p>Un único canal web para <b>registrar, asignar, seguir, medir y auditar</b> las solicitudes de soporte informático, mantenimiento, biblioteca y servicios generales, y para <b>reservar ambientes</b>.</p>
+    </div>
+  </div>
+  <footer><span>Gestal v1.0.0</span><span>2</span></footer>
+</section>
+
+<section class="slide">
+  <h2>Alcance</h2>
+  <div class="cols3">
+    <div class="card"><div class="kpi">29<small>historias de usuario (HU-01 a HU-29)</small></div></div>
+    <div class="card"><div class="kpi">5<small>roles: estudiante, docente, técnico, supervisor, administrador</small></div></div>
+    <div class="card"><div class="kpi">64<small>operaciones REST documentadas en OpenAPI</small></div></div>
+  </div>
+  <div class="cols" style="margin-top:0.3in">
+    <ul>
+      <li>Solicitudes: registro, evidencias, comentarios, historial y encuesta.</li>
+      <li>Gestión: asignación por área, prioridad y ciclo de vida.</li>
+      <li>SLA, indicadores, exportación CSV y auditoría.</li>
+    </ul>
+    <ul>
+      <li>Reserva de ambientes con horarios, política y aprobación.</li>
+      <li>Administración de usuarios, catálogos, SLA y ambientes.</li>
+      <li class="muted">Fuera de alcance: notificaciones, pagos, chatbot, reservas recurrentes, transferencia entre áreas.</li>
+    </ul>
+  </div>
+  <footer><span>Gestal v1.0.0</span><span>3</span></footer>
+</section>
+
+<section class="slide">
+  <h2>Fases del proyecto</h2>
+  <table>
+    <tr><th style="width:18%">Fase</th><th style="width:16%">Semanas</th><th>Resultado</th></tr>
+    <tr><td><b>I</b></td><td>1–4</td><td>Requisitos, épicas, HU con BDD, arquitectura, Figma y prototipo HTML/CSS/JS.</td></tr>
+    <tr><td><b>II</b></td><td>5–10</td><td>MVP end-to-end: React + Spring Boot + MySQL, login, solicitudes, gestión y dashboard.</td></tr>
+    <tr><td><b>III</b></td><td>11–13</td><td>OpenAPI, Docker, CI/CD, staging y producción, OWASP. Release Candidate <code>v1.0.0-rc.2</code>.</td></tr>
+    <tr><td><b>IV</b></td><td>14–16</td><td>Sesión única, observabilidad, seguridad, carga y estrés, UI/UX, UAT y manuales. <code>v1.0.0</code>.</td></tr>
+  </table>
+  <footer><span>Gestal v1.0.0</span><span>4</span></footer>
+</section>
+
+<section class="slide">
+  <h2>Arquitectura</h2>
+  <div class="cols" style="grid-template-columns: 1.35fr 1fr">
+<div class="arq">Usuarios (5 roles)
+     │ HTTPS
+     ▼
+React 19 + Vite ──────── Vercel
+     │ /api/v1 · JWT + cookie HttpOnly
+     ▼
+Spring Boot 4 (monolito modular) ── Render
+     │ Flyway / JdbcClient     │ OTLP · Prometheus
+     ▼                         ▼
+MySQL 8.4 ── Railway    Prometheus · Tempo · Grafana</div>
+    <div>
+      <ul>
+        <li><b>Monolito modular</b>: auth, requests, management, reservations, sla, dashboard y audit.</li>
+        <li><b>Tres repositorios</b>: <code>frontend-uni</code>, <code>backend-uni</code> e <code>infra-uni</code>.</li>
+        <li>Staging (<code>main</code>) y producción (<code>production</code>) con bases separadas.</li>
+        <li>Decisiones registradas en ADR-0001 a ADR-0005.</li>
+      </ul>
+    </div>
+  </div>
+  <footer><span>Gestal v1.0.0</span><span>5</span></footer>
+</section>
+
+<section class="slide">
+  <h2>Flujo principal</h2>
+  <div class="flow"><span>Estudiante registra</span><b>→</b><span>Nuevo</span><b>→</b><span>Supervisor asigna</span><b>→</b><span>Técnico atiende</span><b>→</b><span>Resuelto</span><b>→</b><span>Supervisor cierra</span><b>→</b><span>Encuesta</span></div>
+  <div class="shot" style="flex:1"><img src="assets/manual/13-estudiante-detalle.png" alt="Detalle de solicitud con historial"></div>
+  <footer><span>Gestal v1.0.0</span><span>6</span></footer>
+</section>
+
+<section class="slide">
+  <h2>Demostración</h2>
+  <div class="cols">
+    <div>
+      <ol style="padding-left:0.3in">
+        <li>Estudiante: registra una solicitud y reserva el <b>Laboratorio 10</b>.</li>
+        <li>Supervisor TI: la asigna a un técnico de su área.</li>
+        <li>Técnico: inicia la atención y la resuelve.</li>
+        <li>Supervisor: la cierra. El estudiante la califica.</li>
+        <li>Supervisor de Servicios Generales: aprueba la reserva de la <b>cancha</b>.</li>
+        <li>Administrador: usuarios, catálogos e indicadores.</li>
+      </ol>
+      <p class="muted" style="font-size:12pt">Plan B: Docker Compose local o video. Guion en <code>GUION-DE-DEMOSTRACION.pdf</code>.</p>
+    </div>
+    <div class="card">
+      <h3>Entornos</h3>
+      <p>Staging: <code>frontend-uni-tdk7.vercel.app</code><br>Producción: <code>frontend-uni-wx9m.vercel.app</code><br>Local: <code>localhost:3000</code></p>
+      <h3 style="margin-top:0.2in">Cuentas demo</h3>
+      <p><code>*.demo@universidad.example</code><br>Solo en staging y local.</p>
+    </div>
+  </div>
+  <footer><span>Gestal v1.0.0</span><span>7</span></footer>
+</section>
+
+<section class="slide">
+  <h2>Pruebas</h2>
+  <div class="cols3">
+    <div class="card"><div class="kpi">13 + 94<small>pruebas unitarias + de integración (backend), 0 fallos</small></div></div>
+    <div class="card"><div class="kpi">0 %<small>errores en carga y estrés con k6</small></div></div>
+    <div class="card"><div class="kpi">40 req/s<small>sostenidas en estrés, p95 de 15,5 ms</small></div></div>
+  </div>
+  <table style="margin-top:0.3in">
+    <tr><th>Tipo</th><th>Herramienta</th></tr>
+    <tr><td>Unitarias e integración</td><td>JUnit 5, Testcontainers (MySQL real), Vitest</td></tr>
+    <tr><td>E2E y accesibilidad</td><td>Playwright + axe</td></tr>
+    <tr><td>Contrato API</td><td>OpenAPI + Redocly + <code>OpenApiContractIT</code></td></tr>
+    <tr><td>Carga, estrés y smoke</td><td>k6 2.4.0</td></tr>
+    <tr><td>Aceptación y usabilidad</td><td>UAT con usuarios (ver <code>INFORME-DE-PRUEBAS.pdf</code>)</td></tr>
+  </table>
+  <footer><span>Gestal v1.0.0</span><span>8</span></footer>
+</section>
+
+<section class="slide">
+  <h2>Seguridad</h2>
+  <div class="cols">
+    <ul>
+      <li>JWT de 15 min en memoria + refresh rotativo en cookie <code>HttpOnly</code>.</li>
+      <li><b>Sesión única</b>: un login nuevo revoca la sesión anterior.</li>
+      <li>RBAC + control por recurso: <code>404</code> fuera de alcance, <code>403</code> sin permiso.</li>
+      <li>Límites de intentos (<code>429</code>), validación de archivos y descargas firmadas.</li>
+      <li>Actuator protegido; solo <code>health</code> es público.</li>
+    </ul>
+    <div class="card">
+      <h3>Verificación</h3>
+      <ul>
+        <li>Matriz de autorización de las 64 operaciones.</li>
+        <li>OWASP ZAP pasivo sobre staging.</li>
+        <li>Gitleaks en la historia: 0 credenciales reales.</li>
+        <li>CodeQL y revisión de dependencias en CI.</li>
+        <li class="muted">Pendiente: CSP en el frontend (SEG-01).</li>
+      </ul>
+    </div>
+  </div>
+  <footer><span>Gestal v1.0.0</span><span>9</span></footer>
+</section>
+
+<section class="slide">
+  <h2>Observabilidad</h2>
+  <div class="cols" style="grid-template-columns: 1.3fr 1fr">
+    <div class="shot"><img src="assets/informe/grafana-dashboard.png" alt="Dashboard de Grafana"></div>
+    <div>
+      <ul>
+        <li><b>Métricas</b>: Micrometer y Prometheus (HTTP, JVM, Hikari, negocio).</li>
+        <li><b>Trazas</b>: OpenTelemetry → Tempo.</li>
+        <li><b>Logs JSON</b> con <code>correlationId</code>, <code>traceId</code> y <code>spanId</code>.</li>
+        <li><b>6 alertas</b>: health, 5xx, p95, pool, deploy y fuerza bruta.</li>
+        <li>Runbook por alerta.</li>
+      </ul>
+    </div>
+  </div>
+  <footer><span>Gestal v1.0.0</span><span>10</span></footer>
+</section>
+
+<section class="slide">
+  <h2>CI/CD y operación</h2>
+  <div class="flow"><span>Rama feature/*</span><b>→</b><span>PR + revisión</span><b>→</b><span>CI verde</span><b>→</b><span>main → staging</span><b>→</b><span>PR → production</span><b>→</b><span>Aprobación + smoke</span></div>
+  <div class="cols">
+    <ul>
+      <li><b>Backend</b>: lint OpenAPI, <code>mvn verify</code>, imagen y smoke, CodeQL, dependencias.</li>
+      <li><b>Frontend</b>: lint, Vitest, build y Playwright.</li>
+      <li><b>Infra</b>: Compose, variables, secretos y enlaces.</li>
+    </ul>
+    <ul>
+      <li>Respaldo diario de MySQL (Railway, 7 días).</li>
+      <li>Rollback al deploy anterior en Render o Vercel.</li>
+      <li>Tags inmutables: <code>v1.0.0-rc.2</code> → <code>v1.0.0</code>.</li>
+    </ul>
+  </div>
+  <footer><span>Gestal v1.0.0</span><span>11</span></footer>
+</section>
+
+<section class="slide">
+  <h2>Lecciones aprendidas</h2>
+  <div class="cols">
+    <ul>
+      <li><b>Decidir por escrito</b>: las ADR y las decisiones de Fase IV evitaron discusiones repetidas.</li>
+      <li><b>Probar contra la base real</b>: Testcontainers detectó problemas de concurrencia.</li>
+      <li><b>Identificar la revisión desplegada</b>: sin el SHA en staging, algunas verificaciones quedaron abiertas.</li>
+    </ul>
+    <ul>
+      <li><b>Sanitizar las evidencias</b> antes de publicarlas.</li>
+      <li><b>IA como apoyo revisado</b>: cada resultado se contrastó con código y ejecuciones.</li>
+      <li><b>Ramas y PR</b>: cinco personas, tres repositorios, sin confirmar en <code>main</code>.</li>
+    </ul>
+  </div>
+  <footer><span>Gestal v1.0.0</span><span>12</span></footer>
+</section>
+
+<section class="slide">
+  <h2>Cierre</h2>
+  <div class="cols">
+    <div>
+      <h3>Entregado</h3>
+      <ul>
+        <li>Sistema desplegado en staging y producción.</li>
+        <li><code>v1.0.0</code> en los tres repositorios.</li>
+        <li>13 PDF: versión, informes, manuales, evidencias, presentación y guion.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Trabajo futuro</h3>
+      <ul>
+        <li>CSP y evidencias persistentes (Supabase).</li>
+        <li>Observabilidad gestionada en staging.</li>
+        <li>Notificaciones y recuperación de contraseña por correo.</li>
+        <li>Reservas recurrentes y transferencia entre áreas.</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:0.3in; font-size:20pt; color:var(--azul)"><b>Gracias. ¿Preguntas?</b></p>
+  <footer><span>github.com/taller-web-sigesu</span><span>13</span></footer>
+</section>
+
+</body>
+</html>

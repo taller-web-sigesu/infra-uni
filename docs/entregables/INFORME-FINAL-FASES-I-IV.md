@@ -1260,7 +1260,8 @@ La arquitectura de la sección 12 se mantiene: monolito modular Spring Boot, SPA
 | Unitarias frontend | Vitest + Testing Library | Suite en `src/**/*.test.*`, ejecutada en CI. |
 | E2E | Playwright | Sesión, solicitudes, reservas, administración y accesibilidad. |
 | Carga y estrés | k6 2.4.0 | Sección 18.6. |
-| Seguridad dinámica | OWASP ZAP 2.16.1 (pasivo) | Sección 18.4. |
+| Seguridad estática | CodeQL backend y CodeQL frontend | En verde en CI. |
+| Seguridad dinámica | OWASP ZAP 2.17.0 (activo) | Sección 18.4. |
 | Aceptación, usabilidad, accesibilidad y navegadores | UAT con usuarios, axe y Chromium, Firefox y WebKit | Consolidado en `INFORME-DE-PRUEBAS.pdf` (bloque 2). |
 
 Pruebas nuevas de la Fase IV: `AuthIT` (sesión única, revocación de JWT y refresh, concurrencia), `DemoDataIT` (cuentas y ambientes demo), `RequestLifecycleIT` (duplicados, asignación por área, rechazo y reingreso), `TelemetryIT` (permisos de Actuator) y regresiones de `AttachmentIT`, `SignedDownloadIT` y `OpenApiContractIT`.
@@ -1275,11 +1276,12 @@ Pruebas nuevas de la Fase IV: `AuthIT` (sesión única, revocación de JWT y ref
 
 | ID | Severidad | Hallazgo | Estado |
 | :---- | :---- | :---- | :---- |
-| SEG-01 | Media | El frontend en Vercel no envía `Content-Security-Policy`. | Abierto. Riesgo aceptado para `v1.0.0`. |
+| SEG-01 | Media | El frontend en Vercel no enviaba `Content-Security-Policy`. | **Cerrado.** CSP desplegada en `frontend-uni` (`bc7d78f`) y verificada en staging. |
 | SEG-02 | Informativa | `Access-Control-Allow-Origin: *` en recursos estáticos públicos, sin credenciales. | Clasificado. |
 | SEG-03 | Informativa | Gitleaks: clave ficticia en una prueba unitaria. | Falso positivo. |
 | SEG-04 | Baja | Contraseña generada en XML de `target/` (no versionados). | Revisar al publicar evidencias. |
-| SEG-05 / 06 | Pendiente | Confirmar el SHA desplegado en staging y el acceso a la observabilidad si se despliega allí. | Verificación del bloque 2. |
+| SEG-05 | Cerrado | SHA de staging confirmado en Render (`8136b68`); health/status 200 y smoke en verde. |
+| SEG-06 | Aceptado | Pila de observabilidad local; no se despliega en Render free. |
 | SEG-07 | Informativa | Cuentas demo con contraseña compartida en staging. | Deshabilitarlas tras la sustentación. |
 
 **Escaneo de secretos.** Gitleaks 8.28.0 sobre la historia y el árbol de `backend-uni` e `infra-uni`: una coincidencia en total, un falso positivo, y ninguna credencial real. El procedimiento de rotación está en el informe de seguridad.
@@ -1299,7 +1301,7 @@ Verificada en local con Prometheus, Blackbox, Tempo y Grafana: tres targets UP, 
 | `GestalDeploymentFailed` | Despliegue de producción fallido. |
 | `GestalLoginRejectionsHigh` | 20 o más rechazos de login en 5 min. |
 
-Retención configurada: 15 días de métricas y 7 de trazas, según ADR-0003. La retención de 30 días de logs y la pila en staging quedan pendientes de un proveedor.
+Retención configurada: 15 días de métricas y 7 de trazas, según ADR-0003. Staging quedó en `8136b68` con health/status 200, métricas protegidas y smoke en verde; la pila completa Grafana/Prometheus/Tempo se valida en local. La retención de 30 días de logs y el canal externo de alertas se aceptan como limitación del plan free.
 
 ### 18.6 Rendimiento
 
@@ -1353,12 +1355,12 @@ CSP en el frontend, almacenamiento persistente de evidencias en Supabase, observ
 
 ## 20\. Limitaciones conocidas de `v1.0.0`
 
-1. **CSP** ausente en el frontend (SEG-01).
-2. **Evidencias** en almacenamiento temporal en Render.
-3. **Observabilidad en staging** pendiente de confirmar el SHA desplegado y el destino de las alertas.
-4. **Retención de logs** de 30 días sin proveedor.
-5. **Restauración de respaldos** pendiente de evidencia documentada.
-6. **Cuentas demo** con contraseña compartida en staging, a deshabilitar tras la sustentación.
+1. **Evidencias:** staging y producción usan almacenamiento local temporal en Render; la integración con Supabase Storage queda como evolución.
+2. **Observabilidad en staging:** la pila completa se valida en local; Render free no permite desplegarla. Las métricas de staging quedan protegidas y el health es público mínimo.
+3. **Retención de logs:** 30 días sin proveedor dedicado; se acepta como limitación de infraestructura.
+4. **Canal externo de alertas:** las seis reglas se validan en local; el canal gestionado depende de un proveedor.
+5. **Cuentas demo:** comparten contraseña ficticia en staging; se deshabilitan al cerrar la sustentación.
+6. **Cold start:** Render free puede dormir la instancia; el frontend muestra el login y el tiempo de arranque se documenta aparte.
 
 La lista completa de exclusiones está en `DELIBERADAMENTE-NO-HECHO.md`.
 

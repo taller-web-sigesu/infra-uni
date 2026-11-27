@@ -70,3 +70,10 @@ Evidencias redactadas en `output/p2c-backend-candidato-e-gitleaks-{history,versi
 3. El operador de observabilidad con A/B cambia la contraseña de `prometheus`, actualiza el BCrypt en `APP_TELEMETRY_PASSWORD_HASH` y la contraseña original en el almacén del recolector. Valida health público, rechazo de la credencial anterior y `up=1` con la nueva. Si se usaron credenciales OTLP, coordina el nuevo valor entre backend y receptor y verifica ingestión de una traza ficticia.
 4. El operador de Railway/MySQL o Supabase crea una credencial de reemplazo con los permisos requeridos, actualiza en Render `SPRING_DATASOURCE_PASSWORD` o `APP_STORAGE_SUPABASE_SERVICE_KEY` y prueba desde el servicio (Flyway y health, o alta, URL firmada y descarga ficticia, según el proveedor). Revoca la credencial anterior y comprueba que no autentique. Si se expuso el hook, el propietario de Render lo regenera, E actualiza `RENDER_PROD_DEPLOY_HOOK` en GitHub Secrets y valida únicamente con el procedimiento autorizado de despliegue.
 5. E registra el evento de despliegue y su SHA, verifica métricas, errores, auditoría y permisos, repite el escaneo versionado e histórico y revisa que los artefactos sanitizados omitan valores. P2 cierra el incidente después de revisar los accesos afectados y las evidencias. Durante esta revisión no se rotaron credenciales ni se modificaron proveedores.
+
+## Cierre de DAST y SAST (27/11/2026)
+
+- **SAST frontend:** CodeQL para JavaScript/TypeScript agregado en `frontend-uni/.github/workflows/codeql.yml`; el check `Análisis estático (CodeQL)` pasó en el PR #25 y quedó en `main`.
+- **DAST activo:** ZAP 2.17.0 sobre el login de staging, Swagger UI y `/api/v1/status`. Resultado: 0 altos, 4 medios aceptados, 1 bajo (falso positivo de Swagger UI) y 9 informativos. Reporte y clasificación en [`RESUMEN-DAST.md`](RESUMEN-DAST.md).
+- **CSP:** cerrada en frontend staging; DAST confirmó la política y solo marcó `style-src 'unsafe-inline'` por los dos estilos dinámicos de la SPA.
+- **Restauración:** verificada en una base temporal aislada; 27 tablas y 460 filas sin diferencias. Ver [`VERIFICACION-BACKUP-RESTORE.md`](VERIFICACION-BACKUP-RESTORE.md).

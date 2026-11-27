@@ -1,0 +1,10 @@
+{
+  "source": "railway",
+  "target": "gestal_restore_test_20261127183716",
+  "tables": 27,
+  "rows_source": 460,
+  "rows_restored": 460,
+  "mismatches": {},
+  "dump_bytes": 197347,
+  "result": "OK"
+}

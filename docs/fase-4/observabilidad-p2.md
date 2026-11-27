@@ -37,7 +37,7 @@ GitHub Actions no devolvió ejecuciones asociadas al SHA instrumentado de A. La 
 
 ## Verificado en staging
 
-El último `staging-smoke` consultado reportó `success` el 16 de noviembre sobre el SHA base `b00e92b3500c1a85526372a9bb5c00a6f6ca4dc0`. Sirve como antecedente del entorno. La prueba de observabilidad corresponde al SHA instrumentado de A en local. El 21 de noviembre, una consulta pública a `/actuator/health` confirmó HTTP 200 y `status=UP` tras reintentar con un plazo mayor. [Smoke de staging](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43970286002).
+El 27/11/2026, el servicio `uniservice-backend-staging` quedó en el SHA `8136b68`. `GET /actuator/health` respondió `200` con `status=UP`; `GET /api/v1/status` respondió `200`; el workflow [`staging-smoke` 46078054975](https://github.com/taller-web-sigesu/backend-uni/actions/runs/46078054975) terminó en verde. `GET /actuator/prometheus` rechazó el acceso anónimo con `401`. La pila Grafana/Prometheus/Tempo se validó en local; no se despliega en Render free. El canal externo de alertas y la retención de logs de 30 días se aceptan como limitaciones del plan free y quedan documentados en [`VERIFICACION-STAGING-FINAL.md`](../VERIFICACION-STAGING-FINAL.md).
 
 ## Evidencias y comandos
 

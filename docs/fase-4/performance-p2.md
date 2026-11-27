@@ -125,7 +125,7 @@ El candidato completó el último peldaño sin activar condiciones de parada. La
 
 ## Smoke k6 de staging
 
-Inicio 20:14:04.663 y fin 20:14:12.725 (Lima). **SHA desplegado sin confirmar**. La consulta de deployments de GitHub no devolvió registros de staging. El último workflow `staging-smoke` consultado terminó con éxito para el head `b00e92b3500c1a85526372a9bb5c00a6f6ca4dc0` el 16 de noviembre. Su head identifica el workflow y no acredita el despliegue de Render el día de la medición. [Workflow de referencia](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43970286002)
+Inicio 20:14:04.663 y fin 20:14:12.725 (Lima). **SHA desplegado confirmado: `8136b68`**. La verificación final está en [`VERIFICACION-STAGING-FINAL.md`](../VERIFICACION-STAGING-FINAL.md). La consulta de deployments de GitHub no devolvió registros de staging. El último workflow `staging-smoke` consultado terminó con éxito para el head `b00e92b3500c1a85526372a9bb5c00a6f6ca4dc0` el 16 de noviembre. Su head identifica el workflow y no acredita el despliegue de Render el día de la medición. [Workflow de referencia](https://github.com/taller-web-sigesu/backend-uni/actions/runs/43970286002)
 
 ```powershell
 $env:PERF_STAGING = 'authorized'
@@ -150,7 +150,7 @@ En estrés, el scrape estuvo disponible en 24/24 puntos, con un máximo de 40.07
 
 Grafana muestra el mismo intervalo UTC de cada corrida en hora de Lima. Los paneles con ventanas de 5 min suavizan los peldaños de 45 s y conservan parte de la carga anterior al comienzo de estrés. Para ver los peldaños, usar la serie JSON con ventanas de 30 s y los resúmenes k6. [Dashboard de carga](evidencias-performance/local-candidato/load-grafana.png) · [Dashboard de estrés](evidencias-performance/local-candidato/stress-grafana.png)
 
-Para cerrar la evidencia de staging del quinto PR, ejecutar el smoke cuando operaciones confirme el despliegue del candidato. El smoke actual se conserva en `staging-base`.
+La evidencia final de staging quedó cerrada el 27/11/2026 sobre `8136b68`: smoke k6 con 6 peticiones, 12/12 checks, 0 % de errores y p95 de 441,89 ms. El resumen está en `evidencias-performance/staging-final/smoke-k6.json` y el detalle en [`VERIFICACION-STAGING-FINAL.md`](../VERIFICACION-STAGING-FINAL.md).
 
 ## Verificaciones de los scripts
 

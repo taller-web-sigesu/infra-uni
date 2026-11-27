@@ -37,3 +37,15 @@ La Fase IV es la última fase del proyecto. Las cuatro decisiones de alcance de 
 **Verificación.** Comprobar que el solicitante puede consultar el motivo del rechazo y que el nuevo reporte, con un código distinto, aparece en la bandeja del área correcta.
 
 Las exclusiones de la entrega se registran en [DELIBERADAMENTE-NO-HECHO.md](DELIBERADAMENTE-NO-HECHO.md).
+
+
+## Estado de cierre — 27/11/2026
+
+| Decisión | Estado real |
+| --- | --- |
+| Duplicados | Política manual: el supervisor rechaza el duplicado con motivo. Flujo verificado en staging. |
+| Sesión única | Implementada y verificada en staging: el segundo login revoca el token anterior; el token anterior recibe 401 en endpoints protegidos. |
+| Admin y asignación | Se mantiene la separación: el administrador no asigna solicitudes; el supervisor del área sí. Verificado contra la matriz de autorización. |
+| Transferencia de área | Excluida de `v1.0.0`; el flujo es rechazo motivado y nueva solicitud. |
+
+La verificación final de staging está en [`docs/fase-4/VERIFICACION-STAGING-FINAL.md`](../fase-4/VERIFICACION-STAGING-FINAL.md).

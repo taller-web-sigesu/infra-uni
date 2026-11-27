@@ -32,7 +32,7 @@ Versión anterior: `v1.0.0-rc.2` (16/11/2026). Documento preparado el 22/11/2026
 
 - Matriz de autorización por rol, método, ruta y recurso para las 64 operaciones de la API, Swagger y Actuator.
 - Regresiones nuevas de autorización por recurso, adjuntos, descargas firmadas, Swagger y Actuator. Resultado: 13 pruebas unitarias y 94 de integración, sin fallos.
-- Análisis pasivo con OWASP ZAP 2.16.1 sobre staging y escaneo de secretos con Gitleaks 8.28.0.
+- **SAST:** CodeQL en backend y frontend; **DAST activo** con OWASP ZAP 2.17.0 sobre login, Swagger UI y estado de staging. Sin hallazgos altos. Escaneo de secretos con Gitleaks 8.28.0.
 - Procedimiento de rotación de secretos documentado.
 
 ### 1.5 Rendimiento ([infra-uni#26](https://github.com/taller-web-sigesu/infra-uni/pull/26))
@@ -68,11 +68,11 @@ Versión, release notes, informe final de las Fases I–IV, manual de usuario, m
 
 | Limitación | Detalle |
 | :---- | :---- |
-| CSP | El frontend en Vercel aún no envía `Content-Security-Policy` (hallazgo SEG-01, severidad media). |
+| CSP | Implementada en Vercel. DAST activo solo marcó `style-src 'unsafe-inline'` por dos estilos dinámicos; no hay hallazgos altos. |
 | Evidencias en Render | Staging y producción guardan los adjuntos en almacenamiento temporal (`/tmp/evidencias`). Supabase Storage queda como evolución (ADR-0004). |
-| Observabilidad en staging | La pila se verificó en local. La recolección, la recepción de trazas y el destino de las alertas en staging dependen de identificar el SHA desplegado. |
+| Observabilidad en staging | La pila completa se verifica en local. Staging expone health público mínimo y métricas protegidas; el canal externo de alertas y la retención de 30 días se aceptan como limitación del plan free. |
 | Retención | Prometheus retiene 15 días y Tempo 7. La retención de 30 días para logs requiere un proveedor que la garantice. |
-| Respaldos | La política es un respaldo diario de Railway con retención de 7 días. La prueba de restauración está pendiente de evidencia. |
+| Respaldos | Restauración verificada en una base temporal: 27 tablas y 460 filas sin diferencias. |
 | Sin notificaciones | No hay notificaciones in-app ni por correo, recuperación de contraseña por correo ni reservas recurrentes. |
 | Cuentas demo | Staging tiene cuentas ficticias con una contraseña compartida. Se deshabilitan al terminar la demostración. |
 
